@@ -1,0 +1,14 @@
+{
+  "name": "GIF Local — crie GIFs sem enviar nada para a internet",
+  "short_name": "GIF Local",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f6fa",
+  "theme_color": "#3457d5",
+  "description": "Crie GIFs a partir de fotos, vídeos ou gravações de tela — tudo processado localmente no navegador, sem upload.",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
