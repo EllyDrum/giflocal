@@ -9,6 +9,9 @@
 <meta property="og:description" id="ogDesc" content="Fotos, vídeo, gravação de tela ou do zero. 100% no seu navegador, em qualquer dispositivo.">
 <meta name="twitter:card" content="summary">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <title id="pageTitle">GIF Local: crie GIFs sem enviar nada para a internet</title>
 <style>
   :root{
@@ -64,28 +67,47 @@
   header.top{position:sticky; top:0; z-index:50; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);}
   .top-inner{max-width:900px; margin:0 auto; padding:14px 22px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;}
   .brand{display:flex; align-items:center; gap:9px; font-weight:800; font-size:16px; white-space:nowrap; letter-spacing:-.01em; color:var(--ink);}
-  .brand-mark{width:28px; height:28px; border-radius:9px; background:linear-gradient(135deg, var(--primary), var(--primary-2)); display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-sm); flex-shrink:0;}
-  .brand-mark svg{width:16px; height:16px;}
+  .brand-mark{width:28px; height:28px; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .brand-mark img{width:100%; height:100%; object-fit:contain; display:block;}
   .brand span{background:linear-gradient(90deg, var(--primary), var(--primary-2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .top-nav{display:flex; align-items:center; gap:22px;}
   .top-nav a{color:var(--ink-soft); text-decoration:none; font-size:13.5px; font-weight:600; transition:.15s;}
   .top-nav a:hover{color:var(--primary);}
   @media(max-width:700px){ .top-nav{display:none;} }
   .top-right{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
-  .privacy-badge{display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600; color:var(--green); background:var(--green-soft); border:1px solid color-mix(in srgb, var(--green) 30%, transparent); padding:6px 12px 6px 10px; border-radius:20px; white-space:nowrap;}
+  /* min-width fixo cobrindo a tradução mais longa (francês/alemão) evita que o
+     badge mude de largura ao trocar de idioma — sem isso, o header "pulava"
+     a cada troca porque o texto tem tamanhos bem diferentes por idioma. */
+  .privacy-badge{display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600; color:var(--green); background:var(--green-soft); border:1px solid color-mix(in srgb, var(--green) 30%, transparent); padding:6px 12px 6px 10px; border-radius:20px; min-width:calc(60ch + 40px); max-width:100%; justify-content:center;}
   .privacy-badge svg{width:12px; height:12px; flex-shrink:0;}
-  .icon-btn{display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--ink-soft); cursor:pointer; transition:.15s;}
+  .privacy-badge span{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .icon-btn{display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--ink-soft); cursor:pointer; transition:.15s; flex-shrink:0;}
   .icon-btn:hover{border-color:var(--primary); color:var(--primary);}
   .icon-btn svg{width:17px; height:17px;}
-  .lang-select{font-size:12.5px; font-weight:600; padding:8px 10px; border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--ink); font-family:inherit; cursor:pointer;}
+  /* min-width fixo cobrindo a opção mais longa ("Português") para o <select>
+     fechado não mudar de largura conforme o idioma selecionado. */
+  .lang-select{font-size:12.5px; font-weight:600; padding:8px 10px; border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--ink); font-family:inherit; cursor:pointer; min-width:140px; flex-shrink:0;}
 
   .hero{padding:40px 0 8px;}
   .hero h1{font-size:34px; margin:0 0 10px; font-weight:800; letter-spacing:-.02em; line-height:1.15; color:var(--ink);}
   .hero p{font-size:16px; color:var(--ink-soft); margin:0 0 20px; max-width:640px;}
 
-  .trust-row{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:30px;}
+  .trust-row{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;}
   .trust-item{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; color:var(--ink-soft); background:var(--card); border:1px solid var(--line); padding:7px 12px; border-radius:20px;}
   .trust-item svg{width:13px; height:13px; color:var(--primary); flex-shrink:0;}
+
+  /* Contador de uso freemium (3 GIFs/dia) — visível o tempo todo, discreto
+     mas sempre ali, em vez de um bloqueio-surpresa no 4º GIF do dia. */
+  .usage-badge{display:none; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--ink-soft); margin-bottom:24px;}
+  .usage-badge.show{display:inline-flex;}
+  .usage-badge .usage-track{width:60px; height:5px; border-radius:3px; background:var(--line); overflow:hidden; flex-shrink:0;}
+  .usage-badge .usage-fill{height:100%; background:var(--primary); border-radius:3px; transition:width .2s ease;}
+  .usage-badge.usage-badge--full{color:var(--amber);}
+  .usage-badge.usage-badge--full .usage-fill{background:var(--amber);}
+
+  @keyframes upgradePulse{ 0%,100%{box-shadow:0 0 0 0 color-mix(in srgb, var(--primary) 45%, transparent);} 50%{box-shadow:0 0 0 10px color-mix(in srgb, var(--primary) 0%, transparent);} }
+  .plans.upgrade-pulse{animation:upgradePulse 1.4s ease-out 2; border-radius:var(--radius-lg);}
+  @media (prefers-reduced-motion: reduce){ .plans.upgrade-pulse{animation:none;} }
 
   .how-it-works{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:34px; padding:18px 20px; background:var(--card); border:1px solid var(--line); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm);}
   .how-step{display:flex; align-items:center; gap:10px; flex:1; min-width:190px;}
@@ -214,6 +236,10 @@
   .pay-btn svg{width:20px; height:20px; flex-shrink:0;}
   .pay-note{font-size:12px; color:var(--ink-soft); margin:12px 0 0; text-align:center;}
   .pay-note-placeholder{visibility:hidden;}
+  /* Moeda real cobrada, destacada logo acima dos botões de pagamento — evita
+     surpresa no checkout quando o preço exibido está em outra moeda. */
+  .charge-currency-note{font-size:12px; font-weight:700; color:var(--primary-ink); background:var(--primary-soft); border-radius:8px; padding:6px 10px; margin:0 0 10px; text-align:center;}
+  .charge-currency-note:empty{display:none; margin:0; padding:0;}
   .help-fab{position:fixed; right:20px; bottom:20px; width:48px; height:48px; border-radius:50%; border:none; background:linear-gradient(135deg, var(--primary), var(--primary-2)); color:#fff; cursor:pointer; box-shadow:var(--shadow-md); display:flex; align-items:center; justify-content:center; z-index:40; transition:transform .15s ease;}
   .help-fab:hover{transform:scale(1.08);}
   .help-fab svg{width:26px; height:26px;}
@@ -239,7 +265,7 @@
 <header class="top">
   <div class="top-inner">
     <div class="brand">
-      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="6" width="18" height="12" rx="3" stroke="#fff" stroke-width="1.8"/><circle cx="8.5" cy="12" r="1.4" fill="#fff"/><circle cx="15.5" cy="12" r="1.4" fill="#fff"/></svg></span>
+      <span class="brand-mark" aria-hidden="true"><img src="brand-mark.png" alt="" width="28" height="28" loading="eager"></span>
       GIF<span>Local</span>
     </div>
     <nav class="top-nav">
@@ -248,9 +274,9 @@
       <a href="#privacidade" data-i18n="navPrivacy">Privacidade</a>
     </nav>
     <div class="top-right">
-      <div class="privacy-badge" data-i18n="badge">
+      <div class="privacy-badge">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2l7 3v6c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V5l7-3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-        100% no seu navegador · nada é enviado à internet
+        <span data-i18n="badge">100% no seu navegador · nada é enviado à internet</span>
       </div>
       <button class="icon-btn" id="themeToggle" type="button" aria-label="Alternar tema claro/escuro" title="Alternar tema">
         <svg id="themeIconSun" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v2.4M12 19.1v2.4M21.5 12h-2.4M4.9 12H2.5M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7M18.5 18.5l-1.7-1.7M7.2 7.2 5.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -277,9 +303,11 @@
   <div class="trust-row">
     <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 3l8 4v5c0 5-3.5 9-8 10-4.5-1-8-5-8-10V7l8-4z" stroke="currentColor" stroke-width="2"/></svg><span data-i18n="trustNoUpload">Sem upload</span></span>
     <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="8" r="3.2" stroke="currentColor" stroke-width="2"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4 4l16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span data-i18n="trustNoSignup">Sem cadastro</span></span>
-    <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 7V5.5A3.5 3.5 0 0 1 10.5 2h3A3.5 3.5 0 0 1 17 5.5V7" stroke="currentColor" stroke-width="2"/></svg><span data-i18n="trustFree">100% grátis</span></span>
+    <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 7V5.5A3.5 3.5 0 0 1 10.5 2h3A3.5 3.5 0 0 1 17 5.5V7" stroke="currentColor" stroke-width="2"/></svg><span data-i18n="trustFree">Grátis para começar</span></span>
     <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 3v3m0 12v3m9-9h-3M6 12H3m14.5-6.5-2.1 2.1M8.6 15.4l-2.1 2.1m0-11 2.1 2.1m8.8 8.8 2.1 2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="3.3" stroke="currentColor" stroke-width="2"/></svg><span data-i18n="trustInstallable">Instala como app</span></span>
   </div>
+
+  <div class="usage-badge" id="usageBadge" role="status"></div>
 
   <section class="how-it-works" id="como-funciona">
     <div class="how-step">
@@ -598,7 +626,7 @@
         <ul class="plan-feats">
           <li data-i18n="planFreeF1">Todos os 4 modos de criação</li>
           <li data-i18n="planFreeF2">Sem marca d'água</li>
-          <li data-i18n="planFreeF3">Uso ilimitado</li>
+          <li data-i18n="planFreeF3">3 GIFs grátis por dia</li>
         </ul>
         <a href="#tabs" class="btn secondary" data-i18n="planFreeCta">Começar agora</a>
         <p class="pay-note pay-note-placeholder" aria-hidden="true" data-i18n="payNote">Pagamento seguro processado pelo provedor. Aceita cartão de qualquer país.</p>
@@ -608,9 +636,11 @@
         <div class="plan-price" id="planSupPrice">R$ 9,90</div>
         <div class="plan-price-note" data-i18n="planOneTime">pagamento único</div>
         <ul class="plan-feats">
+          <li data-i18n-html="planSupF0"><b>Uso ilimitado</b>, sem limite diário</li>
           <li data-i18n="planSupF1">Apoie o desenvolvimento do projeto</li>
           <li data-i18n="planSupF2">Novidades em primeira mão por e-mail</li>
         </ul>
+        <p class="charge-currency-note" id="planSupChargeNote"></p>
         <div class="pay-buttons">
           <button class="btn pay-btn" id="planSupBtnStripe" type="button">
             <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16 0C7.163 0 0 7.163 0 16s7.163 16 16 16 16-7.163 16-16S24.837 0 16 0z" fill="#635bff"/><path d="M14.85 12.573c0-.815.67-1.13 1.78-1.13 1.59 0 3.6.483 5.19 1.34V8.14c-1.74-.69-3.46-.96-5.19-.96-4.24 0-7.06 2.214-7.06 5.913 0 5.76 7.94 4.84 7.94 7.33 0 .966-.84 1.28-2.01 1.28-1.74 0-3.97-.716-5.73-1.68v4.71c1.95.836 3.92 1.19 5.73 1.19 4.34 0 7.33-2.147 7.33-5.897-.02-6.22-7.98-5.11-7.98-7.457z" fill="#fff"/></svg>
@@ -632,6 +662,7 @@
           <li data-i18n="planProF1">Tudo do Apoiador</li>
           <li data-i18n="planProF2">Suporte prioritário por e-mail</li>
         </ul>
+        <p class="charge-currency-note" id="planProChargeNote"></p>
         <div class="pay-buttons">
           <button class="btn pay-btn" id="planProBtnStripe" type="button">
             <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16 0C7.163 0 0 7.163 0 16s7.163 16 16 16 16-7.163 16-16S24.837 0 16 0z" fill="#635bff"/><path d="M14.85 12.573c0-.815.67-1.13 1.78-1.13 1.59 0 3.6.483 5.19 1.34V8.14c-1.74-.69-3.46-.96-5.19-.96-4.24 0-7.06 2.214-7.06 5.913 0 5.76 7.94 4.84 7.94 7.33 0 .966-.84 1.28-2.01 1.28-1.74 0-3.97-.716-5.73-1.68v4.71c1.95.836 3.92 1.19 5.73 1.19 4.34 0 7.33-2.147 7.33-5.897-.02-6.22-7.98-5.11-7.98-7.457z" fill="#fff"/></svg>
@@ -946,7 +977,7 @@ const I18N = {
     shareCopied: "Link copiado para a área de transferência.",
     pageTitle: "GIF Local: crie GIFs sem enviar nada para a internet",
     metaDesc: "Crie GIFs a partir de fotos, vídeos ou gravações de tela, tudo processado localmente no navegador, sem upload.",
-    trustNoUpload: "Sem upload", trustNoSignup: "Sem cadastro", trustFree: "100% grátis", trustInstallable: "Instala como app",
+    trustNoUpload: "Sem upload", trustNoSignup: "Sem cadastro", trustFree: "Grátis para começar", trustInstallable: "Instala como app",
     navFeatures: "Recursos", navHowItWorks: "Como funciona", navPrivacy: "Privacidade",
     howStep1: "Escolha a fonte", howStep1Desc: "Fotos, vídeo, tela ou do zero",
     howStep2: "Ajuste e gere", howStep2Desc: "Tamanho, qualidade e pronto",
@@ -971,18 +1002,21 @@ const I18N = {
     plansTitle: "Planos", plansDesc: "Comece grátis. Faça upgrade quando quiser mais.",
     plansCurrencyNote: "Valores aproximados, apenas como referência. A cobrança é sempre feita em reais (R$); a conversão para sua moeda é feita pela operadora do cartão ou provedor de pagamento.",
     planFreeName: "Grátis", planFreePrice: "R$ 0",
-    planFreeF1: "Todos os 4 modos de criação", planFreeF2: "Sem marca d'água", planFreeF3: "Uso ilimitado",
+    planFreeF1: "Todos os 4 modos de criação", planFreeF2: "Sem marca d'água", planFreeF3: "3 GIFs grátis por dia",
     planFreeCta: "Começar agora",
     planProName: "Profissional", planProPrice: "Em breve",
     planProF1: "Tudo do Apoiador", planProF2: "Suporte prioritário por e-mail",
     planSupName: "Apoiador", planOneTime: "pagamento único", planPopularBadge: "Popular",
-    planSupF1: "Apoie o desenvolvimento do projeto", planSupF2: "Novidades em primeira mão por e-mail",
+    planSupF0: "<b>Uso ilimitado</b>, sem limite diário", planSupF1: "Apoie o desenvolvimento do projeto", planSupF2: "Novidades em primeira mão por e-mail",
     planProCta: "Quero ser avisado",
     payWithStripe: "Pagar com Stripe", payWithLemonSqueezy: "Pagar com Lemon Squeezy", payWithPayPal: "Pagar com PayPal",
     helpBtnTitle: "Reportar um problema", helpEmailSubject: "GIF Local - Reportar um problema",
     helpEmailBody: "Descreva o que aconteceu (o que você tentou fazer e o que deu errado):\n\n",
     payNote: "Pagamento seguro processado pelo provedor. Aceita cartão de qualquer país.",
     planComingSoonMsg: "Os planos pagos ainda não estão disponíveis. Em breve você poderá assinar o Pro por aqui.",
+    chargedAsBrl: (amt) => `Cobrado como ${amt} (BRL)`,
+    usageCounterMsg: (used, total) => `${used} de ${total} GIFs grátis hoje`,
+    limitReachedMsg: "Você já criou seus 3 GIFs grátis de hoje. Role para baixo para desbloquear uso ilimitado.",
   },
   en: {
     badge: "100% in your browser · nothing is sent to the internet",
@@ -1043,7 +1077,7 @@ const I18N = {
     shareCopied: "Link copied to clipboard.",
     pageTitle: "GIF Local: create GIFs without sending anything to the internet",
     metaDesc: "Create GIFs from photos, videos or screen recordings, all processed locally in your browser, no upload.",
-    trustNoUpload: "No upload", trustNoSignup: "No sign-up", trustFree: "100% free", trustInstallable: "Installs as an app",
+    trustNoUpload: "No upload", trustNoSignup: "No sign-up", trustFree: "Free to start", trustInstallable: "Installs as an app",
     navFeatures: "Features", navHowItWorks: "How it works", navPrivacy: "Privacy",
     howStep1: "Pick a source", howStep1Desc: "Photos, video, screen or from scratch",
     howStep2: "Adjust and generate", howStep2Desc: "Size, quality, done",
@@ -1068,18 +1102,21 @@ const I18N = {
     plansTitle: "Plans", plansDesc: "Start free. Upgrade whenever you want more.",
     plansCurrencyNote: "Approximate reference prices only. You are always charged in Brazilian Reais (R$); your card issuer or payment provider converts it to your currency.",
     planFreeName: "Free", planFreePrice: "$0",
-    planFreeF1: "All 4 creation modes", planFreeF2: "No watermark", planFreeF3: "Unlimited use",
+    planFreeF1: "All 4 creation modes", planFreeF2: "No watermark", planFreeF3: "3 free GIFs a day",
     planFreeCta: "Get started",
     planProName: "Professional", planProPrice: "Coming soon",
     planProF1: "Everything in Supporter", planProF2: "Priority email support",
     planSupName: "Supporter", planOneTime: "one-time payment", planPopularBadge: "Popular",
-    planSupF1: "Support the project's development", planSupF2: "Get news first, by email",
+    planSupF0: "<b>Unlimited use</b>, no daily limit", planSupF1: "Support the project's development", planSupF2: "Get news first, by email",
     planProCta: "Notify me",
     payWithStripe: "Pay with Stripe", payWithLemonSqueezy: "Pay with Lemon Squeezy", payWithPayPal: "Pay with PayPal",
     helpBtnTitle: "Report a problem", helpEmailSubject: "GIF Local - Report a problem",
     helpEmailBody: "Describe what happened (what you tried to do and what went wrong):\n\n",
     payNote: "Secure payment processed by the provider. Accepts cards from any country.",
     planComingSoonMsg: "Paid plans aren't available yet. You'll soon be able to subscribe to Pro right here.",
+    chargedAsBrl: (amt) => `Charged as ${amt} (BRL)`,
+    usageCounterMsg: (used, total) => `${used} of ${total} free GIFs today`,
+    limitReachedMsg: "You've made your 3 free GIFs for today. Scroll down to unlock unlimited use.",
   },
   es: {
     badge: "100% en tu navegador · nada se envía a internet",
@@ -1140,7 +1177,7 @@ const I18N = {
     shareCopied: "Enlace copiado al portapapeles.",
     pageTitle: "GIF Local: crea GIFs sin enviar nada a internet",
     metaDesc: "Crea GIFs a partir de fotos, vídeos o grabaciones de pantalla, todo procesado localmente en el navegador, sin subir nada.",
-    trustNoUpload: "Sin subir nada", trustNoSignup: "Sin registro", trustFree: "100% gratis", trustInstallable: "Se instala como app",
+    trustNoUpload: "Sin subir nada", trustNoSignup: "Sin registro", trustFree: "Gratis para empezar", trustInstallable: "Se instala como app",
     navFeatures: "Características", navHowItWorks: "Cómo funciona", navPrivacy: "Privacidad",
     howStep1: "Elige una fuente", howStep1Desc: "Fotos, vídeo, pantalla o desde cero",
     howStep2: "Ajusta y genera", howStep2Desc: "Tamaño, calidad y listo",
@@ -1165,18 +1202,21 @@ const I18N = {
     plansTitle: "Planes", plansDesc: "Empieza gratis. Mejora cuando quieras más.",
     plansCurrencyNote: "Precios de referencia aproximados. El cobro siempre se hace en reales brasileños (R$); tu banco o el proveedor de pago lo convierte a tu moneda.",
     planFreeName: "Gratis", planFreePrice: "$0",
-    planFreeF1: "Los 4 modos de creación", planFreeF2: "Sin marca de agua", planFreeF3: "Uso ilimitado",
+    planFreeF1: "Los 4 modos de creación", planFreeF2: "Sin marca de agua", planFreeF3: "3 GIFs gratis al día",
     planFreeCta: "Empezar ahora",
     planProName: "Profesional", planProPrice: "Próximamente",
     planProF1: "Todo lo de Colaborador", planProF2: "Soporte prioritario por correo",
     planSupName: "Colaborador", planOneTime: "pago único", planPopularBadge: "Popular",
-    planSupF1: "Apoya el desarrollo del proyecto", planSupF2: "Novedades primero, por correo",
+    planSupF0: "<b>Uso ilimitado</b>, sin límite diario", planSupF1: "Apoya el desarrollo del proyecto", planSupF2: "Novedades primero, por correo",
     planProCta: "Avísame",
     payWithStripe: "Pagar con Stripe", payWithLemonSqueezy: "Pagar con Lemon Squeezy", payWithPayPal: "Pagar con PayPal",
     helpBtnTitle: "Reportar un problema", helpEmailSubject: "GIF Local - Reportar un problema",
     helpEmailBody: "Describe lo que pasó (qué intentaste hacer y qué salió mal):\n\n",
     payNote: "Pago seguro procesado por el proveedor. Acepta tarjetas de cualquier país.",
     planComingSoonMsg: "Los planes de pago aún no están disponibles. Pronto podrás suscribirte a Pro aquí mismo.",
+    chargedAsBrl: (amt) => `Se cobra como ${amt} (BRL)`,
+    usageCounterMsg: (used, total) => `${used} de ${total} GIFs gratis hoy`,
+    limitReachedMsg: "Ya creaste tus 3 GIFs gratis de hoy. Baja para desbloquear uso ilimitado.",
   },
   fr: {
     badge: "100% dans votre navigateur · rien n'est envoyé sur internet",
@@ -1237,7 +1277,7 @@ const I18N = {
     shareCopied: "Lien copié dans le presse-papiers.",
     pageTitle: "GIF Local: créez des GIF sans rien envoyer sur internet",
     metaDesc: "Créez des GIF à partir de photos, vidéos ou enregistrements d'écran, tout est traité localement dans le navigateur, sans upload.",
-    trustNoUpload: "Sans envoi", trustNoSignup: "Sans inscription", trustFree: "100% gratuit", trustInstallable: "S'installe comme une app",
+    trustNoUpload: "Sans envoi", trustNoSignup: "Sans inscription", trustFree: "Gratuit pour commencer", trustInstallable: "S'installe comme une app",
     navFeatures: "Fonctionnalités", navHowItWorks: "Comment ça marche", navPrivacy: "Confidentialité",
     howStep1: "Choisissez une source", howStep1Desc: "Photos, vidéo, écran ou à partir de zéro",
     howStep2: "Ajustez et générez", howStep2Desc: "Taille, qualité, terminé",
@@ -1262,18 +1302,21 @@ const I18N = {
     plansTitle: "Formules", plansDesc: "Commencez gratuitement. Passez à un forfait supérieur quand vous voulez.",
     plansCurrencyNote: "Prix de référence approximatifs. Le paiement est toujours effectué en réals brésiliens (R$) ; votre banque ou le prestataire de paiement le convertit dans votre devise.",
     planFreeName: "Gratuit", planFreePrice: "0 €",
-    planFreeF1: "Les 4 modes de création", planFreeF2: "Sans filigrane", planFreeF3: "Usage illimité",
+    planFreeF1: "Les 4 modes de création", planFreeF2: "Sans filigrane", planFreeF3: "3 GIF gratuits par jour",
     planFreeCta: "Commencer",
     planProName: "Professionnel", planProPrice: "Bientôt disponible",
     planProF1: "Tout ce qui est dans Supporter", planProF2: "Support prioritaire par e-mail",
     planSupName: "Supporter", planOneTime: "paiement unique", planPopularBadge: "Populaire",
-    planSupF1: "Soutenez le développement du projet", planSupF2: "Nouveautés en avant-première par e-mail",
+    planSupF0: "<b>Usage illimité</b>, sans limite quotidienne", planSupF1: "Soutenez le développement du projet", planSupF2: "Nouveautés en avant-première par e-mail",
     planProCta: "Me prévenir",
     payWithStripe: "Payer avec Stripe", payWithLemonSqueezy: "Payer avec Lemon Squeezy", payWithPayPal: "Payer avec PayPal",
     helpBtnTitle: "Signaler un problème", helpEmailSubject: "GIF Local - Signaler un problème",
     helpEmailBody: "Décrivez ce qui s'est passé (ce que vous avez essayé de faire et ce qui n'a pas fonctionné) :\n\n",
     payNote: "Paiement sécurisé traité par le fournisseur. Accepte les cartes de tous les pays.",
     planComingSoonMsg: "Les formules payantes ne sont pas encore disponibles. Vous pourrez bientôt vous abonner à Pro ici même.",
+    chargedAsBrl: (amt) => `Facturé comme ${amt} (BRL)`,
+    usageCounterMsg: (used, total) => `${used} sur ${total} GIF gratuits aujourd'hui`,
+    limitReachedMsg: "Vous avez créé vos 3 GIF gratuits du jour. Faites défiler pour débloquer l'usage illimité.",
   },
   de: {
     badge: "100% in Ihrem Browser · nichts wird ins Internet gesendet",
@@ -1334,7 +1377,7 @@ const I18N = {
     shareCopied: "Link in die Zwischenablage kopiert.",
     pageTitle: "GIF Local: GIFs erstellen, ohne etwas ins Internet zu senden",
     metaDesc: "Erstellen Sie GIFs aus Fotos, Videos oder Bildschirmaufnahmen, alles wird lokal im Browser verarbeitet, ohne Upload.",
-    trustNoUpload: "Kein Upload", trustNoSignup: "Keine Anmeldung", trustFree: "100% kostenlos", trustInstallable: "Als App installierbar",
+    trustNoUpload: "Kein Upload", trustNoSignup: "Keine Anmeldung", trustFree: "Kostenlos starten", trustInstallable: "Als App installierbar",
     navFeatures: "Funktionen", navHowItWorks: "So funktioniert's", navPrivacy: "Datenschutz",
     howStep1: "Quelle wählen", howStep1Desc: "Fotos, Video, Bildschirm oder von Grund auf",
     howStep2: "Anpassen und erstellen", howStep2Desc: "Größe, Qualität, fertig",
@@ -1359,18 +1402,21 @@ const I18N = {
     plansTitle: "Tarife", plansDesc: "Kostenlos starten. Jederzeit upgraden, wenn Sie mehr möchten.",
     plansCurrencyNote: "Ungefähre Richtwerte. Die Abrechnung erfolgt immer in brasilianischen Real (R$); Ihre Bank oder der Zahlungsanbieter rechnet in Ihre Währung um.",
     planFreeName: "Kostenlos", planFreePrice: "0 €",
-    planFreeF1: "Alle 4 Erstellungsmodi", planFreeF2: "Kein Wasserzeichen", planFreeF3: "Unbegrenzte Nutzung",
+    planFreeF1: "Alle 4 Erstellungsmodi", planFreeF2: "Kein Wasserzeichen", planFreeF3: "3 kostenlose GIFs pro Tag",
     planFreeCta: "Jetzt starten",
     planProName: "Professionell", planProPrice: "Demnächst",
     planProF1: "Alles aus Unterstützer", planProF2: "Priorisierter E-Mail-Support",
     planSupName: "Unterstützer", planOneTime: "einmalige Zahlung", planPopularBadge: "Beliebt",
-    planSupF1: "Unterstütze die Entwicklung des Projekts", planSupF2: "Neuigkeiten zuerst per E-Mail",
+    planSupF0: "<b>Unbegrenzte Nutzung</b>, kein Tageslimit", planSupF1: "Unterstütze die Entwicklung des Projekts", planSupF2: "Neuigkeiten zuerst per E-Mail",
     planProCta: "Benachrichtigt mich",
     payWithStripe: "Mit Stripe bezahlen", payWithLemonSqueezy: "Mit Lemon Squeezy bezahlen", payWithPayPal: "Mit PayPal bezahlen",
     helpBtnTitle: "Problem melden", helpEmailSubject: "GIF Local - Problem melden",
     helpEmailBody: "Beschreiben Sie, was passiert ist (was Sie versucht haben und was schiefgelaufen ist):\n\n",
     payNote: "Sichere Zahlung, abgewickelt vom Anbieter. Akzeptiert Karten aus jedem Land.",
     planComingSoonMsg: "Bezahlte Tarife sind noch nicht verfügbar. Bald können Sie Pro direkt hier abonnieren.",
+    chargedAsBrl: (amt) => `Abgerechnet als ${amt} (BRL)`,
+    usageCounterMsg: (used, total) => `${used} von ${total} kostenlosen GIFs heute`,
+    limitReachedMsg: "Du hast heute schon 3 kostenlose GIFs erstellt. Scrolle nach unten, um unbegrenzte Nutzung freizuschalten.",
   },
   it: {
     badge: "100% nel tuo browser · niente viene inviato a internet",
@@ -1431,7 +1477,7 @@ const I18N = {
     shareCopied: "Link copiato negli appunti.",
     pageTitle: "GIF Local: crea GIF senza inviare nulla a internet",
     metaDesc: "Crea GIF da foto, video o registrazioni dello schermo, tutto elaborato localmente nel browser, senza upload.",
-    trustNoUpload: "Senza upload", trustNoSignup: "Senza registrazione", trustFree: "100% gratis", trustInstallable: "Si installa come app",
+    trustNoUpload: "Senza upload", trustNoSignup: "Senza registrazione", trustFree: "Gratis per iniziare", trustInstallable: "Si installa come app",
     navFeatures: "Funzionalità", navHowItWorks: "Come funziona", navPrivacy: "Privacy",
     howStep1: "Scegli una fonte", howStep1Desc: "Foto, video, schermo o da zero",
     howStep2: "Regola e genera", howStep2Desc: "Dimensione, qualità, fatto",
@@ -1456,18 +1502,21 @@ const I18N = {
     plansTitle: "Piani", plansDesc: "Inizia gratis. Passa a un piano superiore quando vuoi di più.",
     plansCurrencyNote: "Prezzi di riferimento approssimativi. L'addebito avviene sempre in real brasiliani (R$); la conversione nella tua valuta è fatta dalla tua banca o dal fornitore di pagamento.",
     planFreeName: "Gratis", planFreePrice: "0 €",
-    planFreeF1: "Tutte e 4 le modalità di creazione", planFreeF2: "Senza filigrana", planFreeF3: "Uso illimitato",
+    planFreeF1: "Tutte e 4 le modalità di creazione", planFreeF2: "Senza filigrana", planFreeF3: "3 GIF gratuiti al giorno",
     planFreeCta: "Inizia ora",
     planProName: "Professionale", planProPrice: "Prossimamente",
     planProF1: "Tutto di Sostenitore", planProF2: "Supporto prioritario via e-mail",
     planSupName: "Sostenitore", planOneTime: "pagamento unico", planPopularBadge: "Popolare",
-    planSupF1: "Sostieni lo sviluppo del progetto", planSupF2: "Novità in anteprima via e-mail",
+    planSupF0: "<b>Uso illimitato</b>, senza limite giornaliero", planSupF1: "Sostieni lo sviluppo del progetto", planSupF2: "Novità in anteprima via e-mail",
     planProCta: "Avvisami",
     payWithStripe: "Paga con Stripe", payWithLemonSqueezy: "Paga con Lemon Squeezy", payWithPayPal: "Paga con PayPal",
     helpBtnTitle: "Segnala un problema", helpEmailSubject: "GIF Local - Segnala un problema",
     helpEmailBody: "Descrivi cosa è successo (cosa hai provato a fare e cosa è andato storto):\n\n",
     payNote: "Pagamento sicuro elaborato dal fornitore. Accetta carte di qualsiasi paese.",
     planComingSoonMsg: "I piani a pagamento non sono ancora disponibili. Presto potrai abbonarti a Pro proprio qui.",
+    chargedAsBrl: (amt) => `Addebitato come ${amt} (BRL)`,
+    usageCounterMsg: (used, total) => `${used} di ${total} GIF gratuiti oggi`,
+    limitReachedMsg: "Hai già creato i tuoi 3 GIF gratuiti di oggi. Scorri in basso per sbloccare l'uso illimitato.",
   },
 };
 
@@ -1487,12 +1536,104 @@ const PLAN_PRICES = {
 };
 function updatePlanPrices(){
   const p = PLAN_PRICES[currentLang] || PLAN_PRICES.pt;
+  const brl = PLAN_PRICES.pt;
   $('planSupPrice').textContent = p.sup;
   $('planProPrice2').textContent = p.pro;
+  /* O valor mostrado acima é aproximado; o que é de fato cobrado é sempre em
+     reais (BRL), então deixamos isso explícito bem perto dos botões de
+     pagamento sempre que o idioma não for português. */
+  const supNote = $('planSupChargeNote');
+  const proNote = $('planProChargeNote');
+  const showNote = currentLang !== 'pt';
+  if (supNote) supNote.textContent = showNote ? t('chargedAsBrl', brl.sup) : '';
+  if (proNote) proNote.textContent = showNote ? t('chargedAsBrl', brl.pro) : '';
+}
+
+/* =========================================================
+   LIMITE FREEMIUM (3 GIFs grátis por dia)
+   100% client-side (o GIF Local não tem servidor), então isso é
+   fricção honesta, não um bloqueio à prova de burla — localStorage
+   se apaga, aba anônima reseta. Se localStorage estiver bloqueado
+   (ex.: modo privado em alguns navegadores), degradamos com
+   elegância para "sem limite nesta sessão" em vez de travar a
+   ferramenta.
+   ========================================================= */
+const FREE_DAILY_LIMIT = 3;
+const USAGE_STORAGE_KEY = 'gifLocalUsage';
+let usageTrackingAvailable = true;
+
+function todayKeyUTC(){
+  const d = new Date();
+  return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0');
+}
+
+function readUsageState(){
+  const empty = { date: todayKeyUTC(), count: 0 };
+  try {
+    const raw = localStorage.getItem(USAGE_STORAGE_KEY);
+    if (!raw) return empty;
+    const parsed = JSON.parse(raw);
+    if (!parsed || parsed.date !== empty.date || typeof parsed.count !== 'number') return empty;
+    return parsed;
+  } catch (e) {
+    usageTrackingAvailable = false;
+    return empty;
+  }
+}
+
+function writeUsageState(state){
+  try {
+    localStorage.setItem(USAGE_STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    usageTrackingAvailable = false;
+  }
+}
+
+function getRemainingToday(){
+  if (!usageTrackingAvailable) return Infinity;
+  return Math.max(0, FREE_DAILY_LIMIT - readUsageState().count);
+}
+
+function canCreateGif(){
+  return !usageTrackingAvailable || getRemainingToday() > 0;
+}
+
+function registerGifCreated(){
+  if (!usageTrackingAvailable) return;
+  const state = readUsageState();
+  state.count += 1;
+  writeUsageState(state);
+  updateUsageBadge();
+}
+
+function updateUsageBadge(){
+  const el = $('usageBadge');
+  if (!el) return;
+  if (!usageTrackingAvailable) { el.classList.remove('show'); return; }
+  const used = Math.min(readUsageState().count, FREE_DAILY_LIMIT);
+  const pct = Math.round((used / FREE_DAILY_LIMIT) * 100);
+  el.innerHTML = '<span class="usage-track"><span class="usage-fill" style="width:' + pct + '%"></span></span><span></span>';
+  el.querySelector('span:last-child').textContent = t('usageCounterMsg', used, FREE_DAILY_LIMIT);
+  el.classList.toggle('usage-badge--full', used >= FREE_DAILY_LIMIT);
+  el.classList.add('show');
+}
+
+function showUpgradePrompt(prefix){
+  setProgress(prefix, t('limitReachedMsg'), undefined);
+  const plans = document.getElementById('planos');
+  if (!plans) return;
+  plans.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  plans.classList.remove('upgrade-pulse');
+  void plans.offsetWidth; /* reinicia a animação mesmo se já rodou antes */
+  plans.classList.add('upgrade-pulse');
 }
 
 function detectLang(){
-  const saved = localStorage.getItem('gifLocalLang');
+  /* localStorage pode lançar exceção (modo privado, políticas do navegador
+     etc.) — sem o try/catch aqui, essa única linha travava a inicialização
+     inteira do site (nenhum listener de botão chegava a ser registrado). */
+  let saved = null;
+  try { saved = localStorage.getItem('gifLocalLang'); } catch (e) { /* ignora, segue detecção pelo navegador */ }
   if (saved && SUPPORTED_LANGS.includes(saved)) return saved;
   const candidates = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || 'pt'];
   for (const c of candidates) {
@@ -1536,11 +1677,12 @@ function applyTranslations(){
   renderFotosThumbs();
   updateHero();
   updatePlanPrices();
+  updateUsageBadge();
 }
 
 function setLang(lang){
   currentLang = SUPPORTED_LANGS.includes(lang) ? lang : 'en';
-  localStorage.setItem('gifLocalLang', currentLang);
+  try { localStorage.setItem('gifLocalLang', currentLang); } catch (e) { /* segue sem persistir a escolha */ }
   $('langSwitch').value = currentLang;
   applyTranslations();
 }
@@ -1560,6 +1702,7 @@ function formatDuration(sec){
 }
 
 function setResult(prefix, blob, frameCount, durationSec){
+  registerGifCreated();
   const url = URL.createObjectURL(blob);
   $(prefix + 'Img').src = url;
   $(prefix + 'StatDuration').textContent = formatDuration(durationSec || 0);
@@ -1648,7 +1791,10 @@ $('langSwitch').addEventListener('change', (e) => setLang(e.target.value));
 
 /* ============== tema claro/escuro ============== */
 function detectTheme(){
-  const saved = localStorage.getItem('gifLocalTheme');
+  /* mesmo cuidado do detectLang(): localStorage bloqueado não pode travar
+     a inicialização do resto do site. */
+  let saved = null;
+  try { saved = localStorage.getItem('gifLocalTheme'); } catch (e) { /* ignora, segue pela preferência do sistema */ }
   if (saved === 'light' || saved === 'dark') return saved;
   return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
 }
@@ -1656,7 +1802,7 @@ function applyTheme(theme){
   document.documentElement.setAttribute('data-theme', theme);
   $('themeIconSun').style.display = theme === 'dark' ? 'none' : 'block';
   $('themeIconMoon').style.display = theme === 'dark' ? 'block' : 'none';
-  localStorage.setItem('gifLocalTheme', theme);
+  try { localStorage.setItem('gifLocalTheme', theme); } catch (e) { /* segue sem persistir o tema */ }
 }
 $('themeToggle').addEventListener('click', () => {
   const current = document.documentElement.getAttribute('data-theme') || detectTheme();
@@ -1795,6 +1941,7 @@ function loadImage(url){
 }
 
 $('fotosBtn').addEventListener('click', async () => {
+  if (!canCreateGif()) { showUpgradePrompt('fotos'); return; }
   $('fotosBtn').disabled = true;
   try{
     setProgress('fotos', t('progLoadingPhotos'), 2);
@@ -1912,6 +2059,7 @@ $('videoInput').addEventListener('change', (e) => {
 });
 
 $('videoBtn').addEventListener('click', async () => {
+  if (!canCreateGif()) { showUpgradePrompt('video'); return; }
   $('videoBtn').disabled = true;
   try{
     const start = parseFloat($('videoStart').value);
@@ -1985,6 +2133,7 @@ function showTelaFallback(){
 }
 
 $('telaBtn').addEventListener('click', async () => {
+  if (!canCreateGif()) { showUpgradePrompt('tela'); return; }
   $('telaBtn').disabled = true;
   try{
     const start = parseFloat($('telaStart').value);
@@ -2096,6 +2245,7 @@ requestAnimationFrame(previewLoop);
 $('zeroSpeed').addEventListener('input', (e) => { $('zeroSpeedOut').textContent = e.target.value; });
 
 $('zeroBtn').addEventListener('click', async () => {
+  if (!canCreateGif()) { showUpgradePrompt('zero'); return; }
   $('zeroBtn').disabled = true;
   try{
     setProgress('zero', t('progGeneratingFrames'), 5);
