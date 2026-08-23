@@ -2,13 +2,16 @@
    Faz cache do app inteiro no primeiro acesso, para funcionar de verdade
    offline depois — inclusive instalado como app (PWA) — sem nenhuma
    chamada de rede para processar fotos, vídeos ou gravações. */
-const CACHE_NAME = 'gif-local-v2';
+const CACHE_NAME = 'gif-local-v3';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './favicon-32.png',
+  './apple-touch-icon.png',
+  './brand-mark.png'
 ];
 
 self.addEventListener('install', (event) => {
