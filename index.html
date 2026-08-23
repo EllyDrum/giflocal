@@ -1536,17 +1536,16 @@ const PLAN_PRICES = {
 };
 function updatePlanPrices(){
   const p = PLAN_PRICES[currentLang] || PLAN_PRICES.pt;
-  const brl = PLAN_PRICES.pt;
   $('planSupPrice').textContent = p.sup;
   $('planProPrice2').textContent = p.pro;
-  /* O valor mostrado acima é aproximado; o que é de fato cobrado é sempre em
-     reais (BRL), então deixamos isso explícito bem perto dos botões de
-     pagamento sempre que o idioma não for português. */
+  /* Cada idioma agora tem um link Stripe/PayPal próprio na moeda exibida
+     (BRL para pt, USD para en, EUR para es/fr/de/it), então o valor
+     mostrado é o valor de fato cobrado — não precisa mais do aviso de
+     "cobrado em BRL". */
   const supNote = $('planSupChargeNote');
   const proNote = $('planProChargeNote');
-  const showNote = currentLang !== 'pt';
-  if (supNote) supNote.textContent = showNote ? t('chargedAsBrl', brl.sup) : '';
-  if (proNote) proNote.textContent = showNote ? t('chargedAsBrl', brl.pro) : '';
+  if (supNote) supNote.textContent = '';
+  if (proNote) proNote.textContent = '';
 }
 
 /* =========================================================
@@ -1853,19 +1852,41 @@ document.querySelectorAll('#tabs button').forEach(btn => {
    pública do checkout, não precisa de nenhuma chave secreta nem
    servidor). Enquanto estiver vazio, o botão mostra um aviso
    honesto de "em breve" em vez de levar a lugar nenhum. */
-const STRIPE_SUPPORTER_LINK = 'https://buy.stripe.com/bJe5kD95456i9oc6sR8bS02';
-const STRIPE_PRO_LINK = 'https://buy.stripe.com/4gMbJ1fts56i8k85oN8bS04';
-const PAYPAL_SUPPORTER_LINK = 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MHFMP2JKMDDVG&currency_code=BRL';
-const PAYPAL_PRO_LINK = 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=7S83D7WH65Q34&currency_code=BRL';
+/* Um link/botão por moeda, não por idioma: es/fr/de/it dividem o
+   mesmo link EUR, já que todos usam a mesma moeda. */
+const CHECKOUT_LINKS = {
+  BRL: {
+    stripeSup: 'https://buy.stripe.com/bJe5kD95456i9oc6sR8bS02',
+    stripePro: 'https://buy.stripe.com/4gMbJ1fts56i8k85oN8bS04',
+    paypalSup: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MHFMP2JKMDDVG&currency_code=BRL',
+    paypalPro: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=7S83D7WH65Q34&currency_code=BRL',
+  },
+  USD: {
+    stripeSup: 'https://buy.stripe.com/5kQeVda982Ya6c0bNb8bS05',
+    stripePro: 'https://buy.stripe.com/00w7sL1CC7eq9oc5oN8bS06',
+    paypalSup: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=TULVT246D9SS6&currency_code=USD',
+    paypalPro: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=FY2DG9PKSAM6J&currency_code=USD',
+  },
+  EUR: {
+    stripeSup: 'https://buy.stripe.com/eVq3cva9842eeIw4kJ8bS07',
+    stripePro: 'https://buy.stripe.com/bJe8wP0yy0Q29oc04t8bS08',
+    paypalSup: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=TDB6XPLQEVFBG&currency_code=EUR',
+    paypalPro: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ESZXGSASU2ML2&currency_code=EUR',
+  },
+};
+const LANG_CURRENCY = { pt: 'BRL', en: 'USD', es: 'EUR', fr: 'EUR', de: 'EUR', it: 'EUR' };
+function currentCurrency(){
+  return LANG_CURRENCY[currentLang] || 'BRL';
+}
 
 function goToCheckout(url){
   if (url) { window.open(url, '_blank', 'noopener'); }
   else { alert(t('planComingSoonMsg')); }
 }
-$('planSupBtnStripe').addEventListener('click', () => goToCheckout(STRIPE_SUPPORTER_LINK));
-$('planSupBtnPayPal').addEventListener('click', () => goToCheckout(PAYPAL_SUPPORTER_LINK));
-$('planProBtnStripe').addEventListener('click', () => goToCheckout(STRIPE_PRO_LINK));
-$('planProBtnPayPal').addEventListener('click', () => goToCheckout(PAYPAL_PRO_LINK));
+$('planSupBtnStripe').addEventListener('click', () => goToCheckout(CHECKOUT_LINKS[currentCurrency()].stripeSup));
+$('planSupBtnPayPal').addEventListener('click', () => goToCheckout(CHECKOUT_LINKS[currentCurrency()].paypalSup));
+$('planProBtnStripe').addEventListener('click', () => goToCheckout(CHECKOUT_LINKS[currentCurrency()].stripePro));
+$('planProBtnPayPal').addEventListener('click', () => goToCheckout(CHECKOUT_LINKS[currentCurrency()].paypalPro));
 
 /* ====== Botão de suporte ======
    Sem backend, então o "reportar erro" é um e-mail: abre o cliente de
