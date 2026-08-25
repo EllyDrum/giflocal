@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#6C4CF5">
+<meta name="robots" content="noindex">
+<title>Obrigado pela compra — GIF Local</title>
+<style>
+  :root{
+    --bg:#faf9fd; --card:#ffffff; --ink:#181521; --ink-soft:#655f72; --ink-faint:#8b859a;
+    --line:#e9e5f4; --primary:#6c4cf5; --primary-ink:#4c2fd6; --primary-soft:#efe9ff;
+    --green:#12915a; --green-soft:#e3f6ec; --amber:#b4790b; --amber-soft:#fdf1de;
+    --radius-lg:20px; --radius:14px;
+    --font-ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#141220; --card:#1d1a2e; --ink:#f1eefb; --ink-soft:#b6aecf; --ink-faint:#7d7594; --line:#322c4a; --primary:#9c85ff; --primary-ink:#c3b3ff; --primary-soft:#2a2350; --green:#4bcf95; --green-soft:#173428; --amber:#e2a545; --amber-soft:#3a2e12; }
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; font-family:var(--font-ui); background:var(--bg); color:var(--ink);}
+  .card{background:var(--card); border-radius:var(--radius-lg); box-shadow:0 16px 40px rgba(76,47,214,.12); max-width:440px; width:100%; padding:32px 28px; text-align:center;}
+  h1{font-size:20px; margin:0 0 8px;}
+  p{color:var(--ink-soft); font-size:14px; line-height:1.5; margin:0 0 20px;}
+  .key-box{background:var(--primary-soft); border-radius:12px; padding:16px; margin-bottom:18px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:17px; font-weight:700; letter-spacing:1px; color:var(--primary-ink); word-break:break-all;}
+  .status{font-size:13px; color:var(--ink-faint); margin-bottom:18px; min-height:18px;}
+  .status.error{color:var(--amber);}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:13px 18px; border-radius:12px; border:none; background:var(--primary); color:#fff; font-size:14.5px; font-weight:700; cursor:pointer; text-decoration:none; margin-bottom:10px;}
+  .btn.secondary{background:var(--card); color:var(--primary-ink); border:1.5px solid var(--primary);}
+  .hidden{display:none;}
+  .spinner{width:28px; height:28px; border:3px solid var(--line); border-top-color:var(--primary); border-radius:50%; margin:0 auto 16px; animation:spin 1s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div id="loadingState">
+      <div class="spinner"></div>
+      <h1>Confirmando seu pagamento...</h1>
+      <p>Isso leva só alguns segundos.</p>
+    </div>
+
+    <div id="readyState" class="hidden">
+      <h1>✓ Pagamento confirmado!</h1>
+      <p>Esta é a sua chave de licença do GIF Local PRO. Guarde-a — ela também dá pra ativar em outro dispositivo depois, dentro do limite do seu plano.</p>
+      <div class="key-box" id="keyBox">-</div>
+      <div class="status" id="copyStatus"></div>
+      <button class="btn" id="copyBtn" type="button">Copiar chave</button>
+      <a class="btn secondary" id="activateBtn" href="index.html">Ativar agora no GIF Local</a>
+    </div>
+
+    <div id="errorState" class="hidden">
+      <h1>Ainda processando</h1>
+      <p id="errorMsg">Seu pagamento foi recebido, mas a licença ainda está sendo gerada. Isso normalmente leva só alguns segundos — tentando de novo automaticamente.</p>
+      <button class="btn secondary" id="retryBtn" type="button">Tentar de novo agora</button>
+    </div>
+  </div>
+
+<script>
+  var params = new URLSearchParams(location.search);
+  var sessionId = params.get('session_id');
+  var LICENSE_API_BASE = 'https://COLOQUE-AQUI-A-URL-DO-SEU-WORKER.workers.dev'; // mesma URL usada em index.html
+
+  function show(id){
+    ['loadingState','readyState','errorState'].forEach(function(s){
+      document.getElementById(s).classList.toggle('hidden', s !== id);
+    });
+  }
+
+  var attempts = 0;
+  function fetchLicense(){
+    if (!sessionId) { show('errorState'); document.getElementById('errorMsg').textContent = 'Link incompleto — falta o identificador da compra.'; return; }
+    attempts++;
+    fetch(LICENSE_API_BASE + '/license-by-session?session_id=' + encodeURIComponent(sessionId))
+      .then(function(res){ return res.json().then(function(data){ return { ok: res.ok, data: data }; }); })
+      .then(function(r){
+        if (r.ok) {
+          document.getElementById('keyBox').textContent = r.data.license_key || r.data.licenseKey;
+          show('readyState');
+          try { localStorage.setItem('gifLocalPendingActivationKey', r.data.license_key || r.data.licenseKey); } catch (e) {}
+        } else if (attempts < 6) {
+          setTimeout(fetchLicense, 3000);
+        } else {
+          show('errorState');
+        }
+      })
+      .catch(function(){
+        if (attempts < 6) setTimeout(fetchLicense, 3000);
+        else show('errorState');
+      });
+  }
+  fetchLicense();
+
+  document.getElementById('retryBtn').addEventListener('click', function(){ show('loadingState'); attempts = 0; fetchLicense(); });
+
+  document.getElementById('copyBtn').addEventListener('click', function(){
+    var key = document.getElementById('keyBox').textContent;
+    var status = document.getElementById('copyStatus');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(key).then(function(){ status.textContent = 'Copiado!'; status.className = 'status'; })
+        .catch(function(){ status.textContent = 'Não foi possível copiar — selecione o texto manualmente.'; status.className = 'status error'; });
+    } else {
+      status.textContent = 'Selecione o texto acima manualmente para copiar.';
+      status.className = 'status error';
+    }
+  });
+</script>
+</body>
+</html>

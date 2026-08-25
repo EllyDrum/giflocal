@@ -233,6 +233,29 @@
   .plan-card .btn{width:100%; justify-content:center;}
   .pay-buttons{display:flex; flex-direction:column; gap:10px;}
   .pay-btn{display:flex; align-items:center; justify-content:center; gap:9px;}
+
+  .pro-badge-btn{display:inline-flex; align-items:center; gap:6px; height:36px; padding:0 12px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--ink-soft); font-size:12.5px; font-weight:700; cursor:pointer; transition:.15s; flex-shrink:0;}
+  .pro-badge-btn:hover{border-color:var(--primary);}
+  .pro-badge-btn.is-pro{border-color:var(--primary); color:var(--primary-ink); background:var(--primary-soft);}
+  .license-overlay{position:fixed; inset:0; background:rgba(20,18,32,.55); display:none; align-items:center; justify-content:center; padding:20px; z-index:100;}
+  .license-overlay.show{display:flex;}
+  .license-panel{position:relative; background:var(--card); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); max-width:420px; width:100%; padding:26px 24px 24px; max-height:88vh; overflow-y:auto;}
+  .license-panel h3{margin:0 0 4px; font-size:18px;}
+  .license-panel .hint{margin:0 0 16px; font-size:13px;}
+  .license-panel .btn-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
+  .license-panel .btn-row .btn{flex:1; min-width:140px; justify-content:center;}
+  .license-panel input[type=text]{width:100%; padding:11px 13px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); font-size:14px; font-family:inherit; letter-spacing:.5px;}
+  .license-state{display:none;}
+  .license-state.show{display:block;}
+  .license-summary{background:var(--bg-soft); border-radius:12px; padding:6px 16px; margin:14px 0; font-size:13.5px;}
+  .license-summary div{display:flex; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px solid var(--line-soft);}
+  .license-summary div:last-child{border-bottom:none;}
+  .license-summary b{color:var(--ink); text-align:right;}
+  .device-list{margin:12px 0; display:flex; flex-direction:column; gap:8px; font-size:13px; color:var(--ink-soft);}
+  .device-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:10px;}
+  .device-row .device-meta{color:var(--ink-faint); font-size:11.5px; margin-top:2px;}
+  .device-row button{border:none; background:none; color:var(--primary-ink); font-weight:700; cursor:pointer; font-size:12.5px; flex-shrink:0;}
+  .license-close{position:absolute; top:14px; right:16px; background:none; border:none; color:var(--ink-faint); cursor:pointer; font-size:22px; line-height:1; padding:4px;}
   .pay-btn svg{width:20px; height:20px; flex-shrink:0;}
   .pay-note{font-size:12px; color:var(--ink-soft); margin:12px 0 0; text-align:center;}
   .pay-note-placeholder{visibility:hidden;}
@@ -279,6 +302,10 @@
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2l7 3v6c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V5l7-3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
         <span data-i18n="badge">100% no seu navegador · nada é enviado à internet</span>
       </div>
+      <button class="pro-badge-btn" id="proStatusBtn" type="button" data-i18n-title="licenseFreeTitle" title="GIF Local PRO">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="14" height="14"><path d="M12 2l7 3v6c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V5l7-3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        <span id="proStatusLabel" data-i18n="proStatusFree">Free</span>
+      </button>
       <button class="icon-btn" id="themeToggle" type="button" aria-label="Alternar tema claro/escuro" title="Alternar tema">
         <svg id="themeIconSun" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v2.4M12 19.1v2.4M21.5 12h-2.4M4.9 12H2.5M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7M18.5 18.5l-1.7-1.7M7.2 7.2 5.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         <svg id="themeIconMoon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:none;"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
@@ -635,6 +662,7 @@
           <li data-i18n="planFreeF1">Todos os 4 modos de criação</li>
           <li data-i18n="planFreeF2">Sem marca d'água</li>
           <li data-i18n="planFreeF3">3 GIFs grátis por dia</li>
+          <li data-i18n="planFreeF4">Resolução até 480px</li>
         </ul>
         <a href="#tabs" class="btn secondary" data-i18n="planFreeCta">Começar agora</a>
         <p class="pay-note pay-note-placeholder" aria-hidden="true" data-i18n="payNote">Pagamento seguro processado pelo provedor. Aceita cartão de qualquer país.</p>
@@ -645,6 +673,7 @@
         <div class="plan-price-note" data-i18n="planOneTime">pagamento único</div>
         <ul class="plan-feats">
           <li data-i18n-html="planSupF0"><b>Uso ilimitado</b>, sem limite diário</li>
+          <li data-i18n="planSupF3">Resolução alta, até 1280px</li>
           <li data-i18n="planSupF1">Apoie o desenvolvimento do projeto</li>
           <li data-i18n="planSupF2">Novidades em primeira mão por e-mail</li>
         </ul>
@@ -693,6 +722,53 @@
 <button id="helpBtn" class="help-fab" type="button" data-i18n-title="helpBtnTitle" title="Reportar um problema">
   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M12 17.5a1 1 0 100-2 1 1 0 000 2zM12 13.5a1 1 0 01-1-1c0-1.1.55-1.7 1.3-2.2.6-.4 1-.7 1-1.3 0-.7-.6-1.2-1.3-1.2-.6 0-1.15.35-1.3.95a1 1 0 11-1.94-.5C9.15 6.9 10.4 6 12 6c1.8 0 3.3 1.25 3.3 2.9 0 1.35-.85 2-1.6 2.5-.55.35-.7.55-.7.9a1 1 0 01-1 1.1z" fill="#fff"/></svg>
 </button>
+
+<div class="license-overlay" id="licenseOverlay">
+  <div class="license-panel">
+    <button class="license-close" id="licenseCloseBtn" type="button" aria-label="Fechar">&times;</button>
+
+    <div class="license-state" id="licenseStateFree">
+      <h3 data-i18n="licenseFreeTitle">GIF Local PRO</h3>
+      <p class="hint" data-i18n="licenseFreeDesc">Seu aplicativo está funcionando em modo gratuito.</p>
+      <div class="btn-row">
+        <button class="btn" id="licenseShowActivateBtn" type="button" data-i18n="licenseActivateBtn">Ativar licença</button>
+        <a class="btn secondary" href="#planos" id="licenseBuyBtn" data-i18n="licenseBuyBtn">Comprar GIF Local PRO</a>
+      </div>
+    </div>
+
+    <div class="license-state" id="licenseStateActivate">
+      <h3 data-i18n="licenseActivateTitle">Ativar licença</h3>
+      <p class="hint" data-i18n="licenseActivateDesc">Cole a chave que você recebeu após a compra.</p>
+      <input type="text" id="licenseKeyInput" placeholder="GLPR-XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters">
+      <div class="status" id="licenseActivateStatus"></div>
+      <div class="btn-row">
+        <button class="btn" id="licenseSubmitBtn" type="button" data-i18n="licenseSubmitBtn">Ativar</button>
+        <button class="btn secondary" id="licenseCancelActivateBtn" type="button" data-i18n="licenseCancelBtn">Cancelar</button>
+      </div>
+    </div>
+
+    <div class="license-state" id="licenseStateActive">
+      <h3 data-i18n="licenseActiveTitle">✓ GIF Local PRO ativado</h3>
+      <div class="license-summary">
+        <div><span data-i18n="licenseDeviceLabel">Dispositivo</span><b id="licenseDeviceId">-</b></div>
+        <div><span data-i18n="licensePlanLabel">Licença</span><b id="licensePlanName">-</b></div>
+        <div><span data-i18n="licenseStatusLabel">Status</span><b id="licenseStatusValue">-</b></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn secondary" id="licenseManageDevicesBtn" type="button" data-i18n="licenseManageBtn">Gerenciar dispositivos</button>
+      </div>
+    </div>
+
+    <div class="license-state" id="licenseStateDevices">
+      <h3 data-i18n="licenseDevicesTitle">Dispositivos</h3>
+      <p class="hint" data-i18n="licenseDevicesDesc">Desative um dispositivo antigo para liberar uma vaga.</p>
+      <div class="device-list" id="deviceList"></div>
+      <div class="btn-row">
+        <button class="btn secondary" id="licenseBackBtn" type="button" data-i18n="licenseBackBtn">Voltar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 /* =========================================================
@@ -1031,6 +1107,24 @@ const I18N = {
     chargedAsBrl: (amt) => `Cobrado como ${amt} (BRL)`,
     usageCounterMsg: (used, total) => `${used} de ${total} GIFs grátis hoje`,
     limitReachedMsg: "Você já criou seus 3 GIFs grátis de hoje. Role para baixo para desbloquear uso ilimitado.",
+    proStatusFree: "Free", proOnlyOptionSuffix: " 🔒 PRO",
+    planFreeF4: "Resolução até 480px", planSupF3: "Resolução alta, até 1280px",
+    licenseFreeTitle: "GIF Local PRO", licenseFreeDesc: "Seu aplicativo está funcionando em modo gratuito.",
+    licenseActivateBtn: "Ativar licença", licenseBuyBtn: "Comprar GIF Local PRO",
+    licenseActivateTitle: "Ativar licença", licenseActivateDesc: "Cole a chave que você recebeu após a compra.",
+    licenseSubmitBtn: "Ativar", licenseCancelBtn: "Cancelar", licenseActivating: "Ativando...",
+    licenseActiveTitle: "✓ GIF Local PRO ativado",
+    licenseDeviceLabel: "Dispositivo", licensePlanLabel: "Licença", licenseStatusLabel: "Status", licenseStatusActive: "Ativa",
+    licenseManageBtn: "Gerenciar dispositivos", licenseDevicesTitle: "Dispositivos",
+    licenseDevicesDesc: "Desative um dispositivo antigo para liberar uma vaga.", licenseBackBtn: "Voltar",
+    licenseLoadingDevices: "Carregando...", licenseNoOtherDevices: "Nenhum outro dispositivo ativo.",
+    licenseUnknownDevice: "Dispositivo", licenseThisDevice: "este dispositivo", licenseLastSeen: "Última validação:",
+    licenseDeactivateBtn: "Desativar",
+    licenseErrNotFound: "Licença não encontrada. Confira a chave digitada.",
+    licenseErrNotActivatable: "Esta licença não pode ser ativada (verifique o status).",
+    licenseErrDeviceLimit: "Esta licença já está ativada no número máximo de dispositivos permitido.",
+    licenseErrGeneric: "Não foi possível completar a ação. Tente novamente.",
+    licenseErrOffline: "Sem conexão para carregar os dispositivos agora.",
   },
   en: {
     badge: "100% in your browser · nothing is sent to the internet",
@@ -1136,6 +1230,24 @@ const I18N = {
     chargedAsBrl: (amt) => `Charged as ${amt} (BRL)`,
     usageCounterMsg: (used, total) => `${used} of ${total} free GIFs today`,
     limitReachedMsg: "You've made your 3 free GIFs for today. Scroll down to unlock unlimited use.",
+    proStatusFree: "Free", proOnlyOptionSuffix: " 🔒 PRO",
+    planFreeF4: "Resolution up to 480px", planSupF3: "High resolution, up to 1280px",
+    licenseFreeTitle: "GIF Local PRO", licenseFreeDesc: "Your app is currently running in free mode.",
+    licenseActivateBtn: "Activate license", licenseBuyBtn: "Buy GIF Local PRO",
+    licenseActivateTitle: "Activate license", licenseActivateDesc: "Paste the key you received after purchase.",
+    licenseSubmitBtn: "Activate", licenseCancelBtn: "Cancel", licenseActivating: "Activating...",
+    licenseActiveTitle: "✓ GIF Local PRO activated",
+    licenseDeviceLabel: "Device", licensePlanLabel: "License", licenseStatusLabel: "Status", licenseStatusActive: "Active",
+    licenseManageBtn: "Manage devices", licenseDevicesTitle: "Devices",
+    licenseDevicesDesc: "Deactivate an old device to free up a slot.", licenseBackBtn: "Back",
+    licenseLoadingDevices: "Loading...", licenseNoOtherDevices: "No other active devices.",
+    licenseUnknownDevice: "Device", licenseThisDevice: "this device", licenseLastSeen: "Last validated:",
+    licenseDeactivateBtn: "Deactivate",
+    licenseErrNotFound: "License not found. Double-check the key.",
+    licenseErrNotActivatable: "This license can't be activated (check its status).",
+    licenseErrDeviceLimit: "This license is already activated on the maximum number of allowed devices.",
+    licenseErrGeneric: "Couldn't complete the action. Please try again.",
+    licenseErrOffline: "No connection to load devices right now.",
   },
   es: {
     badge: "100% en tu navegador · nada se envía a internet",
@@ -1241,6 +1353,24 @@ const I18N = {
     chargedAsBrl: (amt) => `Se cobra como ${amt} (BRL)`,
     usageCounterMsg: (used, total) => `${used} de ${total} GIFs gratis hoy`,
     limitReachedMsg: "Ya creaste tus 3 GIFs gratis de hoy. Baja para desbloquear uso ilimitado.",
+    proStatusFree: "Free", proOnlyOptionSuffix: " 🔒 PRO",
+    planFreeF4: "Resolución hasta 480px", planSupF3: "Resolución alta, hasta 1280px",
+    licenseFreeTitle: "GIF Local PRO", licenseFreeDesc: "Tu aplicación está funcionando en modo gratuito.",
+    licenseActivateBtn: "Activar licencia", licenseBuyBtn: "Comprar GIF Local PRO",
+    licenseActivateTitle: "Activar licencia", licenseActivateDesc: "Pega la clave que recibiste tras la compra.",
+    licenseSubmitBtn: "Activar", licenseCancelBtn: "Cancelar", licenseActivating: "Activando...",
+    licenseActiveTitle: "✓ GIF Local PRO activado",
+    licenseDeviceLabel: "Dispositivo", licensePlanLabel: "Licencia", licenseStatusLabel: "Estado", licenseStatusActive: "Activa",
+    licenseManageBtn: "Gestionar dispositivos", licenseDevicesTitle: "Dispositivos",
+    licenseDevicesDesc: "Desactiva un dispositivo antiguo para liberar un cupo.", licenseBackBtn: "Volver",
+    licenseLoadingDevices: "Cargando...", licenseNoOtherDevices: "No hay otros dispositivos activos.",
+    licenseUnknownDevice: "Dispositivo", licenseThisDevice: "este dispositivo", licenseLastSeen: "Última validación:",
+    licenseDeactivateBtn: "Desactivar",
+    licenseErrNotFound: "Licencia no encontrada. Revisa la clave ingresada.",
+    licenseErrNotActivatable: "Esta licencia no se puede activar (revisa su estado).",
+    licenseErrDeviceLimit: "Esta licencia ya está activada en el número máximo de dispositivos permitidos.",
+    licenseErrGeneric: "No se pudo completar la acción. Inténtalo de nuevo.",
+    licenseErrOffline: "Sin conexión para cargar los dispositivos ahora.",
   },
   fr: {
     badge: "100% dans votre navigateur · rien n'est envoyé sur internet",
@@ -1346,6 +1476,24 @@ const I18N = {
     chargedAsBrl: (amt) => `Facturé comme ${amt} (BRL)`,
     usageCounterMsg: (used, total) => `${used} sur ${total} GIF gratuits aujourd'hui`,
     limitReachedMsg: "Vous avez créé vos 3 GIF gratuits du jour. Faites défiler pour débloquer l'usage illimité.",
+    proStatusFree: "Free", proOnlyOptionSuffix: " 🔒 PRO",
+    planFreeF4: "Résolution jusqu'à 480px", planSupF3: "Haute résolution, jusqu'à 1280px",
+    licenseFreeTitle: "GIF Local PRO", licenseFreeDesc: "Votre application fonctionne actuellement en mode gratuit.",
+    licenseActivateBtn: "Activer la licence", licenseBuyBtn: "Acheter GIF Local PRO",
+    licenseActivateTitle: "Activer la licence", licenseActivateDesc: "Collez la clé reçue après l'achat.",
+    licenseSubmitBtn: "Activer", licenseCancelBtn: "Annuler", licenseActivating: "Activation...",
+    licenseActiveTitle: "✓ GIF Local PRO activé",
+    licenseDeviceLabel: "Appareil", licensePlanLabel: "Licence", licenseStatusLabel: "Statut", licenseStatusActive: "Active",
+    licenseManageBtn: "Gérer les appareils", licenseDevicesTitle: "Appareils",
+    licenseDevicesDesc: "Désactivez un ancien appareil pour libérer une place.", licenseBackBtn: "Retour",
+    licenseLoadingDevices: "Chargement...", licenseNoOtherDevices: "Aucun autre appareil actif.",
+    licenseUnknownDevice: "Appareil", licenseThisDevice: "cet appareil", licenseLastSeen: "Dernière validation :",
+    licenseDeactivateBtn: "Désactiver",
+    licenseErrNotFound: "Licence introuvable. Vérifiez la clé saisie.",
+    licenseErrNotActivatable: "Cette licence ne peut pas être activée (vérifiez son statut).",
+    licenseErrDeviceLimit: "Cette licence est déjà activée sur le nombre maximum d'appareils autorisés.",
+    licenseErrGeneric: "Impossible de terminer l'action. Réessayez.",
+    licenseErrOffline: "Pas de connexion pour charger les appareils maintenant.",
   },
   de: {
     badge: "100% in Ihrem Browser · nichts wird ins Internet gesendet",
@@ -1451,6 +1599,24 @@ const I18N = {
     chargedAsBrl: (amt) => `Abgerechnet als ${amt} (BRL)`,
     usageCounterMsg: (used, total) => `${used} von ${total} kostenlosen GIFs heute`,
     limitReachedMsg: "Du hast heute schon 3 kostenlose GIFs erstellt. Scrolle nach unten, um unbegrenzte Nutzung freizuschalten.",
+    proStatusFree: "Free", proOnlyOptionSuffix: " 🔒 PRO",
+    planFreeF4: "Auflösung bis 480px", planSupF3: "Hohe Auflösung, bis 1280px",
+    licenseFreeTitle: "GIF Local PRO", licenseFreeDesc: "Deine App läuft aktuell im kostenlosen Modus.",
+    licenseActivateBtn: "Lizenz aktivieren", licenseBuyBtn: "GIF Local PRO kaufen",
+    licenseActivateTitle: "Lizenz aktivieren", licenseActivateDesc: "Füge den nach dem Kauf erhaltenen Schlüssel ein.",
+    licenseSubmitBtn: "Aktivieren", licenseCancelBtn: "Abbrechen", licenseActivating: "Wird aktiviert...",
+    licenseActiveTitle: "✓ GIF Local PRO aktiviert",
+    licenseDeviceLabel: "Gerät", licensePlanLabel: "Lizenz", licenseStatusLabel: "Status", licenseStatusActive: "Aktiv",
+    licenseManageBtn: "Geräte verwalten", licenseDevicesTitle: "Geräte",
+    licenseDevicesDesc: "Deaktiviere ein altes Gerät, um einen Platz freizugeben.", licenseBackBtn: "Zurück",
+    licenseLoadingDevices: "Lädt...", licenseNoOtherDevices: "Keine weiteren aktiven Geräte.",
+    licenseUnknownDevice: "Gerät", licenseThisDevice: "dieses Gerät", licenseLastSeen: "Letzte Prüfung:",
+    licenseDeactivateBtn: "Deaktivieren",
+    licenseErrNotFound: "Lizenz nicht gefunden. Überprüfe den eingegebenen Schlüssel.",
+    licenseErrNotActivatable: "Diese Lizenz kann nicht aktiviert werden (Status prüfen).",
+    licenseErrDeviceLimit: "Diese Lizenz ist bereits auf der maximal erlaubten Geräteanzahl aktiviert.",
+    licenseErrGeneric: "Aktion konnte nicht abgeschlossen werden. Bitte erneut versuchen.",
+    licenseErrOffline: "Keine Verbindung, um Geräte jetzt zu laden.",
   },
   it: {
     badge: "100% nel tuo browser · niente viene inviato a internet",
@@ -1556,6 +1722,24 @@ const I18N = {
     chargedAsBrl: (amt) => `Addebitato come ${amt} (BRL)`,
     usageCounterMsg: (used, total) => `${used} di ${total} GIF gratuiti oggi`,
     limitReachedMsg: "Hai già creato i tuoi 3 GIF gratuiti di oggi. Scorri in basso per sbloccare l'uso illimitato.",
+    proStatusFree: "Free", proOnlyOptionSuffix: " 🔒 PRO",
+    planFreeF4: "Risoluzione fino a 480px", planSupF3: "Alta risoluzione, fino a 1280px",
+    licenseFreeTitle: "GIF Local PRO", licenseFreeDesc: "La tua app sta funzionando in modalità gratuita.",
+    licenseActivateBtn: "Attiva licenza", licenseBuyBtn: "Acquista GIF Local PRO",
+    licenseActivateTitle: "Attiva licenza", licenseActivateDesc: "Incolla la chiave ricevuta dopo l'acquisto.",
+    licenseSubmitBtn: "Attiva", licenseCancelBtn: "Annulla", licenseActivating: "Attivazione...",
+    licenseActiveTitle: "✓ GIF Local PRO attivato",
+    licenseDeviceLabel: "Dispositivo", licensePlanLabel: "Licenza", licenseStatusLabel: "Stato", licenseStatusActive: "Attiva",
+    licenseManageBtn: "Gestisci dispositivi", licenseDevicesTitle: "Dispositivi",
+    licenseDevicesDesc: "Disattiva un dispositivo vecchio per liberare un posto.", licenseBackBtn: "Indietro",
+    licenseLoadingDevices: "Caricamento...", licenseNoOtherDevices: "Nessun altro dispositivo attivo.",
+    licenseUnknownDevice: "Dispositivo", licenseThisDevice: "questo dispositivo", licenseLastSeen: "Ultima convalida:",
+    licenseDeactivateBtn: "Disattiva",
+    licenseErrNotFound: "Licenza non trovata. Controlla la chiave inserita.",
+    licenseErrNotActivatable: "Questa licenza non può essere attivata (controlla lo stato).",
+    licenseErrDeviceLimit: "Questa licenza è già attivata sul numero massimo di dispositivi consentiti.",
+    licenseErrGeneric: "Impossibile completare l'azione. Riprova.",
+    licenseErrOffline: "Nessuna connessione per caricare i dispositivi ora.",
   },
 };
 
@@ -1633,6 +1817,7 @@ function getRemainingToday(){
 }
 
 function canCreateGif(){
+  if (typeof licenseState !== 'undefined' && licenseState.isPro) return true;
   return !usageTrackingAvailable || getRemainingToday() > 0;
 }
 
@@ -1647,7 +1832,7 @@ function registerGifCreated(){
 function updateUsageBadge(){
   const el = $('usageBadge');
   if (!el) return;
-  if (!usageTrackingAvailable) { el.classList.remove('show'); return; }
+  if (!usageTrackingAvailable || (typeof licenseState !== 'undefined' && licenseState.isPro)) { el.classList.remove('show'); return; }
   const used = Math.min(readUsageState().count, FREE_DAILY_LIMIT);
   const pct = Math.round((used / FREE_DAILY_LIMIT) * 100);
   el.innerHTML = '<span class="usage-track"><span class="usage-fill" style="width:' + pct + '%"></span></span><span></span>';
@@ -1715,6 +1900,8 @@ function applyTranslations(){
   renderFotosThumbs();
   updateHero();
   updatePlanPrices();
+  applyResolutionGate();
+  updateProStatusBadge();
   updateUsageBadge();
 }
 
@@ -1888,13 +2075,14 @@ document.querySelectorAll('#tabs button').forEach(btn => {
   });
 });
 
-/* ============== botão do plano Pro (ainda sem checkout real) ============== */
 /* ====== Links de checkout (pagamento) ======
-   Assim que a conta Stripe e/ou Lemon Squeezy estiver ativa e o
-   produto "Pro" criado, cole o link de pagamento aqui (é só a URL
-   pública do checkout, não precisa de nenhuma chave secreta nem
-   servidor). Enquanto estiver vazio, o botão mostra um aviso
-   honesto de "em breve" em vez de levar a lugar nenhum. */
+   IMPORTANTE sobre licenciamento: só as compras feitas pelo Stripe geram
+   licença automaticamente (o Worker escuta o webhook do Stripe — ver
+   worker/README.md). As compras por PayPal continuam funcionando como
+   pagamento, mas hoje NÃO emitem uma licença sozinhas — precisaria de um
+   handler de IPN do PayPal à parte, que ainda não foi implementado. Até lá,
+   um pedido pago via PayPal precisa de uma licença criada manualmente
+   (wrangler d1 execute) depois de confirmar o pagamento. */
 /* Um link/botão por moeda, não por idioma: es/fr/de/it dividem o
    mesmo link EUR, já que todos usam a mesma moeda. */
 const CHECKOUT_LINKS = {
@@ -1930,6 +2118,350 @@ $('planSupBtnStripe').addEventListener('click', () => goToCheckout(CHECKOUT_LINK
 $('planSupBtnPayPal').addEventListener('click', () => goToCheckout(CHECKOUT_LINKS[currentCurrency()].paypalSup));
 $('planProBtnStripe').addEventListener('click', () => goToCheckout(CHECKOUT_LINKS[currentCurrency()].stripePro));
 $('planProBtnPayPal').addEventListener('click', () => goToCheckout(CHECKOUT_LINKS[currentCurrency()].paypalPro));
+
+/* =========================================================
+   LICENCIAMENTO — GIF Local PRO
+   A licença é assinada com ECDSA P-256 pelo Worker (chave privada só
+   existe no servidor). Aqui só verificamos a assinatura com a chave
+   pública (crypto.subtle.verify), 100% local. Nenhum arquivo do
+   usuário (foto/vídeo/GIF) participa deste fluxo — só a chave de
+   licença digitada e um ID de dispositivo aleatório gerado aqui.
+   Funciona offline: a última licença validada com sucesso continua
+   valendo dentro da janela de tolerância que o servidor definir
+   (ver worker/schema.sql, offlineToleranceDays no payload assinado).
+   ========================================================= */
+
+/* Atualize depois de publicar o Worker (ver worker/README.md, passo 4). Enquanto
+   continuar com esse valor de placeholder, LICENSE_BACKEND_CONFIGURED fica false
+   e o site continua se comportando exatamente como antes (sem travar nenhum
+   tamanho, sem tentar ativar nada) — só liga o gate PRO de verdade quando o
+   Worker estiver realmente no ar e essa URL for atualizada. */
+const LICENSE_API_BASE = 'https://COLOQUE-AQUI-A-URL-DO-SEU-WORKER.workers.dev';
+const LICENSE_BACKEND_CONFIGURED = !LICENSE_API_BASE.includes('COLOQUE-AQUI');
+const APP_VERSION = '1.0.0';
+
+/* Chave pública ECDSA P-256 — só verifica assinatura, não é segredo. */
+const LICENSE_PUBLIC_KEY_JWK = {"key_ops":["verify"],"ext":true,"kty":"EC","x":"wJDIVqc0KNof76AojrkDE1L6xaWP6Y43wNJI09yymFk","y":"2D5fM-xf7UHhe7qULtFEaM-KEQJrwQdAg1OR-PEA780","crv":"P-256"};
+
+const LICENSE_STORAGE_KEY = 'gifLocalLicenseV1';
+const DEVICE_ID_STORAGE_KEY = 'gifLocalDeviceId';
+const LAST_SEEN_ISSUED_AT_KEY = 'gifLocalLicenseLastIssuedAt';
+const PRO_ONLY_SIZES = ['640', '960', '1280'];
+
+let licenseState = { isPro: false, payloadObj: null };
+
+function getOrCreateDeviceId(){
+  try {
+    let id = localStorage.getItem(DEVICE_ID_STORAGE_KEY);
+    if (!id) {
+      id = (crypto.randomUUID ? crypto.randomUUID() : ('dev-' + Date.now() + '-' + Math.random().toString(16).slice(2)));
+      localStorage.setItem(DEVICE_ID_STORAGE_KEY, id);
+    }
+    return id;
+  } catch (e) {
+    return 'dev-' + Date.now();
+  }
+}
+
+function guessDeviceLabel(){
+  const ua = navigator.userAgent;
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(ua);
+  const browser = /Firefox/i.test(ua) ? 'Firefox' : /Edg/i.test(ua) ? 'Edge' : /Chrome/i.test(ua) ? 'Chrome' : /Safari/i.test(ua) ? 'Safari' : 'Navegador';
+  return browser + ' · ' + (isMobile ? 'mobile' : 'desktop');
+}
+
+function base64ToBuf(b64){
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes.buffer;
+}
+
+async function importLicensePublicKey(){
+  return crypto.subtle.importKey('jwk', LICENSE_PUBLIC_KEY_JWK, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);
+}
+
+async function verifyLicenseSignature(payloadString, signatureB64){
+  try {
+    const key = await importLicensePublicKey();
+    return await crypto.subtle.verify(
+      { name: 'ECDSA', hash: 'SHA-256' },
+      key,
+      base64ToBuf(signatureB64),
+      new TextEncoder().encode(payloadString)
+    );
+  } catch (e) {
+    return false;
+  }
+}
+
+function readStoredLicense(){
+  try {
+    const raw = localStorage.getItem(LICENSE_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+function writeStoredLicense(record){
+  try { localStorage.setItem(LICENSE_STORAGE_KEY, JSON.stringify(record)); } catch (e) { /* sem localStorage — licença não persiste entre sessões */ }
+}
+
+/* Guarda contra o relógio local ser adiantado/atrasado manualmente para
+   tentar burlar a expiração: nunca aceita um issuedAt mais antigo que o
+   maior já visto. Mitigação parcial (documentado em ARQUITETURA_LICENCIAMENTO.md,
+   seção 10) — não existe defesa 100% eficaz num app client-side. */
+function isIssuedAtRegressing(issuedAt){
+  try {
+    const last = localStorage.getItem(LAST_SEEN_ISSUED_AT_KEY);
+    return last ? new Date(issuedAt).getTime() < new Date(last).getTime() : false;
+  } catch (e) { return false; }
+}
+function rememberIssuedAt(issuedAt){
+  try { localStorage.setItem(LAST_SEEN_ISSUED_AT_KEY, issuedAt); } catch (e) {}
+}
+
+async function evaluateLicenseRecord(record){
+  if (!record || !record.payload || !record.signature) return { isPro: false, payloadObj: null };
+  const validSig = await verifyLicenseSignature(record.payload, record.signature);
+  if (!validSig) return { isPro: false, payloadObj: null };
+
+  const payloadObj = JSON.parse(record.payload);
+  if (isIssuedAtRegressing(payloadObj.issuedAt)) return { isPro: false, payloadObj };
+  rememberIssuedAt(payloadObj.issuedAt);
+
+  if (payloadObj.status !== 'ACTIVE') return { isPro: false, payloadObj };
+  if (payloadObj.expiresAt && new Date(payloadObj.expiresAt).getTime() < Date.now()) return { isPro: false, payloadObj };
+
+  const toleranceMs = (payloadObj.offlineToleranceDays || 30) * 24 * 60 * 60 * 1000;
+  if (Date.now() - new Date(payloadObj.issuedAt).getTime() > toleranceMs) return { isPro: false, payloadObj };
+
+  return { isPro: true, payloadObj };
+}
+
+async function refreshLicenseState(){
+  licenseState = await evaluateLicenseRecord(readStoredLicense());
+  applyResolutionGate();
+  updateProStatusBadge();
+  updateLicensePanelUI();
+  updateUsageBadge();
+}
+
+function updateProStatusBadge(){
+  const btn = $('proStatusBtn');
+  const label = $('proStatusLabel');
+  if (!btn || !label) return;
+  btn.classList.toggle('is-pro', licenseState.isPro);
+  label.textContent = licenseState.isPro ? 'PRO' : t('proStatusFree');
+}
+
+function applyResolutionGate(){
+  ['fotosSize', 'videoSize', 'telaSize'].forEach((selectId) => {
+    const sel = $(selectId);
+    if (!sel) return;
+    let selectedLocked = false;
+    Array.from(sel.options).forEach((opt) => {
+      const key = opt.getAttribute('data-i18n');
+      const base = key ? t(key) : opt.textContent;
+      // Só passa a travar tamanho quando o backend de licenciamento estiver
+      // de fato configurado (ver LICENSE_BACKEND_CONFIGURED) — antes disso,
+      // travar sem ter como comprar/ativar seria tirar um recurso já grátis
+      // sem dar nenhuma forma de recuperá-lo.
+      const locked = LICENSE_BACKEND_CONFIGURED && !licenseState.isPro && PRO_ONLY_SIZES.includes(opt.value);
+      opt.disabled = locked;
+      opt.textContent = locked ? base + t('proOnlyOptionSuffix') : base;
+      if (locked && opt.selected) selectedLocked = true;
+    });
+    if (selectedLocked) sel.value = '480';
+  });
+}
+
+async function activateLicense(licenseKeyRaw){
+  const licenseKey = licenseKeyRaw.trim().toUpperCase();
+  const deviceId = getOrCreateDeviceId();
+  const res = await fetch(LICENSE_API_BASE + '/activate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ licenseKey, deviceId, deviceLabel: guessDeviceLabel(), appVersion: APP_VERSION }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    const e = new Error(data.message || data.error || 'Falha ao ativar');
+    e.code = data.error;
+    throw e;
+  }
+  writeStoredLicense({ payload: data.payload, signature: data.signature, licenseKey, verifiedAt: new Date().toISOString() });
+  await refreshLicenseState();
+}
+
+async function validateLicenseOnline(){
+  if (!LICENSE_BACKEND_CONFIGURED) return;
+  const record = readStoredLicense();
+  if (!record || !record.payload) return;
+  let payloadObj;
+  try { payloadObj = JSON.parse(record.payload); } catch (e) { return; }
+  if (!payloadObj.licenseId || !payloadObj.deviceId) return;
+  try {
+    const res = await fetch(LICENSE_API_BASE + '/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ licenseId: payloadObj.licenseId, deviceId: payloadObj.deviceId }),
+    });
+    if (!res.ok) return; // Worker fora do ar ou erro: mantém a última licença válida guardada localmente
+    const data = await res.json();
+    writeStoredLicense({ payload: data.payload, signature: data.signature, licenseKey: record.licenseKey, verifiedAt: new Date().toISOString() });
+    await refreshLicenseState();
+  } catch (e) {
+    /* offline: segue com a última licença válida guardada, dentro da janela de tolerância —
+       não derruba o usuário PRO simplesmente por falta de internet. */
+  }
+}
+
+function licenseErrorMessage(code){
+  const map = {
+    LICENSE_NOT_FOUND: t('licenseErrNotFound'),
+    LICENSE_NOT_ACTIVATABLE: t('licenseErrNotActivatable'),
+    LICENSE_DEVICE_LIMIT_REACHED: t('licenseErrDeviceLimit'),
+  };
+  return map[code] || t('licenseErrGeneric');
+}
+
+/* ---- painel/modal ---- */
+
+function showLicenseState(name){
+  ['Free', 'Activate', 'Active', 'Devices'].forEach((s) => {
+    const el = $('licenseState' + s);
+    if (el) el.classList.toggle('show', s === name);
+  });
+}
+
+function openLicensePanel(){
+  $('licenseOverlay').classList.add('show');
+  updateLicensePanelUI();
+}
+function closeLicensePanel(){
+  $('licenseOverlay').classList.remove('show');
+  $('licenseKeyInput').value = '';
+  $('licenseActivateStatus').textContent = '';
+}
+
+function updateLicensePanelUI(){
+  if (!$('licenseOverlay')) return;
+  if (licenseState.isPro) {
+    if (!$('licenseStateDevices').classList.contains('show')) showLicenseState('Active');
+    $('licenseDeviceId').textContent = guessDeviceLabel();
+    $('licensePlanName').textContent = (licenseState.payloadObj && licenseState.payloadObj.plan) || 'PRO';
+    $('licenseStatusValue').textContent = t('licenseStatusActive');
+  } else if (!$('licenseStateActivate').classList.contains('show')) {
+    showLicenseState('Free');
+  }
+}
+
+function renderDeviceList(devices, record){
+  const list = $('deviceList');
+  list.innerHTML = '';
+  let myDeviceId = null;
+  try { myDeviceId = JSON.parse(record.payload).deviceId; } catch (e) {}
+  const active = devices.filter((d) => !d.deactivated_at);
+  active.forEach((d) => {
+    const row = document.createElement('div');
+    row.className = 'device-row';
+    const isThis = d.device_id === myDeviceId;
+    const meta = document.createElement('div');
+    const nameLine = document.createElement('div');
+    nameLine.textContent = (d.device_label || t('licenseUnknownDevice')) + (isThis ? ' · ' + t('licenseThisDevice') : '');
+    const metaLine = document.createElement('div');
+    metaLine.className = 'device-meta';
+    metaLine.textContent = t('licenseLastSeen') + ' ' + formatRelativeDate(d.last_validated_at);
+    meta.appendChild(nameLine);
+    meta.appendChild(metaLine);
+    row.appendChild(meta);
+    if (!isThis) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = t('licenseDeactivateBtn');
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        try {
+          await fetch(LICENSE_API_BASE + '/device/deactivate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ licenseKey: record.licenseKey, deviceId: d.device_id }),
+          });
+          loadDeviceList();
+        } catch (e) {
+          btn.disabled = false;
+        }
+      });
+      row.appendChild(btn);
+    }
+    list.appendChild(row);
+  });
+  if (!active.length) list.textContent = t('licenseNoOtherDevices');
+}
+
+function formatRelativeDate(iso){
+  if (!iso) return '-';
+  try { return new Date(iso).toLocaleDateString(currentLang === 'pt' ? 'pt-BR' : currentLang); } catch (e) { return iso; }
+}
+
+async function loadDeviceList(){
+  const list = $('deviceList');
+  list.textContent = t('licenseLoadingDevices');
+  const record = readStoredLicense();
+  if (!record || !record.licenseKey) { list.textContent = ''; return; }
+  try {
+    const res = await fetch(LICENSE_API_BASE + '/license/devices?licenseKey=' + encodeURIComponent(record.licenseKey));
+    const data = await res.json();
+    if (!res.ok) { list.textContent = data.message || t('licenseErrGeneric'); return; }
+    renderDeviceList(data.devices, record);
+  } catch (e) {
+    list.textContent = t('licenseErrOffline');
+  }
+}
+
+$('proStatusBtn').addEventListener('click', openLicensePanel);
+$('licenseCloseBtn').addEventListener('click', closeLicensePanel);
+$('licenseOverlay').addEventListener('click', (e) => { if (e.target.id === 'licenseOverlay') closeLicensePanel(); });
+$('licenseShowActivateBtn').addEventListener('click', () => showLicenseState('Activate'));
+$('licenseCancelActivateBtn').addEventListener('click', () => showLicenseState('Free'));
+$('licenseBackBtn').addEventListener('click', () => showLicenseState('Active'));
+$('licenseManageDevicesBtn').addEventListener('click', () => { showLicenseState('Devices'); loadDeviceList(); });
+
+$('licenseSubmitBtn').addEventListener('click', async () => {
+  const key = $('licenseKeyInput').value.trim();
+  if (!key) return;
+  if (!LICENSE_BACKEND_CONFIGURED) {
+    $('licenseActivateStatus').textContent = t('licenseErrGeneric');
+    return;
+  }
+  $('licenseSubmitBtn').disabled = true;
+  $('licenseActivateStatus').textContent = t('licenseActivating');
+  try {
+    await activateLicense(key);
+    $('licenseActivateStatus').textContent = '';
+  } catch (e) {
+    $('licenseActivateStatus').textContent = licenseErrorMessage(e.code);
+  } finally {
+    $('licenseSubmitBtn').disabled = false;
+  }
+});
+
+async function initLicense(){
+  await refreshLicenseState();
+  if (navigator.onLine) validateLicenseOnline();
+  /* Se a pessoa acabou de vir da página obrigado.html (pós-compra), a chave
+     fica guardada temporariamente para já abrir o painel pronta pra ativar,
+     sem precisar copiar/colar de novo. */
+  try {
+    const pendingKey = localStorage.getItem('gifLocalPendingActivationKey');
+    if (pendingKey && !licenseState.isPro) {
+      localStorage.removeItem('gifLocalPendingActivationKey');
+      openLicensePanel();
+      showLicenseState('Activate');
+      $('licenseKeyInput').value = pendingKey;
+    }
+  } catch (e) { /* localStorage indisponível — segue sem o preenchimento automático */ }
+}
+window.addEventListener('online', validateLicenseOnline);
 
 /* ====== Botão de suporte ======
    Sem backend, então o "reportar erro" é um e-mail: abre o cliente de
@@ -2402,6 +2934,7 @@ $('zeroBtn').addEventListener('click', async () => {
 currentLang = detectLang();
 $('langSwitch').value = currentLang;
 applyTranslations();
+initLicense();
 
 /* Detecção proativa da gravação de tela: em vez de deixar o usuário
    clicar em "Iniciar gravação da tela" e só então ver o erro, já
