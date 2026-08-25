@@ -247,6 +247,7 @@
   @media(min-width:601px) and (max-width:880px){ .plans-grid-3{grid-template-columns:1fr 1fr;} }
 
   footer.end{margin-top:38px; padding-top:20px; border-top:1px solid var(--line); font-size:12.5px; color:var(--ink-faint); text-align:center;}
+  .credit-line{margin-top:8px; font-size:11.5px; color:var(--ink-faint); opacity:.7; text-align:center;}
 
   @media(max-width:720px){
     .hero h1{font-size:28px;}
@@ -678,7 +679,8 @@
     </div>
   </section>
 
-  <footer class="end" id="privacidade" data-i18n="footerText">Nenhuma foto, vídeo ou gravação sai do seu computador. Tudo é processado no seu navegador com JavaScript comum (EC).</footer>
+  <footer class="end" id="privacidade" data-i18n="footerText">Nenhuma foto, vídeo ou gravação sai do seu computador. Tudo é processado no seu navegador com JavaScript comum.</footer>
+  <div class="credit-line">© GIF Local — EC</div>
 </div>
 
 <button id="helpBtn" class="help-fab" type="button" data-i18n-title="helpBtnTitle" title="Reportar um problema">
@@ -962,7 +964,7 @@ const I18N = {
     zeroBtn: "Gerar GIF", zeroDownload: "Baixar GIF",
     altZero: "Prévia do GIF animado gerado do zero",
     aiNote: "Quer usar imagens geradas por IA (ChatGPT/DALL·E, Sora)? Baixe as imagens ou quadros gerados e junte-os aqui mesmo na aba <b>Fotos</b>, a montagem final continua 100% local.",
-    footerText: "Nenhuma foto, vídeo ou gravação sai do seu computador. Tudo é processado no seu navegador com JavaScript comum (EC).",
+    footerText: "Nenhuma foto, vídeo ou gravação sai do seu computador. Tudo é processado no seu navegador com JavaScript comum.",
     errorPrefix: "Não foi possível gerar o GIF: ",
     framesMeta: (n, size) => n + " quadros · " + size,
     progAnalyzing: "Analisando cores...", progConverting: "Convertendo quadros...",
@@ -1062,7 +1064,7 @@ const I18N = {
     zeroBtn: "Generate GIF", zeroDownload: "Download GIF",
     altZero: "Preview of the animated GIF generated from scratch",
     aiNote: "Want to use AI-generated images (ChatGPT/DALL·E, Sora)? Download the images or frames and combine them right here in the <b>Photos</b> tab, the final assembly stays 100% local.",
-    footerText: "No photo, video or recording leaves your computer. Everything is processed in your browser with plain JavaScript (EC).",
+    footerText: "No photo, video or recording leaves your computer. Everything is processed in your browser with plain JavaScript.",
     errorPrefix: "Couldn't generate the GIF: ",
     framesMeta: (n, size) => n + " frames · " + size,
     progAnalyzing: "Analyzing colors...", progConverting: "Converting frames...",
@@ -1162,7 +1164,7 @@ const I18N = {
     zeroBtn: "Generar GIF", zeroDownload: "Descargar GIF",
     altZero: "Vista previa del GIF animado generado desde cero",
     aiNote: "¿Quieres usar imágenes generadas por IA (ChatGPT/DALL·E, Sora)? Descarga las imágenes o fotogramas generados y únelos aquí mismo en la pestaña <b>Fotos</b>, el montaje final sigue siendo 100% local.",
-    footerText: "Ninguna foto, vídeo o grabación sale de tu ordenador. Todo se procesa en tu navegador con JavaScript común (EC).",
+    footerText: "Ninguna foto, vídeo o grabación sale de tu ordenador. Todo se procesa en tu navegador con JavaScript común.",
     errorPrefix: "No se pudo generar el GIF: ",
     framesMeta: (n, size) => n + " fotogramas · " + size,
     progAnalyzing: "Analizando colores...", progConverting: "Convirtiendo fotogramas...",
@@ -1262,7 +1264,7 @@ const I18N = {
     zeroBtn: "Générer le GIF", zeroDownload: "Télécharger le GIF",
     altZero: "Aperçu du GIF animé généré à partir de zéro",
     aiNote: "Vous voulez utiliser des images générées par IA (ChatGPT/DALL·E, Sora) ? Téléchargez les images générées et assemblez-les ici même dans l'onglet <b>Photos</b>, le montage final reste 100% local.",
-    footerText: "Aucune photo, vidéo ou capture ne quitte votre ordinateur. Tout est traité dans votre navigateur avec du JavaScript classique (EC).",
+    footerText: "Aucune photo, vidéo ou capture ne quitte votre ordinateur. Tout est traité dans votre navigateur avec du JavaScript classique.",
     errorPrefix: "Impossible de générer le GIF : ",
     framesMeta: (n, size) => n + " images · " + size,
     progAnalyzing: "Analyse des couleurs...", progConverting: "Conversion des images...",
@@ -1362,7 +1364,7 @@ const I18N = {
     zeroBtn: "GIF erstellen", zeroDownload: "GIF herunterladen",
     altZero: "Vorschau des von Grund auf erstellten animierten GIFs",
     aiNote: "Möchten Sie KI-generierte Bilder verwenden (ChatGPT/DALL·E, Sora)? Laden Sie die generierten Bilder oder Einzelbilder herunter und fügen Sie sie hier im Tab <b>Fotos</b> zusammen, der finale Zusammenbau bleibt 100% lokal.",
-    footerText: "Kein Foto, Video oder keine Aufnahme verlässt Ihren Computer. Alles wird in Ihrem Browser mit gewöhnlichem JavaScript (EC) verarbeitet.",
+    footerText: "Kein Foto, Video oder keine Aufnahme verlässt Ihren Computer. Alles wird in Ihrem Browser mit gewöhnlichem JavaScript verarbeitet.",
     errorPrefix: "Das GIF konnte nicht erstellt werden: ",
     framesMeta: (n, size) => n + " Bilder · " + size,
     progAnalyzing: "Farben werden analysiert...", progConverting: "Bilder werden konvertiert...",
@@ -1462,7 +1464,7 @@ const I18N = {
     zeroBtn: "Genera GIF", zeroDownload: "Scarica GIF",
     altZero: "Anteprima del GIF animato generato da zero",
     aiNote: "Vuoi usare immagini generate dall'IA (ChatGPT/DALL·E, Sora)? Scarica le immagini o i fotogrammi generati e uniscili qui nella scheda <b>Foto</b>, il montaggio finale resta 100% locale.",
-    footerText: "Nessuna foto, video o registrazione lascia il tuo computer. Tutto viene elaborato nel tuo browser con normale JavaScript (EC).",
+    footerText: "Nessuna foto, video o registrazione lascia il tuo computer. Tutto viene elaborato nel tuo browser con normale JavaScript.",
     errorPrefix: "Non è stato possibile generare il GIF: ",
     framesMeta: (n, size) => n + " fotogrammi · " + size,
     progAnalyzing: "Analisi dei colori...", progConverting: "Conversione dei fotogrammi...",
