@@ -369,7 +369,7 @@
         </div>
         <div class="field">
           <label data-i18n="sizeLabel">Tamanho do GIF</label>
-          <select id="fotosSize"><option value="320" data-i18n="sizeSmallOpt">Pequeno (320px)</option><option value="480" selected data-i18n="sizeMedOpt">Médio (480px)</option><option value="640" data-i18n="sizeLargeOpt">Grande (640px)</option></select>
+          <select id="fotosSize"><option value="320" data-i18n="sizeSmallOpt">Pequeno (320px)</option><option value="480" selected data-i18n="sizeMedOpt">Médio (480px)</option><option value="640" data-i18n="sizeLargeOpt">Grande (640px)</option><option value="960" data-i18n="sizeXLargeOpt">Extra grande (960px)</option><option value="1280" data-i18n="sizeFullOpt">Máxima (1280px)</option></select>
         </div>
         <div class="field">
           <label data-i18n="qualityLabel">Qualidade de cores</label>
@@ -442,7 +442,7 @@
           </div>
           <div class="field">
             <label data-i18n="sizeLabel">Tamanho do GIF</label>
-            <select id="videoSize"><option value="320" data-i18n="sizeSmallOpt">Pequeno (320px)</option><option value="480" selected data-i18n="sizeMedOpt">Médio (480px)</option><option value="640" data-i18n="sizeLargeOpt">Grande (640px)</option></select>
+            <select id="videoSize"><option value="320" data-i18n="sizeSmallOpt">Pequeno (320px)</option><option value="480" selected data-i18n="sizeMedOpt">Médio (480px)</option><option value="640" data-i18n="sizeLargeOpt">Grande (640px)</option><option value="960" data-i18n="sizeXLargeOpt">Extra grande (960px)</option><option value="1280" data-i18n="sizeFullOpt">Máxima (1280px)</option></select>
           </div>
           <div class="field">
             <label data-i18n="qualityLabel">Qualidade de cores</label>
@@ -487,7 +487,14 @@
     <p class="desc" data-i18n="telaDesc">Grave a tela agora, ou envie uma gravação que você já fez.</p>
     <div class="card">
       <div id="telaCaptureArea">
-        <button class="btn" id="telaRecordBtn" data-i18n="telaStartRecBtn">Iniciar gravação da tela</button>
+        <div class="btn-row">
+          <button class="btn" id="telaRecordBtn" data-i18n="telaStartRecBtn">Iniciar gravação da tela</button>
+          <button class="btn secondary" id="cameraRecordBtn" type="button" data-i18n="cameraStartRecBtn">Gravar pela câmera</button>
+          <button class="btn secondary" id="cameraFlipBtn" type="button" style="display:none;">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4 12a8 8 0 0 1 13.7-5.7M20 12a8 8 0 0 1-13.7 5.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M17 3v4h-4M7 21v-4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span data-i18n="cameraFlipBtn">Trocar câmera</span>
+          </button>
+        </div>
         <div class="status" id="telaCaptureStatus"></div>
       </div>
       <div class="note info" id="telaFallbackNote" style="display:none;"></div>
@@ -521,7 +528,7 @@
           </div>
           <div class="field">
             <label data-i18n="sizeLabel">Tamanho do GIF</label>
-            <select id="telaSize"><option value="320" data-i18n="sizeSmallOpt">Pequeno (320px)</option><option value="480" selected data-i18n="sizeMedOpt">Médio (480px)</option><option value="640" data-i18n="sizeLargeOpt">Grande (640px)</option></select>
+            <select id="telaSize"><option value="320" data-i18n="sizeSmallOpt">Pequeno (320px)</option><option value="480" selected data-i18n="sizeMedOpt">Médio (480px)</option><option value="640" data-i18n="sizeLargeOpt">Grande (640px)</option><option value="960" data-i18n="sizeXLargeOpt">Extra grande (960px)</option><option value="1280" data-i18n="sizeFullOpt">Máxima (1280px)</option></select>
           </div>
           <div class="field">
             <label data-i18n="qualityLabel">Qualidade de cores</label>
@@ -933,7 +940,7 @@ const I18N = {
     fotosInputHint: "Você pode selecionar várias de uma vez e reordenar depois.",
     fotosDurationLabel: "Duração de cada foto",
     sizeLabel: "Tamanho do GIF",
-    sizeSmallOpt: "Pequeno (320px)", sizeMedOpt: "Médio (480px)", sizeLargeOpt: "Grande (640px)",
+    sizeSmallOpt: "Pequeno (320px)", sizeMedOpt: "Médio (480px)", sizeLargeOpt: "Grande (640px)", sizeXLargeOpt: "Extra grande (960px)", sizeFullOpt: "Máxima (1280px)",
     qualityLabel: "Qualidade de cores",
     qualityHighOpt: "Alta (arquivo maior)", qualityMedOpt: "Média", qualityLowOpt: "Leve (arquivo menor)",
     fotosBtn: "Gerar GIF",
@@ -952,10 +959,15 @@ const I18N = {
     telaH2: "Gravação de tela → GIF", telaDesc: "Grave a tela agora, ou envie uma gravação que você já fez.",
     telaStartRecBtn: "Iniciar gravação da tela", telaStopRecBtn: "Parar gravação",
     telaUploadLabel: "Ou envie um vídeo já gravado",
-    telaFallbackMsg: "Seu navegador não deixa iniciar a gravação de tela a partir de um arquivo aberto localmente (proteção de segurança). Grave a tela com o gravador do seu sistema (Windows, Mac ou celular) e envie o arquivo abaixo.",
+    telaFallbackMsg: "Este navegador ou dispositivo não permite gravar a tela diretamente aqui (no celular isso é uma limitação do sistema, não do site). Grave a tela com o gravador nativo do seu aparelho (Windows, Mac, iPhone ou Android) e envie o arquivo abaixo — ou use \"Gravar pela câmera\" para gravar direto por aqui.",
     telaRecordingMsg: "Gravando... clique em \"Parar gravação\" quando terminar.",
     telaReadyMsg: "Gravação pronta. Ajuste o trecho abaixo e gere o GIF.",
     telaCantStart: "Não foi possível iniciar a gravação. Envie um vídeo já gravado abaixo.",
+    cameraStartRecBtn: "Gravar pela câmera", cameraStopRecBtn: "Parar gravação",
+    cameraFlipBtn: "Trocar câmera",
+    cameraRecordingMsg: "Gravando pela câmera... clique em \"Parar gravação\" quando terminar.",
+    cameraReadyMsg: "Gravação pronta. Ajuste o trecho abaixo e gere o GIF.",
+    cameraCantStart: "Não foi possível acessar a câmera. Verifique a permissão do navegador ou envie um vídeo já gravado abaixo.",
     telaBtn: "Gerar GIF", telaDownload: "Baixar GIF",
     altTela: "Prévia do GIF gerado a partir da gravação de tela",
     zeroH2: "Criar do zero, sem IA", zeroDesc: "Uma animação simples gerada por código, direto aqui, sem foto, vídeo ou inteligência artificial.",
@@ -1033,7 +1045,7 @@ const I18N = {
     fotosInputHint: "You can select several at once and reorder them afterwards.",
     fotosDurationLabel: "Duration of each photo",
     sizeLabel: "GIF size",
-    sizeSmallOpt: "Small (320px)", sizeMedOpt: "Medium (480px)", sizeLargeOpt: "Large (640px)",
+    sizeSmallOpt: "Small (320px)", sizeMedOpt: "Medium (480px)", sizeLargeOpt: "Large (640px)", sizeXLargeOpt: "Extra large (960px)", sizeFullOpt: "Maximum (1280px)",
     qualityLabel: "Color quality",
     qualityHighOpt: "High (larger file)", qualityMedOpt: "Medium", qualityLowOpt: "Light (smaller file)",
     fotosBtn: "Generate GIF",
@@ -1052,10 +1064,15 @@ const I18N = {
     telaH2: "Screen recording → GIF", telaDesc: "Record your screen now, or upload a recording you already made.",
     telaStartRecBtn: "Start screen recording", telaStopRecBtn: "Stop recording",
     telaUploadLabel: "Or upload an existing recording",
-    telaFallbackMsg: "Your browser won't allow starting a screen recording from a file opened locally (security protection). Record your screen with your system's recorder (Windows, Mac or phone) and upload the file below.",
+    telaFallbackMsg: "This browser or device doesn't allow recording the screen directly here (on mobile that's a system limitation, not the site's). Record your screen with your device's built-in recorder (Windows, Mac, iPhone or Android) and upload the file below — or use \"Record with camera\" to record right here.",
     telaRecordingMsg: "Recording... click \"Stop recording\" when you're done.",
     telaReadyMsg: "Recording ready. Adjust the segment below and generate the GIF.",
     telaCantStart: "Couldn't start the recording. Upload an already recorded video below.",
+    cameraStartRecBtn: "Record with camera", cameraStopRecBtn: "Stop recording",
+    cameraFlipBtn: "Switch camera",
+    cameraRecordingMsg: "Recording from camera... click \"Stop recording\" when you're done.",
+    cameraReadyMsg: "Recording ready. Adjust the segment below and generate the GIF.",
+    cameraCantStart: "Couldn't access the camera. Check your browser permission or upload an already recorded video below.",
     telaBtn: "Generate GIF", telaDownload: "Download GIF",
     altTela: "Preview of the GIF generated from the screen recording",
     zeroH2: "Create from scratch, no AI", zeroDesc: "A simple code-generated animation, right here, no photo, video or artificial intelligence.",
@@ -1133,7 +1150,7 @@ const I18N = {
     fotosInputHint: "Puedes seleccionar varias a la vez y reordenarlas después.",
     fotosDurationLabel: "Duración de cada foto",
     sizeLabel: "Tamaño del GIF",
-    sizeSmallOpt: "Pequeño (320px)", sizeMedOpt: "Mediano (480px)", sizeLargeOpt: "Grande (640px)",
+    sizeSmallOpt: "Pequeño (320px)", sizeMedOpt: "Mediano (480px)", sizeLargeOpt: "Grande (640px)", sizeXLargeOpt: "Extra grande (960px)", sizeFullOpt: "Máxima (1280px)",
     qualityLabel: "Calidad de color",
     qualityHighOpt: "Alta (archivo más grande)", qualityMedOpt: "Media", qualityLowOpt: "Ligera (archivo más pequeño)",
     fotosBtn: "Generar GIF",
@@ -1152,10 +1169,15 @@ const I18N = {
     telaH2: "Grabación de pantalla → GIF", telaDesc: "Graba la pantalla ahora, o sube una grabación que ya hayas hecho.",
     telaStartRecBtn: "Iniciar grabación de pantalla", telaStopRecBtn: "Detener grabación",
     telaUploadLabel: "O sube una grabación ya hecha",
-    telaFallbackMsg: "Tu navegador no permite iniciar la grabación de pantalla desde un archivo abierto localmente (protección de seguridad). Graba la pantalla con el grabador de tu sistema (Windows, Mac o celular) y sube el archivo abajo.",
+    telaFallbackMsg: "Este navegador o dispositivo no permite grabar la pantalla directamente aquí (en el celular eso es una limitación del sistema, no del sitio). Graba la pantalla con el grabador nativo de tu dispositivo (Windows, Mac, iPhone o Android) y sube el archivo abajo — o usa \"Grabar con la cámara\" para grabar directamente aquí.",
     telaRecordingMsg: "Grabando... haz clic en \"Detener grabación\" cuando termines.",
     telaReadyMsg: "Grabación lista. Ajusta el fragmento abajo y genera el GIF.",
     telaCantStart: "No se pudo iniciar la grabación. Sube un vídeo ya grabado abajo.",
+    cameraStartRecBtn: "Grabar con la cámara", cameraStopRecBtn: "Detener grabación",
+    cameraFlipBtn: "Cambiar cámara",
+    cameraRecordingMsg: "Grabando con la cámara... haz clic en \"Detener grabación\" cuando termines.",
+    cameraReadyMsg: "Grabación lista. Ajusta el fragmento abajo y genera el GIF.",
+    cameraCantStart: "No se pudo acceder a la cámara. Verifica el permiso del navegador o sube un vídeo ya grabado abajo.",
     telaBtn: "Generar GIF", telaDownload: "Descargar GIF",
     altTela: "Vista previa del GIF generado a partir de la grabación de pantalla",
     zeroH2: "Crear desde cero, sin IA", zeroDesc: "Una animación simple generada por código, aquí mismo, sin foto, vídeo o inteligencia artificial.",
@@ -1233,7 +1255,7 @@ const I18N = {
     fotosInputHint: "Vous pouvez en sélectionner plusieurs à la fois et les réordonner ensuite.",
     fotosDurationLabel: "Durée de chaque photo",
     sizeLabel: "Taille du GIF",
-    sizeSmallOpt: "Petit (320px)", sizeMedOpt: "Moyen (480px)", sizeLargeOpt: "Grand (640px)",
+    sizeSmallOpt: "Petit (320px)", sizeMedOpt: "Moyen (480px)", sizeLargeOpt: "Grand (640px)", sizeXLargeOpt: "Très grand (960px)", sizeFullOpt: "Maximum (1280px)",
     qualityLabel: "Qualité des couleurs",
     qualityHighOpt: "Haute (fichier plus lourd)", qualityMedOpt: "Moyenne", qualityLowOpt: "Légère (fichier plus léger)",
     fotosBtn: "Générer le GIF",
@@ -1252,9 +1274,14 @@ const I18N = {
     telaH2: "Enregistrement d'écran → GIF", telaDesc: "Enregistrez l'écran maintenant, ou envoyez un enregistrement déjà fait.",
     telaStartRecBtn: "Démarrer l'enregistrement d'écran", telaStopRecBtn: "Arrêter l'enregistrement",
     telaUploadLabel: "Ou envoyez un enregistrement déjà fait",
-    telaFallbackMsg: "Votre navigateur ne permet pas de démarrer l'enregistrement d'écran depuis un fichier ouvert localement (protection de sécurité). Enregistrez l'écran avec l'enregistreur de votre système (Windows, Mac ou téléphone) et envoyez le fichier ci-dessous.",
+    telaFallbackMsg: "Ce navigateur ou cet appareil ne permet pas d'enregistrer l'écran directement ici (sur mobile, c'est une limitation du système, pas du site). Enregistrez l'écran avec l'enregistreur natif de votre appareil (Windows, Mac, iPhone ou Android) et envoyez le fichier ci-dessous — ou utilisez « Enregistrer avec la caméra » pour enregistrer directement ici.",
     telaRecordingMsg: "Enregistrement en cours... cliquez sur « Arrêter l'enregistrement » quand vous avez terminé.",
     telaReadyMsg: "Enregistrement prêt. Ajustez le passage ci-dessous et générez le GIF.",
+    cameraStartRecBtn: "Enregistrer avec la caméra", cameraStopRecBtn: "Arrêter l'enregistrement",
+    cameraFlipBtn: "Changer de caméra",
+    cameraRecordingMsg: "Enregistrement avec la caméra en cours... cliquez sur « Arrêter l'enregistrement » quand vous avez terminé.",
+    cameraReadyMsg: "Enregistrement prêt. Ajustez le passage ci-dessous et générez le GIF.",
+    cameraCantStart: "Impossible d'accéder à la caméra. Vérifiez l'autorisation du navigateur ou envoyez une vidéo déjà enregistrée ci-dessous.",
     telaCantStart: "Impossible de démarrer l'enregistrement. Envoyez une vidéo déjà enregistrée ci-dessous.",
     telaBtn: "Générer le GIF", telaDownload: "Télécharger le GIF",
     altTela: "Aperçu du GIF généré à partir de l'enregistrement d'écran",
@@ -1333,7 +1360,7 @@ const I18N = {
     fotosInputHint: "Sie können mehrere gleichzeitig auswählen und später neu anordnen.",
     fotosDurationLabel: "Dauer jedes Fotos",
     sizeLabel: "GIF-Größe",
-    sizeSmallOpt: "Klein (320px)", sizeMedOpt: "Mittel (480px)", sizeLargeOpt: "Groß (640px)",
+    sizeSmallOpt: "Klein (320px)", sizeMedOpt: "Mittel (480px)", sizeLargeOpt: "Groß (640px)", sizeXLargeOpt: "Extra groß (960px)", sizeFullOpt: "Maximal (1280px)",
     qualityLabel: "Farbqualität",
     qualityHighOpt: "Hoch (größere Datei)", qualityMedOpt: "Mittel", qualityLowOpt: "Leicht (kleinere Datei)",
     fotosBtn: "GIF erstellen",
@@ -1352,9 +1379,14 @@ const I18N = {
     telaH2: "Bildschirmaufnahme → GIF", telaDesc: "Nehmen Sie jetzt den Bildschirm auf oder laden Sie eine bereits vorhandene Aufnahme hoch.",
     telaStartRecBtn: "Bildschirmaufnahme starten", telaStopRecBtn: "Aufnahme stoppen",
     telaUploadLabel: "Oder laden Sie eine bereits aufgenommene Aufnahme hoch",
-    telaFallbackMsg: "Ihr Browser erlaubt es nicht, die Bildschirmaufnahme von einer lokal geöffneten Datei aus zu starten (Sicherheitsschutz). Nehmen Sie den Bildschirm mit dem Rekorder Ihres Systems auf (Windows, Mac oder Handy) und laden Sie die Datei unten hoch.",
+    telaFallbackMsg: "Dieser Browser oder dieses Gerät erlaubt es nicht, den Bildschirm direkt hier aufzunehmen (auf dem Handy ist das eine Systemeinschränkung, keine Einschränkung der Website). Nehmen Sie den Bildschirm mit dem integrierten Rekorder Ihres Geräts auf (Windows, Mac, iPhone oder Android) und laden Sie die Datei unten hoch — oder nutzen Sie „Mit Kamera aufnehmen“, um direkt hier aufzunehmen.",
     telaRecordingMsg: "Aufnahme läuft... klicken Sie auf „Aufnahme stoppen“, wenn Sie fertig sind.",
     telaReadyMsg: "Aufnahme bereit. Passen Sie den Ausschnitt unten an und erstellen Sie das GIF.",
+    cameraStartRecBtn: "Mit Kamera aufnehmen", cameraStopRecBtn: "Aufnahme stoppen",
+    cameraFlipBtn: "Kamera wechseln",
+    cameraRecordingMsg: "Aufnahme mit der Kamera läuft... klicken Sie auf „Aufnahme stoppen“, wenn Sie fertig sind.",
+    cameraReadyMsg: "Aufnahme bereit. Passen Sie den Ausschnitt unten an und erstellen Sie das GIF.",
+    cameraCantStart: "Kein Zugriff auf die Kamera möglich. Prüfen Sie die Browserberechtigung oder laden Sie unten ein bereits aufgenommenes Video hoch.",
     telaCantStart: "Die Aufnahme konnte nicht gestartet werden. Laden Sie unten ein bereits aufgenommenes Video hoch.",
     telaBtn: "GIF erstellen", telaDownload: "GIF herunterladen",
     altTela: "Vorschau des aus der Bildschirmaufnahme erstellten GIFs",
@@ -1433,7 +1465,7 @@ const I18N = {
     fotosInputHint: "Puoi selezionarne più di una alla volta e riordinarle dopo.",
     fotosDurationLabel: "Durata di ogni foto",
     sizeLabel: "Dimensione del GIF",
-    sizeSmallOpt: "Piccolo (320px)", sizeMedOpt: "Medio (480px)", sizeLargeOpt: "Grande (640px)",
+    sizeSmallOpt: "Piccolo (320px)", sizeMedOpt: "Medio (480px)", sizeLargeOpt: "Grande (640px)", sizeXLargeOpt: "Extra grande (960px)", sizeFullOpt: "Massima (1280px)",
     qualityLabel: "Qualità dei colori",
     qualityHighOpt: "Alta (file più grande)", qualityMedOpt: "Media", qualityLowOpt: "Leggera (file più piccolo)",
     fotosBtn: "Genera GIF",
@@ -1452,9 +1484,14 @@ const I18N = {
     telaH2: "Registrazione schermo → GIF", telaDesc: "Registra lo schermo ora, oppure carica una registrazione già fatta.",
     telaStartRecBtn: "Avvia registrazione schermo", telaStopRecBtn: "Ferma registrazione",
     telaUploadLabel: "Oppure carica una registrazione già fatta",
-    telaFallbackMsg: "Il tuo browser non consente di avviare la registrazione dello schermo da un file aperto localmente (protezione di sicurezza). Registra lo schermo con il registratore del tuo sistema (Windows, Mac o cellulare) e carica il file qui sotto.",
+    telaFallbackMsg: "Questo browser o dispositivo non consente di registrare lo schermo direttamente qui (sul cellulare è una limitazione del sistema, non del sito). Registra lo schermo con il registratore nativo del tuo dispositivo (Windows, Mac, iPhone o Android) e carica il file qui sotto — oppure usa \"Registra con la fotocamera\" per registrare direttamente qui.",
     telaRecordingMsg: "Registrazione in corso... clicca su \"Ferma registrazione\" quando hai finito.",
     telaReadyMsg: "Registrazione pronta. Regola il segmento qui sotto e genera il GIF.",
+    cameraStartRecBtn: "Registra con la fotocamera", cameraStopRecBtn: "Ferma registrazione",
+    cameraFlipBtn: "Cambia fotocamera",
+    cameraRecordingMsg: "Registrazione con la fotocamera in corso... clicca su \"Ferma registrazione\" quando hai finito.",
+    cameraReadyMsg: "Registrazione pronta. Regola il segmento qui sotto e genera il GIF.",
+    cameraCantStart: "Impossibile accedere alla fotocamera. Controlla il permesso del browser o carica un video già registrato qui sotto.",
     telaCantStart: "Non è stato possibile avviare la registrazione. Carica un video già registrato qui sotto.",
     telaBtn: "Genera GIF", telaDownload: "Scarica GIF",
     altTela: "Anteprima del GIF generato dalla registrazione dello schermo",
@@ -1686,6 +1723,10 @@ function setLang(lang){
   try { localStorage.setItem('gifLocalLang', currentLang); } catch (e) { /* segue sem persistir a escolha */ }
   $('langSwitch').value = currentLang;
   applyTranslations();
+  /* O aviso de gravação de tela indisponível é definido via textContent
+     (não data-i18n), então applyTranslations() sozinho não o atualiza —
+     precisa ser refeito manualmente ao trocar de idioma. */
+  if ($('telaFallbackNote').style.display !== 'none') { showTelaFallback(); }
 }
 
 /* ============== utilidades gerais ============== */
@@ -2122,6 +2163,7 @@ let telaRecorder = null, telaChunks = [], telaRecording = false;
 
 $('telaRecordBtn').addEventListener('click', async () => {
   if (telaRecording) { telaRecorder.stop(); return; }
+  if (cameraRecording) return;
   if (!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia)) {
     showTelaFallback();
     return;
@@ -2138,9 +2180,11 @@ $('telaRecordBtn').addEventListener('click', async () => {
       stream.getTracks().forEach(tr => tr.stop());
       telaRecording = false;
       $('telaRecordBtn').textContent = t('telaStartRecBtn');
+      $('cameraRecordBtn').disabled = false;
     };
     telaRecorder.start();
     telaRecording = true;
+    $('cameraRecordBtn').disabled = true;
     $('telaCaptureStatus').textContent = t('telaRecordingMsg');
     $('telaRecordBtn').textContent = t('telaStopRecBtn');
   } catch (err) {
@@ -2154,6 +2198,60 @@ function showTelaFallback(){
   $('telaFallbackNote').textContent = t('telaFallbackMsg');
   $('telaCaptureArea').querySelector('#telaRecordBtn').disabled = true;
 }
+
+/* =========================================================
+   GRAVAÇÃO PELA CÂMERA (alternativa que funciona em qualquer
+   celular, já que getUserMedia é suportado em praticamente
+   todo navegador móvel — diferente de getDisplayMedia, que o
+   iOS bloqueia por completo e o Android suporta de forma
+   instável. Reaproveita o mesmo fluxo de recorte/GIF da aba
+   de gravação de tela: o resultado vira o mesmo <video>.)
+   ========================================================= */
+let cameraStream = null, cameraRecorder = null, cameraChunks = [], cameraRecording = false;
+let cameraFacing = 'environment';
+const isMobileUA = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+/* A troca de câmera frontal/traseira só é oferecida antes de começar a
+   gravar (trocar em pleno andamento não é confiável entre navegadores),
+   e só em celular — desktop normalmente tem uma única webcam. */
+if (isMobileUA) { $('cameraFlipBtn').style.display = 'inline-flex'; }
+
+$('cameraRecordBtn').addEventListener('click', async () => {
+  if (cameraRecording) { cameraRecorder.stop(); return; }
+  if (telaRecording) return;
+  if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
+    $('telaCaptureStatus').textContent = t('cameraCantStart');
+    return;
+  }
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: cameraFacing }, audio: true });
+    cameraChunks = [];
+    cameraRecorder = new MediaRecorder(cameraStream, { mimeType: 'video/webm' });
+    cameraRecorder.ondataavailable = (ev) => { if (ev.data.size > 0) cameraChunks.push(ev.data); };
+    cameraRecorder.onstop = () => {
+      const blob = new Blob(cameraChunks, { type: 'video/webm' });
+      telaVideoEl.src = URL.createObjectURL(blob);
+      $('telaCaptureStatus').textContent = t('cameraReadyMsg');
+      cameraStream.getTracks().forEach(tr => tr.stop());
+      cameraRecording = false;
+      $('cameraRecordBtn').textContent = t('cameraStartRecBtn');
+      $('cameraFlipBtn').disabled = false;
+      if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) { $('telaRecordBtn').disabled = false; }
+    };
+    cameraRecorder.start();
+    cameraRecording = true;
+    $('telaRecordBtn').disabled = true;
+    $('telaCaptureStatus').textContent = t('cameraRecordingMsg');
+    $('cameraRecordBtn').textContent = t('cameraStopRecBtn');
+    $('cameraFlipBtn').disabled = true;
+  } catch (err) {
+    $('telaCaptureStatus').textContent = t('cameraCantStart');
+  }
+});
+
+$('cameraFlipBtn').addEventListener('click', () => {
+  if (cameraRecording) return;
+  cameraFacing = cameraFacing === 'environment' ? 'user' : 'environment';
+});
 
 $('telaBtn').addEventListener('click', async () => {
   if (!canCreateGif()) { showUpgradePrompt('tela'); return; }
@@ -2304,6 +2402,17 @@ $('zeroBtn').addEventListener('click', async () => {
 currentLang = detectLang();
 $('langSwitch').value = currentLang;
 applyTranslations();
+
+/* Detecção proativa da gravação de tela: em vez de deixar o usuário
+   clicar em "Iniciar gravação da tela" e só então ver o erro, já
+   avisamos de cara quando o navegador/dispositivo não suporta (cobre
+   praticamente todo iOS e boa parte do Android — limitação de cada
+   navegador, não do site). A gravação pela câmera continua disponível
+   normalmente nesse caso. Roda depois de applyTranslations() para a
+   mensagem já sair no idioma certo. */
+if (!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia)) {
+  showTelaFallback();
+}
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
