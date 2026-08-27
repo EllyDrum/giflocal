@@ -1772,6 +1772,56 @@ function updatePlanPrices(){
 }
 
 /* =========================================================
+   MODELO CENTRAL DE PLANOS — Free / Pro / Full
+   Fonte única de verdade para nomes e limites de plano. Antes,
+   os mesmos fatos (3 GIFs/dia, quais tamanhos são bloqueados)
+   viviam espalhados em constantes soltas (FREE_DAILY_LIMIT,
+   PRO_ONLY_SIZES) sem nenhuma ligação com o vocabulário do
+   backend. Esta é a Fase 2 do plano Free/Pro/Full: só reorganiza
+   essas mesmas regras num único objeto — os VALORES continuam
+   idênticos aos de hoje (nenhum comportamento muda nesta fase).
+   A Fase 4 vai atualizar os valores para o desenho definitivo
+   (resolução/duração/exportações por plano).
+
+   BACKEND_PLAN_TO_TIER mapeia o campo `plan` que já vem assinado
+   pelo servidor (worker/src/index.js, PLAN_DEVICES) para o tier
+   comercial exibido na interface:
+     apoiador     -> pro   (já vendido, R$9,90 · 1 dispositivo)
+     profissional -> full  (já vendido, R$29,90 · 3 dispositivos)
+     empresa      -> ainda sem tier comercial equivalente — o
+                     backend já reserva esse plano (10 dispositivos),
+                     mas ele nunca teve Payment Link nem card na UI.
+   ========================================================= */
+const BACKEND_PLAN_TO_TIER = {
+  apoiador: 'pro',
+  profissional: 'full',
+};
+
+const PLANS = {
+  free: {
+    tier: 'free',
+    backendPlan: null,
+    label: 'Free',
+    dailyGifLimit: 3,
+    lockedSizes: ['640', '960', '1280'],
+  },
+  pro: {
+    tier: 'pro',
+    backendPlan: 'apoiador',
+    label: 'Pro',
+    dailyGifLimit: Infinity,
+    lockedSizes: [],
+  },
+  full: {
+    tier: 'full',
+    backendPlan: 'profissional',
+    label: 'Full',
+    dailyGifLimit: Infinity,
+    lockedSizes: [],
+  },
+};
+
+/* =========================================================
    LIMITE FREEMIUM (3 GIFs grátis por dia)
    100% client-side (o GIF Local não tem servidor), então isso é
    fricção honesta, não um bloqueio à prova de burla — localStorage
@@ -1780,7 +1830,6 @@ function updatePlanPrices(){
    elegância para "sem limite nesta sessão" em vez de travar a
    ferramenta.
    ========================================================= */
-const FREE_DAILY_LIMIT = 3;
 const USAGE_STORAGE_KEY = 'gifLocalUsage';
 let usageTrackingAvailable = true;
 
@@ -1813,7 +1862,7 @@ function writeUsageState(state){
 
 function getRemainingToday(){
   if (!usageTrackingAvailable) return Infinity;
-  return Math.max(0, FREE_DAILY_LIMIT - readUsageState().count);
+  return Math.max(0, PLANS.free.dailyGifLimit - readUsageState().count);
 }
 
 function canCreateGif(){
@@ -1833,11 +1882,11 @@ function updateUsageBadge(){
   const el = $('usageBadge');
   if (!el) return;
   if (!usageTrackingAvailable || (typeof licenseState !== 'undefined' && licenseState.isPro)) { el.classList.remove('show'); return; }
-  const used = Math.min(readUsageState().count, FREE_DAILY_LIMIT);
-  const pct = Math.round((used / FREE_DAILY_LIMIT) * 100);
+  const used = Math.min(readUsageState().count, PLANS.free.dailyGifLimit);
+  const pct = Math.round((used / PLANS.free.dailyGifLimit) * 100);
   el.innerHTML = '<span class="usage-track"><span class="usage-fill" style="width:' + pct + '%"></span></span><span></span>';
-  el.querySelector('span:last-child').textContent = t('usageCounterMsg', used, FREE_DAILY_LIMIT);
-  el.classList.toggle('usage-badge--full', used >= FREE_DAILY_LIMIT);
+  el.querySelector('span:last-child').textContent = t('usageCounterMsg', used, PLANS.free.dailyGifLimit);
+  el.classList.toggle('usage-badge--full', used >= PLANS.free.dailyGifLimit);
   el.classList.add('show');
 }
 
@@ -2146,9 +2195,17 @@ const LICENSE_PUBLIC_KEY_JWK = {"key_ops":["verify"],"ext":true,"kty":"EC","x":"
 const LICENSE_STORAGE_KEY = 'gifLocalLicenseV1';
 const DEVICE_ID_STORAGE_KEY = 'gifLocalDeviceId';
 const LAST_SEEN_ISSUED_AT_KEY = 'gifLocalLicenseLastIssuedAt';
-const PRO_ONLY_SIZES = ['640', '960', '1280'];
 
 let licenseState = { isPro: false, payloadObj: null };
+
+/* Deriva o tier comercial (free/pro/full) do estado de licença atual,
+   usando o campo `plan` já assinado pelo servidor como fonte de verdade
+   (ver PLANS/BACKEND_PLAN_TO_TIER acima) — nunca um booleano isPro solto. */
+function getCurrentTier(){
+  if (!licenseState.isPro) return 'free';
+  const backendPlan = licenseState.payloadObj && licenseState.payloadObj.plan;
+  return BACKEND_PLAN_TO_TIER[backendPlan] || 'pro';
+}
 
 function getOrCreateDeviceId(){
   try {
@@ -2254,6 +2311,7 @@ function updateProStatusBadge(){
 }
 
 function applyResolutionGate(){
+  const lockedSizes = PLANS[getCurrentTier()].lockedSizes;
   ['fotosSize', 'videoSize', 'telaSize'].forEach((selectId) => {
     const sel = $(selectId);
     if (!sel) return;
@@ -2265,7 +2323,7 @@ function applyResolutionGate(){
       // de fato configurado (ver LICENSE_BACKEND_CONFIGURED) — antes disso,
       // travar sem ter como comprar/ativar seria tirar um recurso já grátis
       // sem dar nenhuma forma de recuperá-lo.
-      const locked = LICENSE_BACKEND_CONFIGURED && !licenseState.isPro && PRO_ONLY_SIZES.includes(opt.value);
+      const locked = LICENSE_BACKEND_CONFIGURED && lockedSizes.includes(opt.value);
       opt.disabled = locked;
       opt.textContent = locked ? base + t('proOnlyOptionSuffix') : base;
       if (locked && opt.selected) selectedLocked = true;
@@ -2348,7 +2406,7 @@ function updateLicensePanelUI(){
   if (licenseState.isPro) {
     if (!$('licenseStateDevices').classList.contains('show')) showLicenseState('Active');
     $('licenseDeviceId').textContent = guessDeviceLabel();
-    $('licensePlanName').textContent = (licenseState.payloadObj && licenseState.payloadObj.plan) || 'PRO';
+    $('licensePlanName').textContent = PLANS[getCurrentTier()].label;
     $('licenseStatusValue').textContent = t('licenseStatusActive');
   } else if (!$('licenseStateActivate').classList.contains('show')) {
     showLicenseState('Free');
