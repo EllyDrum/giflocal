@@ -2751,6 +2751,70 @@ $('telaFileInput').addEventListener('change', (e) => {
 
 let telaRecorder = null, telaChunks = [], telaRecording = false;
 
+/* =========================================================
+   QUALIDADE DE CAPTURA
+   Antes, a gravação usava getDisplayMedia({video:true}) e
+   MediaRecorder(stream, {mimeType:'video/webm'}) — sem nenhuma
+   restrição de resolução e sem bitrate definido. Isso deixava
+   três decisões críticas de qualidade na mão do padrão do
+   navegador, e os padrões são conservadores:
+     - sem constraints, o navegador pode entregar a captura já
+       reduzida (a câmera costuma cair para 640x480);
+     - sem videoBitsPerSecond, o Chrome grava por volta de
+       2,5 Mbps — pouco para tela cheia com texto, que é
+       justamente o conteúdo que mais sofre com compressão;
+     - 'video/webm' genérico deixa o navegador escolher o codec,
+       e ele costuma escolher VP8, que rende bem menos qualidade
+       por bit do que VP9 em conteúdo de tela.
+   Aqui pedimos explicitamente a melhor captura disponível e
+   deixamos o navegador reduzir só se o dispositivo não der conta
+   (por isso 'ideal' e não 'exact' — 'exact' faria a captura
+   falhar por completo em telas menores).
+   ========================================================= */
+const SCREEN_VIDEO_CONSTRAINTS = {
+  width:     { ideal: 1920, max: 3840 },
+  height:    { ideal: 1080, max: 2160 },
+  frameRate: { ideal: 30,   max: 60 },
+};
+
+const CAMERA_VIDEO_CONSTRAINTS = {
+  width:     { ideal: 1920, max: 3840 },
+  height:    { ideal: 1080, max: 2160 },
+  frameRate: { ideal: 30,   max: 60 },
+};
+
+/* Escolhe o melhor codec que o navegador realmente suporta, em vez de
+   assumir. Cada navegador suporta um subconjunto diferente, então
+   testamos do melhor para o mais compatível e paramos no primeiro que
+   passar — se nenhum passar, devolvemos {} e o MediaRecorder usa o
+   padrão dele (comportamento idêntico ao de antes, nunca pior). */
+function pickRecorderOptions(withAudio, bitsPerSecond){
+  const candidates = withAudio
+    ? ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm']
+    : ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+  for (const mimeType of candidates) {
+    try {
+      if (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(mimeType)) {
+        const opts = { mimeType, videoBitsPerSecond: bitsPerSecond };
+        if (withAudio) opts.audioBitsPerSecond = 128000;
+        return opts;
+      }
+    } catch (e) { /* isTypeSupported pode lançar em navegadores antigos — segue tentando */ }
+  }
+  return {};
+}
+
+/* Cria o MediaRecorder com as opções de qualidade, mas nunca deixa a
+   gravação falhar por causa delas: se o navegador recusar as opções,
+   cai para o construtor simples (que é exatamente o que existia antes). */
+function createRecorder(stream, withAudio, bitsPerSecond){
+  try {
+    return new MediaRecorder(stream, pickRecorderOptions(withAudio, bitsPerSecond));
+  } catch (e) {
+    return new MediaRecorder(stream);
+  }
+}
+
 $('telaRecordBtn').addEventListener('click', async () => {
   if (telaRecording) { telaRecorder.stop(); return; }
   if (cameraRecording) return;
@@ -2759,9 +2823,18 @@ $('telaRecordBtn').addEventListener('click', async () => {
     return;
   }
   try {
-    const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getDisplayMedia({ video: SCREEN_VIDEO_CONSTRAINTS });
+    } catch (constraintErr) {
+      /* Alguns navegadores/monitores recusam constraints de captura de tela.
+         Nesse caso repetimos o pedido sem elas em vez de deixar o usuário
+         sem gravação nenhuma — qualidade um pouco menor é melhor do que
+         um botão que não funciona. */
+      stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+    }
     telaChunks = [];
-    telaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+    telaRecorder = createRecorder(stream, false, 8000000);
     telaRecorder.ondataavailable = (ev) => { if (ev.data.size > 0) telaChunks.push(ev.data); };
     telaRecorder.onstop = () => {
       const blob = new Blob(telaChunks, { type: 'video/webm' });
@@ -2813,9 +2886,18 @@ $('cameraRecordBtn').addEventListener('click', async () => {
     return;
   }
   try {
-    cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: cameraFacing }, audio: true });
+    try {
+      cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: Object.assign({ facingMode: cameraFacing }, CAMERA_VIDEO_CONSTRAINTS),
+        audio: true,
+      });
+    } catch (constraintErr) {
+      /* Câmera que não atende as constraints pedidas: repete sem elas,
+         para não deixar o usuário sem gravação (mesmo comportamento de antes). */
+      cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: cameraFacing }, audio: true });
+    }
     cameraChunks = [];
-    cameraRecorder = new MediaRecorder(cameraStream, { mimeType: 'video/webm' });
+    cameraRecorder = createRecorder(cameraStream, true, 5000000);
     cameraRecorder.ondataavailable = (ev) => { if (ev.data.size > 0) cameraChunks.push(ev.data); };
     cameraRecorder.onstop = () => {
       const blob = new Blob(cameraChunks, { type: 'video/webm' });
