@@ -2594,62 +2594,6 @@ function loadImage(url){
   });
 }
 
-/* =========================================================
-   REDIMENSIONAMENTO PROGRESSIVO (usado por Fotos, Vídeo e Tela)
-   Reduzir uma foto de 4000px direto para 480px numa única chamada
-   de drawImage faz o navegador amostrar só uma fração dos pixels
-   de origem: cada pixel final "escolhe" vizinhos em vez de fazer a
-   média de todos os ~70 pixels que ele deveria representar. O
-   resultado é serrilhado e moiré — o granulado típico de foto de
-   celular virando GIF pequeno. imageSmoothingQuality:'high' ajuda
-   pouco em reduções acima de 2x.
-   A correção padrão é reduzir pela metade em etapas: cada passo é
-   uma redução de 2x, onde a filtragem do navegador funciona bem, e
-   o resultado final é a média real de toda a área de origem.
-   Os dois canvas de apoio são reaproveitados entre chamadas (não
-   recria a cada quadro) e alternam entre si para nunca ler e
-   escrever no mesmo buffer.
-   ========================================================= */
-let _dsCanvasA = null, _dsCanvasB = null;
-
-function drawScaledHQ(ctx, source, sw, sh, dx, dy, dw, dh){
-  const needW = Math.max(1, Math.round(dw));
-  const needH = Math.max(1, Math.round(dh));
-
-  /* Origem sem dimensão conhecida (ex.: vídeo ainda sem metadados):
-     cai para o comportamento simples de antes, nunca falha. */
-  if (!sw || !sh) { ctx.drawImage(source, dx, dy, needW, needH); return; }
-
-  /* Redução leve (até 2x) ou ampliação: o drawImage direto já é bom. */
-  if (sw <= needW * 2 && sh <= needH * 2) {
-    ctx.drawImage(source, 0, 0, sw, sh, dx, dy, needW, needH);
-    return;
-  }
-
-  if (!_dsCanvasA) {
-    _dsCanvasA = document.createElement('canvas');
-    _dsCanvasB = document.createElement('canvas');
-  }
-  let src = source, curW = sw, curH = sh;
-  let target = _dsCanvasA, spare = _dsCanvasB;
-
-  while (curW > needW * 2 && curH > needH * 2) {
-    const nextW = Math.max(needW, Math.round(curW / 2));
-    const nextH = Math.max(needH, Math.round(curH / 2));
-    target.width = nextW; target.height = nextH;
-    /* definir width/height reseta o estado do contexto — por isso o
-       imageSmoothing é reaplicado depois, a cada passo. */
-    const tctx = target.getContext('2d');
-    tctx.imageSmoothingEnabled = true;
-    tctx.imageSmoothingQuality = 'high';
-    tctx.drawImage(src, 0, 0, curW, curH, 0, 0, nextW, nextH);
-    src = target; curW = nextW; curH = nextH;
-    const swap = target; target = spare; spare = swap;
-  }
-
-  ctx.drawImage(src, 0, 0, curW, curH, dx, dy, needW, needH);
-}
-
 $('fotosBtn').addEventListener('click', async () => {
   if (!canCreateGif()) { showUpgradePrompt('fotos'); return; }
   $('fotosBtn').disabled = true;
@@ -2673,7 +2617,7 @@ $('fotosBtn').addEventListener('click', async () => {
       const scale = Math.min(targetW / img.width, targetH / img.height);
       const dw = img.width * scale, dh = img.height * scale;
       const dx = (targetW - dw) / 2, dy = (targetH - dh) / 2;
-      drawScaledHQ(ctx, img, img.width, img.height, dx, dy, dw, dh);
+      ctx.drawImage(img, dx, dy, dw, dh);
       frames.push(ctx.getImageData(0, 0, targetW, targetH));
       await tick();
     }
@@ -2717,7 +2661,7 @@ async function extractVideoFrames(video, start, end, fps, targetW, onProgress){
   const frames = [];
   for (let i = 0; i < timestamps.length; i++) {
     await seekTo(video, timestamps[i]);
-    drawScaledHQ(ctx, video, video.videoWidth, video.videoHeight, 0, 0, targetW, targetH);
+    ctx.drawImage(video, 0, 0, targetW, targetH);
     frames.push(ctx.getImageData(0, 0, targetW, targetH));
     onProgress && onProgress(t('progCapturingFrame', i + 1, timestamps.length), Math.round((i / timestamps.length) * 25));
     await tick();
