@@ -777,8 +777,8 @@
 <script>
 /* =========================================================
    NÚCLEO DO CODIFICADOR DE GIF (GIF89a, paleta única,
-   quantização por median cut, LZW de largura fixa com
-   auto-reset via código Clear, testado e validado).
+   quantização por median cut, LZW com dicionário e largura
+   de código variável, testado e validado).
    Esta parte não muda entre idiomas: é só matemática/bytes.
    ========================================================= */
 class BitWriter {
@@ -797,20 +797,49 @@ class BitWriter {
   }
 }
 
+/* LZW do GIF, com dicionário de verdade.
+   A versão anterior escrevia cada pixel como um código de largura fixa e
+   nunca construía o dicionário — ou seja, não comprimia nada: cada pixel
+   custava minCodeSize+1 bits, então o arquivo saía MAIOR que os dados
+   crus, e o tamanho dependia só da quantidade de pixels (duas animações
+   diferentes davam exatamente o mesmo número de bytes).
+   Aqui está o algoritmo correto: sequências repetidas viram um único
+   código, a largura do código cresce de minCodeSize+1 até 12 bits, e
+   quando o dicionário enche (4096 entradas) emitimos Clear e recomeçamos.
+   A ordem importa e é a convenção do formato: a largura aumenta ANTES de
+   atribuir o código que não caberia na largura atual — se aumentar depois,
+   um código é emitido com bits de menos e o arquivo corrompe. */
 function encodeIndicesToLZW(indices, minCodeSize) {
-  const baseCodeCount = 1 << minCodeSize;
-  const clearCode = baseCodeCount;
-  const endCode = baseCodeCount + 1;
-  const codeWidth = minCodeSize + 1;
-  const safeBlockSize = Math.max(1, baseCodeCount - 3);
+  const clearCode = 1 << minCodeSize;
+  const endCode = clearCode + 1;
   const bw = new BitWriter();
+  let codeWidth = minCodeSize + 1;
+  let nextCode = endCode + 1;
+  let dict = new Map();
+
   bw.writeBits(clearCode, codeWidth);
-  let sinceClear = 0;
-  for (let i = 0; i < indices.length; i++) {
-    if (sinceClear >= safeBlockSize) { bw.writeBits(clearCode, codeWidth); sinceClear = 0; }
-    bw.writeBits(indices[i], codeWidth);
-    sinceClear++;
+  if (indices.length === 0) { bw.writeBits(endCode, codeWidth); bw.flush(); return bw.bytes; }
+
+  let prefix = indices[0];
+  for (let i = 1; i < indices.length; i++) {
+    const k = indices[i];
+    const key = prefix * 256 + k;
+    const found = dict.get(key);
+    if (found !== undefined) { prefix = found; continue; }
+    bw.writeBits(prefix, codeWidth);
+    if (nextCode === 4096) {
+      bw.writeBits(clearCode, codeWidth);
+      dict = new Map();
+      nextCode = endCode + 1;
+      codeWidth = minCodeSize + 1;
+    } else {
+      if (nextCode >= (1 << codeWidth) && codeWidth < 12) codeWidth++;
+      dict.set(key, nextCode);
+      nextCode++;
+    }
+    prefix = k;
   }
+  bw.writeBits(prefix, codeWidth);
   bw.writeBits(endCode, codeWidth);
   bw.flush();
   return bw.bytes;
