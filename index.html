@@ -523,6 +523,10 @@
           </button>
         </div>
         <div class="status" id="telaCaptureStatus"></div>
+        <div class="btn-row" id="telaVideoActions" style="display:none; margin-top:10px;">
+          <a class="btn" id="telaVideoDownload" download="gravacao.webm"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 19h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="telaDownloadVideo">Baixar vídeo (qualidade máxima)</span></a>
+        </div>
+        <div class="hint" id="telaVideoHint" style="display:none;"></div>
       </div>
       <div class="note info" id="telaFallbackNote" style="display:none;"></div>
       <div class="field" style="margin-top:14px;">
@@ -1038,6 +1042,12 @@ const I18N = {
     telaFallbackMsg: "Este navegador ou dispositivo não permite gravar a tela diretamente aqui (no celular isso é uma limitação do sistema, não do site). Grave a tela com o gravador nativo do seu aparelho (Windows, Mac, iPhone ou Android) e envie o arquivo abaixo — ou use \"Gravar pela câmera\" para gravar direto por aqui.",
     telaRecordingMsg: "Gravando... clique em \"Parar gravação\" quando terminar.",
     telaReadyMsg: "Gravação pronta. Ajuste o trecho abaixo e gere o GIF.",
+    telaDownloadVideo: "Baixar vídeo (qualidade máxima)",
+    telaVideoHintMsg: (size) => `Vídeo original em qualidade total (${size}) — sem conversão, sem perda de cor.`,
+    telaRecordingLeft: (clock) => `Gravando... ${clock} restantes. Clique em "Parar gravação" quando terminar.`,
+    telaRecordingElapsed: (clock) => `Gravando... ${clock}. Clique em "Parar gravação" quando terminar.`,
+    telaLimitReached: (sec) => `Limite de ${sec}s do plano Free atingido — sua gravação foi salva.`,
+    telaLimitUpgradeMsg: (freeSec, proMin) => `O plano Free grava até ${freeSec}s em 720p. O Pro grava até ${proMin} minutos em 1080p.`,
     telaCantStart: "Não foi possível iniciar a gravação. Envie um vídeo já gravado abaixo.",
     cameraStartRecBtn: "Gravar pela câmera", cameraStopRecBtn: "Parar gravação",
     cameraFlipBtn: "Trocar câmera",
@@ -1161,6 +1171,12 @@ const I18N = {
     telaFallbackMsg: "This browser or device doesn't allow recording the screen directly here (on mobile that's a system limitation, not the site's). Record your screen with your device's built-in recorder (Windows, Mac, iPhone or Android) and upload the file below — or use \"Record with camera\" to record right here.",
     telaRecordingMsg: "Recording... click \"Stop recording\" when you're done.",
     telaReadyMsg: "Recording ready. Adjust the segment below and generate the GIF.",
+    telaDownloadVideo: "Download video (best quality)",
+    telaVideoHintMsg: (size) => `Original full-quality video (${size}) — no conversion, no color loss.`,
+    telaRecordingLeft: (clock) => `Recording... ${clock} left. Click "Stop recording" when you\u0027re done.`,
+    telaRecordingElapsed: (clock) => `Recording... ${clock}. Click "Stop recording" when you\u0027re done.`,
+    telaLimitReached: (sec) => `Free plan limit of ${sec}s reached — your recording was saved.`,
+    telaLimitUpgradeMsg: (freeSec, proMin) => `Free records up to ${freeSec}s at 720p. Pro records up to ${proMin} minutes at 1080p.`,
     telaCantStart: "Couldn't start the recording. Upload an already recorded video below.",
     cameraStartRecBtn: "Record with camera", cameraStopRecBtn: "Stop recording",
     cameraFlipBtn: "Switch camera",
@@ -1284,6 +1300,12 @@ const I18N = {
     telaFallbackMsg: "Este navegador o dispositivo no permite grabar la pantalla directamente aquí (en el celular eso es una limitación del sistema, no del sitio). Graba la pantalla con el grabador nativo de tu dispositivo (Windows, Mac, iPhone o Android) y sube el archivo abajo — o usa \"Grabar con la cámara\" para grabar directamente aquí.",
     telaRecordingMsg: "Grabando... haz clic en \"Detener grabación\" cuando termines.",
     telaReadyMsg: "Grabación lista. Ajusta el fragmento abajo y genera el GIF.",
+    telaDownloadVideo: "Descargar video (máxima calidad)",
+    telaVideoHintMsg: (size) => `Video original en calidad total (${size}) — sin conversión, sin pérdida de color.`,
+    telaRecordingLeft: (clock) => `Grabando... quedan ${clock}. Haz clic en "Detener grabación" cuando termines.`,
+    telaRecordingElapsed: (clock) => `Grabando... ${clock}. Haz clic en "Detener grabación" cuando termines.`,
+    telaLimitReached: (sec) => `Límite de ${sec}s del plan Free alcanzado — tu grabación se guardó.`,
+    telaLimitUpgradeMsg: (freeSec, proMin) => `Free graba hasta ${freeSec}s en 720p. Pro graba hasta ${proMin} minutos en 1080p.`,
     telaCantStart: "No se pudo iniciar la grabación. Sube un vídeo ya grabado abajo.",
     cameraStartRecBtn: "Grabar con la cámara", cameraStopRecBtn: "Detener grabación",
     cameraFlipBtn: "Cambiar cámara",
@@ -1407,6 +1429,12 @@ const I18N = {
     telaFallbackMsg: "Ce navigateur ou cet appareil ne permet pas d'enregistrer l'écran directement ici (sur mobile, c'est une limitation du système, pas du site). Enregistrez l'écran avec l'enregistreur natif de votre appareil (Windows, Mac, iPhone ou Android) et envoyez le fichier ci-dessous — ou utilisez « Enregistrer avec la caméra » pour enregistrer directement ici.",
     telaRecordingMsg: "Enregistrement en cours... cliquez sur « Arrêter l'enregistrement » quand vous avez terminé.",
     telaReadyMsg: "Enregistrement prêt. Ajustez le passage ci-dessous et générez le GIF.",
+    telaDownloadVideo: "Télécharger la vidéo (qualité maximale)",
+    telaVideoHintMsg: (size) => `Vidéo originale en qualité totale (${size}) — sans conversion, sans perte de couleur.`,
+    telaRecordingLeft: (clock) => `Enregistrement... ${clock} restantes. Cliquez sur « Arrêter l\u2019enregistrement » quand vous avez terminé.`,
+    telaRecordingElapsed: (clock) => `Enregistrement... ${clock}. Cliquez sur « Arrêter l\u2019enregistrement » quand vous avez terminé.`,
+    telaLimitReached: (sec) => `Limite de ${sec}s du plan Free atteinte — votre enregistrement a été sauvegardé.`,
+    telaLimitUpgradeMsg: (freeSec, proMin) => `Free enregistre jusqu\u2019à ${freeSec}s en 720p. Pro enregistre jusqu\u2019à ${proMin} minutes en 1080p.`,
     cameraStartRecBtn: "Enregistrer avec la caméra", cameraStopRecBtn: "Arrêter l'enregistrement",
     cameraFlipBtn: "Changer de caméra",
     cameraRecordingMsg: "Enregistrement avec la caméra en cours... cliquez sur « Arrêter l'enregistrement » quand vous avez terminé.",
@@ -1530,6 +1558,12 @@ const I18N = {
     telaFallbackMsg: "Dieser Browser oder dieses Gerät erlaubt es nicht, den Bildschirm direkt hier aufzunehmen (auf dem Handy ist das eine Systemeinschränkung, keine Einschränkung der Website). Nehmen Sie den Bildschirm mit dem integrierten Rekorder Ihres Geräts auf (Windows, Mac, iPhone oder Android) und laden Sie die Datei unten hoch — oder nutzen Sie „Mit Kamera aufnehmen“, um direkt hier aufzunehmen.",
     telaRecordingMsg: "Aufnahme läuft... klicken Sie auf „Aufnahme stoppen“, wenn Sie fertig sind.",
     telaReadyMsg: "Aufnahme bereit. Passen Sie den Ausschnitt unten an und erstellen Sie das GIF.",
+    telaDownloadVideo: "Video herunterladen (beste Qualität)",
+    telaVideoHintMsg: (size) => `Originalvideo in voller Qualität (${size}) — ohne Konvertierung, ohne Farbverlust.`,
+    telaRecordingLeft: (clock) => `Aufnahme läuft... noch ${clock}. Klicken Sie auf „Aufnahme stoppen“, wenn Sie fertig sind.`,
+    telaRecordingElapsed: (clock) => `Aufnahme läuft... ${clock}. Klicken Sie auf „Aufnahme stoppen“, wenn Sie fertig sind.`,
+    telaLimitReached: (sec) => `Limit von ${sec}s im Free-Tarif erreicht — Ihre Aufnahme wurde gespeichert.`,
+    telaLimitUpgradeMsg: (freeSec, proMin) => `Free nimmt bis zu ${freeSec}s in 720p auf. Pro nimmt bis zu ${proMin} Minuten in 1080p auf.`,
     cameraStartRecBtn: "Mit Kamera aufnehmen", cameraStopRecBtn: "Aufnahme stoppen",
     cameraFlipBtn: "Kamera wechseln",
     cameraRecordingMsg: "Aufnahme mit der Kamera läuft... klicken Sie auf „Aufnahme stoppen“, wenn Sie fertig sind.",
@@ -1653,6 +1687,12 @@ const I18N = {
     telaFallbackMsg: "Questo browser o dispositivo non consente di registrare lo schermo direttamente qui (sul cellulare è una limitazione del sistema, non del sito). Registra lo schermo con il registratore nativo del tuo dispositivo (Windows, Mac, iPhone o Android) e carica il file qui sotto — oppure usa \"Registra con la fotocamera\" per registrare direttamente qui.",
     telaRecordingMsg: "Registrazione in corso... clicca su \"Ferma registrazione\" quando hai finito.",
     telaReadyMsg: "Registrazione pronta. Regola il segmento qui sotto e genera il GIF.",
+    telaDownloadVideo: "Scarica video (qualità massima)",
+    telaVideoHintMsg: (size) => `Video originale in qualità piena (${size}) — senza conversione, senza perdita di colore.`,
+    telaRecordingLeft: (clock) => `Registrazione... ${clock} rimanenti. Clicca su "Ferma registrazione" quando hai finito.`,
+    telaRecordingElapsed: (clock) => `Registrazione... ${clock}. Clicca su "Ferma registrazione" quando hai finito.`,
+    telaLimitReached: (sec) => `Limite di ${sec}s del piano Free raggiunto — la registrazione è stata salvata.`,
+    telaLimitUpgradeMsg: (freeSec, proMin) => `Free registra fino a ${freeSec}s in 720p. Pro registra fino a ${proMin} minuti in 1080p.`,
     cameraStartRecBtn: "Registra con la fotocamera", cameraStopRecBtn: "Ferma registrazione",
     cameraFlipBtn: "Cambia fotocamera",
     cameraRecordingMsg: "Registrazione con la fotocamera in corso... clicca su \"Ferma registrazione\" quando hai finito.",
@@ -1804,6 +1844,13 @@ const PLANS = {
     label: 'Free',
     dailyGifLimit: 3,
     lockedSizes: ['640', '960', '1280'],
+    /* Captura de vídeo (gravação de tela/câmera). captureHeight é o que
+       pedimos ao navegador — 'ideal', não 'exact': se o dispositivo não
+       tiver essa resolução, ele entrega a que tem em vez de falhar.
+       maxRecordingSec = 0 significa sem limite artificial de duração. */
+    captureWidth: 1280,
+    captureHeight: 720,
+    maxRecordingSec: 60,
   },
   pro: {
     tier: 'pro',
@@ -1811,6 +1858,9 @@ const PLANS = {
     label: 'Pro',
     dailyGifLimit: Infinity,
     lockedSizes: [],
+    captureWidth: 1920,
+    captureHeight: 1080,
+    maxRecordingSec: 600,
   },
   full: {
     tier: 'full',
@@ -1818,6 +1868,9 @@ const PLANS = {
     label: 'Full',
     dailyGifLimit: Infinity,
     lockedSizes: [],
+    captureWidth: 3840,
+    captureHeight: 2160,
+    maxRecordingSec: 0,
   },
 };
 
@@ -2771,17 +2824,31 @@ let telaRecorder = null, telaChunks = [], telaRecording = false;
    (por isso 'ideal' e não 'exact' — 'exact' faria a captura
    falhar por completo em telas menores).
    ========================================================= */
-const SCREEN_VIDEO_CONSTRAINTS = {
-  width:     { ideal: 1920, max: 3840 },
-  height:    { ideal: 1080, max: 2160 },
-  frameRate: { ideal: 30,   max: 60 },
-};
+/* A resolução pedida agora vem do plano (ver PLANS). 'ideal' e não 'exact'
+   de propósito: o navegador entrega o mais próximo que o dispositivo
+   suporta em vez de recusar a captura — é o que permite prometer
+   "até 4K, quando suportado" sem quebrar em telas menores. */
+function captureVideoConstraints(){
+  const plan = PLANS[getCurrentTier()];
+  return {
+    width:     { ideal: plan.captureWidth },
+    height:    { ideal: plan.captureHeight },
+    frameRate: { ideal: 30, max: 60 },
+  };
+}
 
-const CAMERA_VIDEO_CONSTRAINTS = {
-  width:     { ideal: 1920, max: 3840 },
-  height:    { ideal: 1080, max: 2160 },
-  frameRate: { ideal: 30,   max: 60 },
-};
+/* Bitrate proporcional à resolução do plano. Um valor fixo não serve:
+   8 Mbps deixa 1080p muito bom, mas em 4K (4x mais pixels) ficaria pior
+   que 1080p. Escalar por pixel mantém a mesma qualidade percebida em
+   qualquer resolução. Tela usa um fator maior que câmera porque texto e
+   bordas nítidas sofrem muito mais com compressão do que imagem natural.
+   O teto de 40 Mbps evita arquivos absurdos em 4K. */
+function captureBitrate(isScreen){
+  const plan = PLANS[getCurrentTier()];
+  const pixels = plan.captureWidth * plan.captureHeight;
+  const perPixel = isScreen ? 5.0 : 3.0;
+  return Math.round(Math.min(40000000, Math.max(2500000, pixels * perPixel)));
+}
 
 /* Escolhe o melhor codec que o navegador realmente suporta, em vez de
    assumir. Cada navegador suporta um subconjunto diferente, então
@@ -2815,6 +2882,96 @@ function createRecorder(stream, withAudio, bitsPerSecond){
   }
 }
 
+/* =========================================================
+   ENTREGA DA GRAVAÇÃO EM VÍDEO
+   A gravação já existe em qualidade total (webm, VP9) antes de
+   qualquer conversão. Até agora esse arquivo era usado só como
+   fonte para gerar o GIF e depois descartado — o usuário nunca
+   tinha acesso a ele. Como GIF tem no máximo 256 cores, converter
+   era justamente onde a qualidade se perdia.
+   Aqui o arquivo original é oferecido para download, sem
+   recodificar nada: zero perda, zero uso extra de memória.
+   O GIF continua disponível como antes, para quem precisa de GIF.
+   ========================================================= */
+let lastRecordingUrl = null;
+
+function offerRecordingDownload(blob, isCamera){
+  const link = $('telaVideoDownload');
+  if (!link) return;
+  /* Revoga a URL da gravação anterior — sem isso, cada nova gravação
+     deixaria o blob antigo preso na memória até recarregar a página. */
+  if (lastRecordingUrl) { try { URL.revokeObjectURL(lastRecordingUrl); } catch (e) {} }
+  lastRecordingUrl = URL.createObjectURL(blob);
+  link.href = lastRecordingUrl;
+  link.download = (isCamera ? 'gravacao-camera' : 'gravacao-tela') + '.webm';
+  $('telaVideoActions').style.display = 'flex';
+  const hint = $('telaVideoHint');
+  hint.style.display = 'block';
+  hint.textContent = t('telaVideoHintMsg', formatBytes(blob.size));
+}
+
+function formatBytes(bytes){
+  if (bytes >= 1048576) return (bytes / 1048576).toFixed(1) + ' MB';
+  return Math.max(1, Math.round(bytes / 1024)) + ' KB';
+}
+
+function hideRecordingDownload(){
+  if ($('telaVideoActions')) $('telaVideoActions').style.display = 'none';
+  if ($('telaVideoHint')) $('telaVideoHint').style.display = 'none';
+}
+
+/* Limite de duração por plano, com aviso antes de cortar.
+   Nunca descarta o que já foi gravado: ao atingir o limite a gravação
+   é encerrada normalmente e o material continua disponível — o brief
+   pede exatamente isso ("o teste gratuito terminou", não "você perdeu
+   sua gravação"). */
+let recordingTimer = null, recordingStartedAt = 0, recordingHitLimit = false;
+
+function startRecordingTimer(stopFn){
+  const limit = PLANS[getCurrentTier()].maxRecordingSec;
+  recordingStartedAt = Date.now();
+  recordingHitLimit = false;
+  clearRecordingTimer();
+  recordingTimer = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - recordingStartedAt) / 1000);
+    if (!limit) {
+      $('telaCaptureStatus').textContent = t('telaRecordingElapsed', formatClock(elapsed));
+      return;
+    }
+    const left = limit - elapsed;
+    if (left <= 0) {
+      clearRecordingTimer();
+      recordingHitLimit = true;
+      $('telaCaptureStatus').textContent = t('telaLimitReached', limit);
+      stopFn();
+      showRecordingLimitUpgrade();
+      return;
+    }
+    $('telaCaptureStatus').textContent = t('telaRecordingLeft', formatClock(left));
+  }, 250);
+}
+
+function clearRecordingTimer(){
+  if (recordingTimer) { clearInterval(recordingTimer); recordingTimer = null; }
+}
+
+function formatClock(totalSec){
+  const m = Math.floor(totalSec / 60), s = totalSec % 60;
+  return m > 0 ? (m + ':' + String(s).padStart(2, '0')) : (s + 's');
+}
+
+/* Convite ao upgrade só quando o limite foi realmente alcançado — é o
+   momento em que a pessoa já viu o produto funcionar e sentiu a falta,
+   e não antes (paywall contextual, não preventivo). */
+function showRecordingLimitUpgrade(){
+  const tier = getCurrentTier();
+  if (tier !== 'free') return;
+  const hint = $('telaVideoHint');
+  if (!hint) return;
+  hint.style.display = 'block';
+  hint.textContent = t('telaLimitUpgradeMsg', PLANS.free.maxRecordingSec, Math.round(PLANS.pro.maxRecordingSec / 60));
+}
+
 $('telaRecordBtn').addEventListener('click', async () => {
   if (telaRecording) { telaRecorder.stop(); return; }
   if (cameraRecording) return;
@@ -2825,7 +2982,7 @@ $('telaRecordBtn').addEventListener('click', async () => {
   try {
     let stream;
     try {
-      stream = await navigator.mediaDevices.getDisplayMedia({ video: SCREEN_VIDEO_CONSTRAINTS });
+      stream = await navigator.mediaDevices.getDisplayMedia({ video: captureVideoConstraints() });
     } catch (constraintErr) {
       /* Alguns navegadores/monitores recusam constraints de captura de tela.
          Nesse caso repetimos o pedido sem elas em vez de deixar o usuário
@@ -2833,23 +2990,32 @@ $('telaRecordBtn').addEventListener('click', async () => {
          um botão que não funciona. */
       stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
     }
+    hideRecordingDownload();
     telaChunks = [];
-    telaRecorder = createRecorder(stream, false, 8000000);
+    telaRecorder = createRecorder(stream, false, captureBitrate(true));
     telaRecorder.ondataavailable = (ev) => { if (ev.data.size > 0) telaChunks.push(ev.data); };
     telaRecorder.onstop = () => {
+      clearRecordingTimer();
       const blob = new Blob(telaChunks, { type: 'video/webm' });
       telaVideoEl.src = URL.createObjectURL(blob);
-      $('telaCaptureStatus').textContent = t('telaReadyMsg');
+      if (!recordingHitLimit) $('telaCaptureStatus').textContent = t('telaReadyMsg');
+      offerRecordingDownload(blob, false);
       stream.getTracks().forEach(tr => tr.stop());
       telaRecording = false;
       $('telaRecordBtn').textContent = t('telaStartRecBtn');
       $('cameraRecordBtn').disabled = false;
     };
+    /* Se a pessoa encerrar o compartilhamento pelo próprio aviso do navegador
+       ("Parar de compartilhar"), a trilha termina sozinha — sem isso a gravação
+       ficaria presa achando que ainda está rodando. */
+    stream.getVideoTracks().forEach(tr => {
+      tr.addEventListener('ended', () => { if (telaRecording) telaRecorder.stop(); });
+    });
     telaRecorder.start();
     telaRecording = true;
     $('cameraRecordBtn').disabled = true;
-    $('telaCaptureStatus').textContent = t('telaRecordingMsg');
     $('telaRecordBtn').textContent = t('telaStopRecBtn');
+    startRecordingTimer(() => { if (telaRecording) telaRecorder.stop(); });
   } catch (err) {
     $('telaCaptureStatus').textContent = t('telaCantStart');
     showTelaFallback();
@@ -2888,7 +3054,7 @@ $('cameraRecordBtn').addEventListener('click', async () => {
   try {
     try {
       cameraStream = await navigator.mediaDevices.getUserMedia({
-        video: Object.assign({ facingMode: cameraFacing }, CAMERA_VIDEO_CONSTRAINTS),
+        video: Object.assign({ facingMode: cameraFacing }, captureVideoConstraints()),
         audio: true,
       });
     } catch (constraintErr) {
@@ -2896,13 +3062,16 @@ $('cameraRecordBtn').addEventListener('click', async () => {
          para não deixar o usuário sem gravação (mesmo comportamento de antes). */
       cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: cameraFacing }, audio: true });
     }
+    hideRecordingDownload();
     cameraChunks = [];
-    cameraRecorder = createRecorder(cameraStream, true, 5000000);
+    cameraRecorder = createRecorder(cameraStream, true, captureBitrate(false));
     cameraRecorder.ondataavailable = (ev) => { if (ev.data.size > 0) cameraChunks.push(ev.data); };
     cameraRecorder.onstop = () => {
+      clearRecordingTimer();
       const blob = new Blob(cameraChunks, { type: 'video/webm' });
       telaVideoEl.src = URL.createObjectURL(blob);
-      $('telaCaptureStatus').textContent = t('cameraReadyMsg');
+      if (!recordingHitLimit) $('telaCaptureStatus').textContent = t('cameraReadyMsg');
+      offerRecordingDownload(blob, true);
       cameraStream.getTracks().forEach(tr => tr.stop());
       cameraRecording = false;
       $('cameraRecordBtn').textContent = t('cameraStartRecBtn');
@@ -2910,6 +3079,7 @@ $('cameraRecordBtn').addEventListener('click', async () => {
       if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) { $('telaRecordBtn').disabled = false; }
     };
     cameraRecorder.start();
+    startRecordingTimer(() => { if (cameraRecording) cameraRecorder.stop(); });
     cameraRecording = true;
     $('telaRecordBtn').disabled = true;
     $('telaCaptureStatus').textContent = t('cameraRecordingMsg');
