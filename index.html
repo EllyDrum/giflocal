@@ -3163,59 +3163,220 @@ document.querySelectorAll('#zeroChoices button').forEach(btn => {
   });
 });
 
+/* Utilitários de cor para o sombreamento das animações: clarear/escurecer
+   a cor que o usuário escolheu, para gradientes e sombras coerentes. */
+function hexToRgb(hex){
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+  if (!m) return { r: 108, g: 76, b: 245 };
+  const n = parseInt(m[1], 16);
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+function shadeColor(hex, amt){
+  const c = hexToRgb(hex);
+  const f = (v) => Math.round(amt >= 0 ? v + (255 - v) * amt : v * (1 + amt));
+  return 'rgb(' + f(c.r) + ',' + f(c.g) + ',' + f(c.b) + ')';
+}
+function rgbaOf(hex, alpha){
+  const c = hexToRgb(hex);
+  return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + alpha + ')';
+}
+
+/* Confete com profundidade: três camadas (fundo/meio/frente) com tamanho,
+   velocidade e opacidade próprios — é o que dá a sensação de volume.
+   IMPORTANTE para o loop perfeito: todo movimento é função periódica de
+   tt em [0,1] com frequências INTEIRAS (voltas completas, quicadas
+   completas, giros completos) — assim o último quadro emenda exatamente
+   no primeiro, sem o "pulo" clássico de confete mal feito. */
 function makeConfetti(){
-  const colors = ['#e24b4a', '#378add', '#63991a', '#ef9f27', '#d4537e'];
+  const colors = ['#ff5e5b', '#ffd166', '#06d6a0', '#4d96ff', '#c77dff', '#ff8fab', '#f9f871'];
   const particles = [];
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < 90; i++) {
+    const depth = i < 30 ? 0 : (i < 66 ? 1 : 2); /* 0 = fundo ... 2 = frente */
     particles.push({
-      x: Math.random() * 400,
-      y0: Math.random() * 300,
-      speed: 0.4 + Math.random() * 0.8,
-      rot: (Math.random() - 0.5) * 2,
-      color: colors[i % colors.length]
+      x: Math.random(),
+      y0: Math.random(),
+      laps: 1 + depth,                                      /* quedas completas por loop */
+      swayAmp: 6 + depth * 9 + Math.random() * 8,
+      swayFreq: 1 + Math.floor(Math.random() * 2),          /* inteiro → loop perfeito */
+      phase: Math.random() * Math.PI * 2,
+      spins: (1 + Math.floor(Math.random() * 2)) * (Math.random() < 0.5 ? -1 : 1),
+      flips: 2 + Math.floor(Math.random() * 3),             /* viradas 3D por loop */
+      size: 4 + depth * 3 + Math.random() * 4,
+      shape: Math.random() < 0.7 ? 'rect' : (Math.random() < 0.55 ? 'circle' : 'ribbon'),
+      color: colors[(Math.random() * colors.length) | 0],
+      depth
     });
   }
   return particles;
 }
 confettiParticles = makeConfetti();
 
+const ZERO_FONT_STACK = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+
 function drawZeroFrame(ctx, w, h, tt, opts){
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, w, h);
   if (opts.kind === 'texto') {
-    const scale = 1 + 0.18 * Math.sin(tt * Math.PI * 2);
+    /* Fundo com leve gradiente radial, para o texto não flutuar num vazio. */
+    const bg = ctx.createRadialGradient(w / 2, h / 2, 40, w / 2, h / 2, Math.max(w, h) * 0.75);
+    bg.addColorStop(0, '#ffffff');
+    bg.addColorStop(1, '#eeebf8');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, w, h);
+
+    const pulse = Math.sin(tt * Math.PI * 2);           /* periódico → loop perfeito */
+    const scale = 1 + 0.09 * pulse;
+    const text = opts.text || 'OI!';
+
     ctx.save();
     ctx.translate(w / 2, h / 2);
-    ctx.scale(scale, scale);
-    ctx.fillStyle = opts.color;
-    ctx.font = 'bold 46px sans-serif';
+    ctx.font = '800 54px ' + ZERO_FONT_STACK;
+    try { ctx.letterSpacing = '1px'; } catch (e) { /* nem todo navegador expõe */ }
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(opts.text || 'OI!', 0, 0);
+    /* Nunca estourar a largura: mede e reduz o corpo se o texto for longo. */
+    const fit = Math.min(1, (w * 0.86) / Math.max(1, ctx.measureText(text).width));
+    ctx.scale(scale * fit, scale * fit);
+
+    /* Sombra projetada suave, que "respira" junto com o pulso. */
+    ctx.shadowColor = rgbaOf(opts.color, 0.38);
+    ctx.shadowBlur = 16 + 8 * pulse;
+    ctx.shadowOffsetY = 7;
+
+    /* Preenchimento em gradiente vertical: topo mais claro, base mais
+       funda — o que separa um título profissional de uma cor chapada. */
+    const tg = ctx.createLinearGradient(0, -34, 0, 34);
+    tg.addColorStop(0, shadeColor(opts.color, 0.42));
+    tg.addColorStop(0.55, opts.color);
+    tg.addColorStop(1, shadeColor(opts.color, -0.28));
+    ctx.fillStyle = tg;
+    ctx.fillText(text, 0, 0);
+
+    /* Brilho superior sutil (specular), sem sombra. */
+    ctx.shadowColor = 'transparent';
+    ctx.globalAlpha = 0.28;
+    ctx.fillStyle = '#ffffff';
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(-w, -60, w * 2, 34);
+    ctx.clip();
+    ctx.fillText(text, 0, 0);
+    ctx.restore();
     ctx.restore();
   } else if (opts.kind === 'bolinha') {
-    const groundY = h - 30;
-    const bounce = Math.abs(Math.sin(tt * Math.PI));
-    const y = groundY - bounce * (h - 70);
-    const squish = 1 - bounce * 0.15;
+    /* Fundo: parede + chão com gradiente, como um pequeno estúdio. */
+    const groundY = h - 42;
+    const wall = ctx.createLinearGradient(0, 0, 0, groundY);
+    wall.addColorStop(0, '#fbfaff');
+    wall.addColorStop(1, '#eceafb');
+    ctx.fillStyle = wall;
+    ctx.fillRect(0, 0, w, groundY);
+    const floor = ctx.createLinearGradient(0, groundY, 0, h);
+    floor.addColorStop(0, '#dcd9ec');
+    floor.addColorStop(1, '#cfccdf');
+    ctx.fillStyle = floor;
+    ctx.fillRect(0, groundY, w, h - groundY);
+
+    /* Física real: queda livre é parábola, não seno. hNorm vai 0→1→0
+       com velocidade máxima perto do chão — exatamente como gravidade. */
+    const hNorm = 1 - Math.pow(2 * tt - 1, 2);
+    const r = 30;
+    const top = 56;
+
+    /* Squash & stretch: deformação só existe perto do impacto. */
+    const contact = Math.max(0, 1 - hNorm * 5);
+    const sx = 1 + 0.32 * contact;
+    const sy = 1 - 0.30 * contact;
+    /* Alonga levemente na vertical quando em queda rápida (stretch). */
+    const speedStretch = (1 - contact) * 0.10 * (1 - hNorm);
+    const cy = groundY - r * sy - hNorm * (groundY - top - r);
+    const cx = w / 2;
+
+    /* Sombra de contato: pequena e escura no chão, larga e tênue no alto. */
+    const shW = r * (1.15 + hNorm * 1.5);
+    const shA = 0.34 * (1 - hNorm * 0.75);
     ctx.beginPath();
-    ctx.ellipse(w / 2, y, 28 * (2 - squish), 28 * squish, 0, 0, Math.PI * 2);
-    ctx.fillStyle = opts.color;
+    ctx.ellipse(cx, groundY + 6, shW, shW * 0.24, 0, 0, Math.PI * 2);
+    const sg = ctx.createRadialGradient(cx, groundY + 6, 0, cx, groundY + 6, shW);
+    sg.addColorStop(0, 'rgba(30,25,60,' + shA + ')');
+    sg.addColorStop(1, 'rgba(30,25,60,0)');
+    ctx.fillStyle = sg;
     ctx.fill();
-    ctx.fillStyle = '#e4e6ee';
-    ctx.fillRect(0, groundY + 26, w, 4);
+
+    /* A esfera: gradiente radial deslocado (luz vem de cima/esquerda),
+       borda escurecida e um toque de luz ambiente refletida embaixo. */
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(sx, sy * (1 + speedStretch));
+    const ball = ctx.createRadialGradient(-r * 0.35, -r * 0.42, r * 0.1, 0, 0, r * 1.15);
+    ball.addColorStop(0, shadeColor(opts.color, 0.72));
+    ball.addColorStop(0.32, shadeColor(opts.color, 0.28));
+    ball.addColorStop(0.7, opts.color);
+    ball.addColorStop(1, shadeColor(opts.color, -0.5));
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.fillStyle = ball;
+    ctx.fill();
+    /* luz refletida do chão na parte de baixo (o detalhe que engana o olho) */
+    const rim = ctx.createRadialGradient(0, r * 0.85, 0, 0, r * 0.85, r * 0.75);
+    rim.addColorStop(0, 'rgba(255,255,255,0.20)');
+    rim.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = rim;
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.fill();
+    /* brilho especular */
+    ctx.beginPath();
+    ctx.ellipse(-r * 0.38, -r * 0.45, r * 0.2, r * 0.13, -0.5, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.fill();
+    ctx.restore();
   } else if (opts.kind === 'confete') {
-    ctx.fillStyle = '#1c2030';
+    /* Fundo festivo: gradiente profundo + vinheta, não um chapado. */
+    const bg = ctx.createLinearGradient(0, 0, 0, h);
+    bg.addColorStop(0, '#262a49');
+    bg.addColorStop(1, '#131527');
+    ctx.fillStyle = bg;
     ctx.fillRect(0, 0, w, h);
+    const vig = ctx.createRadialGradient(w / 2, h / 2, h * 0.35, w / 2, h / 2, h);
+    vig.addColorStop(0, 'rgba(0,0,0,0)');
+    vig.addColorStop(1, 'rgba(0,0,0,0.4)');
+    ctx.fillStyle = vig;
+    ctx.fillRect(0, 0, w, h);
+
+    const DEPTH_ALPHA = [0.5, 0.78, 1];
     for (const p of opts.particles) {
-      const py = (p.y0 + tt * p.speed * h * 3) % (h + 20) - 10;
+      const fall = (p.y0 + tt * p.laps) % 1;
+      const py = fall * (h + 34) - 17;
+      const px = p.x * w + Math.sin(p.phase + tt * Math.PI * 2 * p.swayFreq) * p.swayAmp;
+      const rot = p.phase + tt * Math.PI * 2 * p.spins;
+      const flip = Math.cos(p.phase + tt * Math.PI * 2 * p.flips); /* -1..1 = virada 3D */
       ctx.save();
-      ctx.translate(p.x, py);
-      ctx.rotate(tt * p.rot * 12);
-      ctx.fillStyle = p.color;
-      ctx.fillRect(-5, -5, 10, 10);
+      ctx.translate(px, py);
+      ctx.globalAlpha = DEPTH_ALPHA[p.depth];
+      if (p.shape === 'circle') {
+        const cg = ctx.createRadialGradient(-p.size * 0.3, -p.size * 0.3, 0, 0, 0, p.size);
+        cg.addColorStop(0, shadeColor(p.color, 0.5));
+        cg.addColorStop(1, shadeColor(p.color, -0.25));
+        ctx.fillStyle = cg;
+        ctx.beginPath();
+        ctx.arc(0, 0, p.size * 0.62, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.rotate(rot);
+        ctx.scale(1, Math.max(0.08, Math.abs(flip))); /* papel virando no ar */
+        /* verso do papel mais escuro — é isso que vende o efeito 3D */
+        ctx.fillStyle = flip >= 0 ? p.color : shadeColor(p.color, -0.38);
+        if (p.shape === 'ribbon') {
+          ctx.fillRect(-p.size * 0.35, -p.size * 1.6, p.size * 0.7, p.size * 3.2);
+        } else {
+          ctx.fillRect(-p.size * 0.75, -p.size * 0.55, p.size * 1.5, p.size * 1.1);
+          /* meia-face com brilho, papel metálico */
+          ctx.fillStyle = flip >= 0 ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.08)';
+          ctx.fillRect(-p.size * 0.75, -p.size * 0.55, p.size * 1.5, p.size * 0.4);
+        }
+      }
       ctx.restore();
     }
+    ctx.globalAlpha = 1;
   }
 }
 
@@ -3247,7 +3408,11 @@ $('zeroBtn').addEventListener('click', async () => {
     const ctx = canvas.getContext('2d');
     const speed = parseInt($('zeroSpeed').value, 10);
     const loopMs = 3200 - speed * 260;
-    const frameCount = 24;
+    /* 32 quadros e paleta cheia (256 cores): as animações agora têm
+       gradientes e sombras, que precisam de cores para não "escadinha".
+       Ficou viável porque o LZW real comprime de verdade — antes disso,
+       cada quadro extra custava ~120 KB; agora custa poucos KB. */
+    const frameCount = 32;
     const delay = Math.round(loopMs / frameCount);
     const opts = { kind: zeroKind, color: $('zeroColor').value, text: $('zeroText').value, particles: confettiParticles };
     const frames = [];
@@ -3257,7 +3422,7 @@ $('zeroBtn').addEventListener('click', async () => {
       if (i % 4 === 0) await tick();
     }
     const delaysMs = frames.map(() => delay);
-    const blob = await framesToGif(frames, w, h, delaysMs, 'media', (text, pct) => setProgress('zero', text, pct));
+    const blob = await framesToGif(frames, w, h, delaysMs, 'alta', (text, pct) => setProgress('zero', text, pct));
     setResult('zero', blob, frames.length, (frames.length * delay) / 1000);
   } catch (err) {
     setProgress('zero', t('errorPrefix') + err.message, undefined);
