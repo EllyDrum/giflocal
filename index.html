@@ -951,11 +951,22 @@ function pixelsToIndices(rgbaData, lut, palette, width, height) {
 }
 
 function buildGif(width, height, framesIndices, palette, delaysMs, loop) {
-  const actualLen = palette.length;
+  /* Otimização entre quadros (frame differencing): a partir do 2º quadro,
+     todo pixel idêntico ao do quadro anterior vira um índice transparente,
+     e o quadro usa disposal "manter" — o decodificador reaproveita o que
+     já está na tela. Em animação com fundo parado (nosso caso típico),
+     isso corta o arquivo pela metade ou mais, com ZERO perda: pixels
+     transparentes mostram exatamente o pixel anterior, que é idêntico.
+     Um índice da paleta fica reservado para a transparência — por isso o
+     quantizador gera no máximo 255 cores, não 256 (imperceptível). */
+  if (palette.length > 255) palette = palette.slice(0, 255); /* garante vaga p/ transparência */
+  const transparentIdx = palette.length;
+  const totalColors = palette.length + 1;
   let minCodeSize = 2;
-  while ((1 << minCodeSize) < actualLen) minCodeSize++;
+  while ((1 << minCodeSize) < totalColors) minCodeSize++;
   const baseCodeCount = 1 << minCodeSize;
   const paddedPalette = palette.slice();
+  paddedPalette.push([0, 0, 0]); /* a cor do slot transparente nunca aparece */
   while (paddedPalette.length < baseCodeCount) paddedPalette.push([0, 0, 0]);
 
   const bytes = [];
@@ -970,12 +981,20 @@ function buildGif(width, height, framesIndices, palette, delaysMs, loop) {
   bytes.push(0x21, 0xFF, 0x0B); pushStr('NETSCAPE2.0');
   bytes.push(0x03, 0x01, loop & 0xFF, (loop >> 8) & 0xFF, 0x00);
 
+  let prevFrame = null;
   for (let f = 0; f < framesIndices.length; f++) {
+    const cur = framesIndices[f];
     const delayCenti = Math.max(1, Math.round((delaysMs[f] || 100) / 10));
-    bytes.push(0x21, 0xF9, 0x04, 0x04); push16(delayCenti); bytes.push(0x00, 0x00);
+    /* 0x05 = disposal "manter o quadro anterior" + flag de transparência */
+    bytes.push(0x21, 0xF9, 0x04, 0x05); push16(delayCenti); bytes.push(transparentIdx, 0x00);
+    let frame = cur;
+    if (prevFrame) {
+      frame = new Uint8Array(cur.length);
+      for (let i = 0; i < cur.length; i++) frame[i] = cur[i] === prevFrame[i] ? transparentIdx : cur[i];
+    }
     bytes.push(0x2C); push16(0); push16(0); push16(width); push16(height); bytes.push(0x00);
     bytes.push(minCodeSize);
-    const lzwBytes = encodeIndicesToLZW(framesIndices[f], minCodeSize);
+    const lzwBytes = encodeIndicesToLZW(frame, minCodeSize);
     let pos = 0;
     while (pos < lzwBytes.length) {
       const chunkLen = Math.min(255, lzwBytes.length - pos);
@@ -984,13 +1003,16 @@ function buildGif(width, height, framesIndices, palette, delaysMs, loop) {
       pos += chunkLen;
     }
     bytes.push(0x00);
+    prevFrame = cur;
   }
   bytes.push(0x3B);
   return Uint8Array.from(bytes);
 }
 
 async function framesToGif(frames, width, height, delaysMs, quality, onProgress){
-  const maxColorsMap = { alta: 256, media: 128, leve: 64 };
+  /* 255 e não 256: um índice fica reservado para a transparência do
+     frame differencing (ver buildGif). */
+  const maxColorsMap = { alta: 255, media: 128, leve: 64 };
   const maxColors = maxColorsMap[quality] || 128;
   onProgress && onProgress(t('progAnalyzing'), 5);
   await tick();
