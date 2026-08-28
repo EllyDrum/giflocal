@@ -215,6 +215,23 @@
   .anim-choices button.active{border-color:var(--primary); background:var(--primary-soft); color:var(--primary-ink); font-weight:700;}
   canvas#previewCanvas{width:100%; max-width:400px; border:1px solid var(--line); border-radius:var(--radius-lg); background:var(--card); display:block; margin:0 auto 16px; box-shadow:var(--shadow-sm);}
 
+  /* --- modo IA (aba Do zero) --- */
+  .anim-choices button.ai-choice{border-color:var(--primary); color:var(--primary-ink); background:linear-gradient(135deg,var(--primary-soft),transparent);}
+  .anim-choices button.ai-choice.active{background:var(--primary); color:#fff; border-color:var(--primary);}
+  #aiPanel{margin-bottom:16px;}
+  #aiPrompt{width:100%; min-height:92px; resize:vertical; padding:12px 14px; border:1.5px solid var(--line); border-radius:var(--radius-sm); font-family:inherit; font-size:14.5px; line-height:1.5; color:var(--ink); background:var(--card);}
+  #aiPrompt:focus{outline:none; border-color:var(--primary);}
+  .ai-styles{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;}
+  .ai-styles button{background:var(--card); border:1.5px solid var(--line); border-radius:999px; padding:7px 13px; cursor:pointer; font-family:inherit; font-size:12.5px; font-weight:600; color:var(--ink-soft); transition:.15s;}
+  .ai-styles button.active{border-color:var(--primary); background:var(--primary-soft); color:var(--primary-ink);}
+  .ai-privacy{font-size:12.5px; color:var(--ink-soft); background:var(--amber-soft); border-left:3px solid var(--amber); padding:10px 12px; border-radius:8px; margin-top:14px; line-height:1.5;}
+  .ai-quota{font-size:12.5px; color:var(--ink-soft); margin-top:10px;}
+  .ai-upsell{border:1.5px solid var(--primary); border-radius:var(--radius); padding:16px; margin-top:14px; background:var(--primary-soft);}
+  .ai-upsell h4{margin:0 0 6px; font-size:15px; color:var(--primary-ink);}
+  .ai-upsell p{margin:0 0 12px; font-size:13.5px; color:var(--ink-soft); line-height:1.5;}
+  #aiSourceWrap{margin-bottom:16px; text-align:center;}
+  #aiSourceImg{max-width:400px; width:100%; border-radius:var(--radius); display:block; margin:0 auto 8px; box-shadow:var(--shadow-sm);}
+
   .plans{margin-top:44px; text-align:center;}
   .plans h2{font-size:24px; font-weight:800; letter-spacing:-.01em; margin:0 0 6px;}
   .plans > .desc{color:var(--ink-soft); margin:0 0 22px; font-size:14.5px;}
@@ -599,14 +616,58 @@
 
   <!-- DO ZERO -->
   <section class="panel" id="panel-zero">
-    <h2 data-i18n="zeroH2">Criar do zero, sem IA</h2>
-    <p class="desc" data-i18n="zeroDesc">Uma animação simples gerada por código, direto aqui, sem foto, vídeo ou inteligência artificial.</p>
+    <h2 data-i18n="zeroH2">Criar do zero, com animação e IA</h2>
+    <p class="desc" data-i18n="zeroDesc">Crie uma animação simples ou transforme sua ideia em um GIF com IA.</p>
     <div class="card">
       <div class="anim-choices" id="zeroChoices">
         <button class="active" data-kind="texto" data-i18n="zeroChoiceText">Texto pulsante</button>
         <button data-kind="bolinha" data-i18n="zeroChoiceBall">Bolinha quicando</button>
         <button data-kind="confete" data-i18n="zeroChoiceConfetti">Confete caindo</button>
+        <button class="ai-choice" data-kind="ia" data-i18n="zeroChoiceAi">✨ Criar com IA</button>
       </div>
+
+      <div id="aiPanel" style="display:none;">
+        <div class="field">
+          <label for="aiPrompt" data-i18n="aiPromptLabel">O que você quer transformar em GIF?</label>
+          <textarea id="aiPrompt" maxlength="800" data-i18n-placeholder="aiPromptPlaceholder" placeholder="Ex.: Um astronauta flutuando no espaço, planetas ao fundo, estrelas brilhando"></textarea>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label data-i18n="aiStyleLabel">Estilo</label>
+          <div class="ai-styles" id="aiStyles">
+            <button class="active" data-style="" data-i18n="aiStyleNone">Nenhum</button>
+            <button data-style="cinematic, dramatic lighting, film still" data-i18n="aiStyleCinema">Cinematográfico</button>
+            <button data-style="3d render, octane, highly detailed" data-i18n="aiStyle3d">3D</button>
+            <button data-style="anime style, vibrant colors" data-i18n="aiStyleAnime">Anime</button>
+            <button data-style="cartoon illustration, bold outlines, flat colors" data-i18n="aiStyleCartoon">Cartoon</button>
+            <button data-style="pixel art, 16-bit" data-i18n="aiStylePixel">Pixel art</button>
+            <button data-style="watercolor painting, soft washes" data-i18n="aiStyleWater">Aquarela</button>
+            <button data-style="minimalist, clean, simple shapes" data-i18n="aiStyleMin">Minimalista</button>
+          </div>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label data-i18n="aiMotionLabel">Movimento</label>
+          <div class="ai-styles" id="aiMotions">
+            <button class="active" data-motion="zoomin" data-i18n="aiMotionZoomIn">Aproximar</button>
+            <button data-motion="zoomout" data-i18n="aiMotionZoomOut">Afastar</button>
+            <button data-motion="panright" data-i18n="aiMotionPanH">Panorâmica</button>
+            <button data-motion="pandown" data-i18n="aiMotionPanV">Vertical</button>
+            <button data-motion="kenburns" data-i18n="aiMotionKen">Cinematográfico</button>
+          </div>
+        </div>
+        <div class="ai-privacy" data-i18n="aiPrivacyNote">🔒 Sua descrição é enviada para o serviço de IA para gerar a imagem. A animação, a otimização e o GIF continuam sendo feitos no seu navegador — nenhum arquivo seu é enviado.</div>
+        <div class="ai-quota" id="aiQuota"></div>
+        <div class="ai-upsell" id="aiUpsell" style="display:none;">
+          <h4 data-i18n="aiUpsellTitle">✨ Você usou sua geração gratuita de hoje</h4>
+          <p data-i18n="aiUpsellDesc">O plano Pro libera bem mais gerações por dia, além de resolução e duração maiores em todas as ferramentas.</p>
+          <button class="btn" id="aiUpsellBtn" type="button" data-i18n="aiUpsellBtn">Ver planos</button>
+        </div>
+      </div>
+
+      <div id="aiSourceWrap" style="display:none;">
+        <img id="aiSourceImg" alt="Imagem gerada por IA que será animada">
+        <div class="hint" data-i18n="aiSourceHint">Imagem gerada. Agora o GIF Local cria o movimento.</div>
+      </div>
+
       <canvas id="previewCanvas" width="400" height="300"></canvas>
       <div class="row">
         <div class="field" id="zeroTextField">
@@ -1119,6 +1180,37 @@ const I18N = {
     zeroChoiceText: "Texto pulsante", zeroChoiceBall: "Bolinha quicando", zeroChoiceConfetti: "Confete caindo",
     zeroTextLabel: "Texto", zeroColorLabel: "Cor", zeroSpeedLabel: "Velocidade",
     zeroBtn: "Gerar GIF", zeroDownload: "Baixar GIF",
+    zeroChoiceAi: "✨ Criar com IA",
+    aiPromptLabel: "O que você quer transformar em GIF?",
+    aiPromptPlaceholder: "Ex.: Um astronauta flutuando no espaço, planetas ao fundo, estrelas brilhando",
+    aiStyleLabel: "Estilo",
+    aiStyleNone: "Nenhum",
+    aiStyleCinema: "Cinematográfico",
+    aiStyle3d: "3D",
+    aiStyleAnime: "Anime",
+    aiStyleCartoon: "Cartoon",
+    aiStylePixel: "Pixel art",
+    aiStyleWater: "Aquarela",
+    aiStyleMin: "Minimalista",
+    aiMotionLabel: "Movimento",
+    aiMotionZoomIn: "Aproximar",
+    aiMotionZoomOut: "Afastar",
+    aiMotionPanH: "Panorâmica",
+    aiMotionPanV: "Vertical",
+    aiMotionKen: "Cinematográfico",
+    aiPrivacyNote: "🔒 Sua descrição é enviada para o serviço de IA para gerar a imagem. A animação, a otimização e o GIF continuam sendo feitos no seu navegador — nenhum arquivo seu é enviado.",
+    aiGenerateBtn: "Criar GIF com IA",
+    aiPreviewEmpty: "Descreva sua ideia e clique em Criar",
+    aiSourceHint: "Imagem gerada. Agora o GIF Local cria o movimento.",
+    aiNeedPrompt: "Escreva o que você quer criar.",
+    aiCreating: "✨ Criando sua imagem...",
+    aiLimitReached: "Você usou sua geração com IA de hoje.",
+    aiServiceBusy: "O limite diário de gerações com IA foi atingido. Tente de novo amanhã.",
+    aiQuotaLoading: "Verificando...",
+    aiQuotaMsg: (r, a) => `${r} de ${a} gerações com IA disponíveis hoje`,
+    aiUpsellTitle: "✨ Você usou sua geração gratuita de hoje",
+    aiUpsellDesc: "O plano Pro libera bem mais gerações por dia, além de resolução e duração maiores em todas as ferramentas.",
+    aiUpsellBtn: "Ver planos",
     altZero: "Prévia do GIF animado gerado do zero",
     aiNote: "Quer usar imagens geradas por IA (ChatGPT/DALL·E, Sora)? Baixe as imagens ou quadros gerados e junte-os aqui mesmo na aba <b>Fotos</b>, a montagem final continua 100% local.",
     footerText: "Nenhuma foto, vídeo ou gravação sai do seu computador. Tudo é processado no seu navegador com JavaScript comum.",
@@ -1248,6 +1340,37 @@ const I18N = {
     zeroChoiceText: "Pulsing text", zeroChoiceBall: "Bouncing ball", zeroChoiceConfetti: "Falling confetti",
     zeroTextLabel: "Text", zeroColorLabel: "Color", zeroSpeedLabel: "Speed",
     zeroBtn: "Generate GIF", zeroDownload: "Download GIF",
+    zeroChoiceAi: "✨ Create with AI",
+    aiPromptLabel: "What do you want to turn into a GIF?",
+    aiPromptPlaceholder: "E.g.: An astronaut floating in space, planets behind, stars shining",
+    aiStyleLabel: "Style",
+    aiStyleNone: "None",
+    aiStyleCinema: "Cinematic",
+    aiStyle3d: "3D",
+    aiStyleAnime: "Anime",
+    aiStyleCartoon: "Cartoon",
+    aiStylePixel: "Pixel art",
+    aiStyleWater: "Watercolor",
+    aiStyleMin: "Minimalist",
+    aiMotionLabel: "Motion",
+    aiMotionZoomIn: "Zoom in",
+    aiMotionZoomOut: "Zoom out",
+    aiMotionPanH: "Pan",
+    aiMotionPanV: "Vertical",
+    aiMotionKen: "Cinematic",
+    aiPrivacyNote: "🔒 Your description is sent to the AI service to generate the image. The animation, optimization and GIF are still done in your browser — none of your files are uploaded.",
+    aiGenerateBtn: "Create GIF with AI",
+    aiPreviewEmpty: "Describe your idea and click Create",
+    aiSourceHint: "Image generated. Now GIF Local creates the motion.",
+    aiNeedPrompt: "Write what you want to create.",
+    aiCreating: "✨ Creating your image...",
+    aiLimitReached: "You have used your AI generation for today.",
+    aiServiceBusy: "The daily AI generation limit was reached. Try again tomorrow.",
+    aiQuotaLoading: "Checking...",
+    aiQuotaMsg: (r, a) => `${r} of ${a} AI generations available today`,
+    aiUpsellTitle: "✨ You used your free generation today",
+    aiUpsellDesc: "Pro unlocks many more generations per day, plus higher resolution and longer duration across all tools.",
+    aiUpsellBtn: "See plans",
     altZero: "Preview of the animated GIF generated from scratch",
     aiNote: "Want to use AI-generated images (ChatGPT/DALL·E, Sora)? Download the images or frames and combine them right here in the <b>Photos</b> tab, the final assembly stays 100% local.",
     footerText: "No photo, video or recording leaves your computer. Everything is processed in your browser with plain JavaScript.",
@@ -1377,6 +1500,37 @@ const I18N = {
     zeroChoiceText: "Texto pulsante", zeroChoiceBall: "Pelota que rebota", zeroChoiceConfetti: "Confeti cayendo",
     zeroTextLabel: "Texto", zeroColorLabel: "Color", zeroSpeedLabel: "Velocidad",
     zeroBtn: "Generar GIF", zeroDownload: "Descargar GIF",
+    zeroChoiceAi: "✨ Crear con IA",
+    aiPromptLabel: "¿Qué quieres convertir en GIF?",
+    aiPromptPlaceholder: "Ej.: Un astronauta flotando en el espacio, planetas al fondo, estrellas brillando",
+    aiStyleLabel: "Estilo",
+    aiStyleNone: "Ninguno",
+    aiStyleCinema: "Cinematográfico",
+    aiStyle3d: "3D",
+    aiStyleAnime: "Anime",
+    aiStyleCartoon: "Cartoon",
+    aiStylePixel: "Pixel art",
+    aiStyleWater: "Acuarela",
+    aiStyleMin: "Minimalista",
+    aiMotionLabel: "Movimiento",
+    aiMotionZoomIn: "Acercar",
+    aiMotionZoomOut: "Alejar",
+    aiMotionPanH: "Panorámica",
+    aiMotionPanV: "Vertical",
+    aiMotionKen: "Cinematográfico",
+    aiPrivacyNote: "🔒 Tu descripción se envía al servicio de IA para generar la imagen. La animación, la optimización y el GIF se siguen haciendo en tu navegador — ningún archivo tuyo se sube.",
+    aiGenerateBtn: "Crear GIF con IA",
+    aiPreviewEmpty: "Describe tu idea y haz clic en Crear",
+    aiSourceHint: "Imagen generada. Ahora GIF Local crea el movimiento.",
+    aiNeedPrompt: "Escribe lo que quieres crear.",
+    aiCreating: "✨ Creando tu imagen...",
+    aiLimitReached: "Ya usaste tu generación con IA de hoy.",
+    aiServiceBusy: "Se alcanzó el límite diario de generaciones con IA. Inténtalo mañana.",
+    aiQuotaLoading: "Comprobando...",
+    aiQuotaMsg: (r, a) => `${r} de ${a} generaciones con IA disponibles hoy`,
+    aiUpsellTitle: "✨ Usaste tu generación gratuita de hoy",
+    aiUpsellDesc: "El plan Pro libera muchas más generaciones por día, además de mayor resolución y duración en todas las herramientas.",
+    aiUpsellBtn: "Ver planes",
     altZero: "Vista previa del GIF animado generado desde cero",
     aiNote: "¿Quieres usar imágenes generadas por IA (ChatGPT/DALL·E, Sora)? Descarga las imágenes o fotogramas generados y únelos aquí mismo en la pestaña <b>Fotos</b>, el montaje final sigue siendo 100% local.",
     footerText: "Ninguna foto, vídeo o grabación sale de tu ordenador. Todo se procesa en tu navegador con JavaScript común.",
@@ -1506,6 +1660,37 @@ const I18N = {
     zeroChoiceText: "Texte pulsant", zeroChoiceBall: "Balle qui rebondit", zeroChoiceConfetti: "Confettis qui tombent",
     zeroTextLabel: "Texte", zeroColorLabel: "Couleur", zeroSpeedLabel: "Vitesse",
     zeroBtn: "Générer le GIF", zeroDownload: "Télécharger le GIF",
+    zeroChoiceAi: "✨ Créer avec l\u2019IA",
+    aiPromptLabel: "Que voulez-vous transformer en GIF ?",
+    aiPromptPlaceholder: "Ex. : Un astronaute flottant dans l\u2019espace, des planètes au fond, des étoiles brillantes",
+    aiStyleLabel: "Style",
+    aiStyleNone: "Aucun",
+    aiStyleCinema: "Cinématographique",
+    aiStyle3d: "3D",
+    aiStyleAnime: "Anime",
+    aiStyleCartoon: "Cartoon",
+    aiStylePixel: "Pixel art",
+    aiStyleWater: "Aquarelle",
+    aiStyleMin: "Minimaliste",
+    aiMotionLabel: "Mouvement",
+    aiMotionZoomIn: "Zoom avant",
+    aiMotionZoomOut: "Zoom arrière",
+    aiMotionPanH: "Panoramique",
+    aiMotionPanV: "Vertical",
+    aiMotionKen: "Cinématographique",
+    aiPrivacyNote: "🔒 Votre description est envoyée au service d\u2019IA pour générer l\u2019image. L\u2019animation, l\u2019optimisation et le GIF restent faits dans votre navigateur — aucun de vos fichiers n\u2019est envoyé.",
+    aiGenerateBtn: "Créer un GIF avec l\u2019IA",
+    aiPreviewEmpty: "Décrivez votre idée et cliquez sur Créer",
+    aiSourceHint: "Image générée. GIF Local crée maintenant le mouvement.",
+    aiNeedPrompt: "Écrivez ce que vous voulez créer.",
+    aiCreating: "✨ Création de votre image...",
+    aiLimitReached: "Vous avez utilisé votre génération IA du jour.",
+    aiServiceBusy: "La limite quotidienne de générations IA est atteinte. Réessayez demain.",
+    aiQuotaLoading: "Vérification...",
+    aiQuotaMsg: (r, a) => `${r} sur ${a} générations IA disponibles aujourd\u2019hui`,
+    aiUpsellTitle: "✨ Vous avez utilisé votre génération gratuite du jour",
+    aiUpsellDesc: "Pro débloque bien plus de générations par jour, ainsi qu\u2019une résolution et une durée supérieures dans tous les outils.",
+    aiUpsellBtn: "Voir les offres",
     altZero: "Aperçu du GIF animé généré à partir de zéro",
     aiNote: "Vous voulez utiliser des images générées par IA (ChatGPT/DALL·E, Sora) ? Téléchargez les images générées et assemblez-les ici même dans l'onglet <b>Photos</b>, le montage final reste 100% local.",
     footerText: "Aucune photo, vidéo ou capture ne quitte votre ordinateur. Tout est traité dans votre navigateur avec du JavaScript classique.",
@@ -1635,6 +1820,37 @@ const I18N = {
     zeroChoiceText: "Pulsierender Text", zeroChoiceBall: "Springender Ball", zeroChoiceConfetti: "Fallendes Konfetti",
     zeroTextLabel: "Text", zeroColorLabel: "Farbe", zeroSpeedLabel: "Geschwindigkeit",
     zeroBtn: "GIF erstellen", zeroDownload: "GIF herunterladen",
+    zeroChoiceAi: "✨ Mit KI erstellen",
+    aiPromptLabel: "Was möchten Sie in ein GIF verwandeln?",
+    aiPromptPlaceholder: "Z. B.: Ein Astronaut schwebt im All, Planeten im Hintergrund, leuchtende Sterne",
+    aiStyleLabel: "Stil",
+    aiStyleNone: "Keiner",
+    aiStyleCinema: "Filmisch",
+    aiStyle3d: "3D",
+    aiStyleAnime: "Anime",
+    aiStyleCartoon: "Cartoon",
+    aiStylePixel: "Pixel-Art",
+    aiStyleWater: "Aquarell",
+    aiStyleMin: "Minimalistisch",
+    aiMotionLabel: "Bewegung",
+    aiMotionZoomIn: "Heranzoomen",
+    aiMotionZoomOut: "Herauszoomen",
+    aiMotionPanH: "Schwenk",
+    aiMotionPanV: "Vertikal",
+    aiMotionKen: "Filmisch",
+    aiPrivacyNote: "🔒 Ihre Beschreibung wird an den KI-Dienst gesendet, um das Bild zu erzeugen. Animation, Optimierung und GIF bleiben in Ihrem Browser — keine Ihrer Dateien wird hochgeladen.",
+    aiGenerateBtn: "GIF mit KI erstellen",
+    aiPreviewEmpty: "Beschreiben Sie Ihre Idee und klicken Sie auf Erstellen",
+    aiSourceHint: "Bild erzeugt. Jetzt erstellt GIF Local die Bewegung.",
+    aiNeedPrompt: "Schreiben Sie, was Sie erstellen möchten.",
+    aiCreating: "✨ Ihr Bild wird erstellt...",
+    aiLimitReached: "Sie haben Ihre KI-Generierung für heute verbraucht.",
+    aiServiceBusy: "Das Tageslimit für KI-Generierungen ist erreicht. Versuchen Sie es morgen erneut.",
+    aiQuotaLoading: "Wird geprüft...",
+    aiQuotaMsg: (r, a) => `${r} von ${a} KI-Generierungen heute verfügbar`,
+    aiUpsellTitle: "✨ Sie haben Ihre kostenlose Generierung heute genutzt",
+    aiUpsellDesc: "Pro schaltet deutlich mehr Generierungen pro Tag frei, dazu höhere Auflösung und längere Dauer in allen Werkzeugen.",
+    aiUpsellBtn: "Tarife ansehen",
     altZero: "Vorschau des von Grund auf erstellten animierten GIFs",
     aiNote: "Möchten Sie KI-generierte Bilder verwenden (ChatGPT/DALL·E, Sora)? Laden Sie die generierten Bilder oder Einzelbilder herunter und fügen Sie sie hier im Tab <b>Fotos</b> zusammen, der finale Zusammenbau bleibt 100% lokal.",
     footerText: "Kein Foto, Video oder keine Aufnahme verlässt Ihren Computer. Alles wird in Ihrem Browser mit gewöhnlichem JavaScript verarbeitet.",
@@ -1764,6 +1980,37 @@ const I18N = {
     zeroChoiceText: "Testo pulsante", zeroChoiceBall: "Pallina che rimbalza", zeroChoiceConfetti: "Coriandoli che cadono",
     zeroTextLabel: "Testo", zeroColorLabel: "Colore", zeroSpeedLabel: "Velocità",
     zeroBtn: "Genera GIF", zeroDownload: "Scarica GIF",
+    zeroChoiceAi: "✨ Crea con IA",
+    aiPromptLabel: "Cosa vuoi trasformare in GIF?",
+    aiPromptPlaceholder: "Es.: Un astronauta che fluttua nello spazio, pianeti sullo sfondo, stelle brillanti",
+    aiStyleLabel: "Stile",
+    aiStyleNone: "Nessuno",
+    aiStyleCinema: "Cinematografico",
+    aiStyle3d: "3D",
+    aiStyleAnime: "Anime",
+    aiStyleCartoon: "Cartoon",
+    aiStylePixel: "Pixel art",
+    aiStyleWater: "Acquerello",
+    aiStyleMin: "Minimalista",
+    aiMotionLabel: "Movimento",
+    aiMotionZoomIn: "Avvicina",
+    aiMotionZoomOut: "Allontana",
+    aiMotionPanH: "Panoramica",
+    aiMotionPanV: "Verticale",
+    aiMotionKen: "Cinematografico",
+    aiPrivacyNote: "🔒 La tua descrizione viene inviata al servizio di IA per generare l\u2019immagine. Animazione, ottimizzazione e GIF restano nel tuo browser — nessun tuo file viene caricato.",
+    aiGenerateBtn: "Crea GIF con IA",
+    aiPreviewEmpty: "Descrivi la tua idea e clicca su Crea",
+    aiSourceHint: "Immagine generata. Ora GIF Local crea il movimento.",
+    aiNeedPrompt: "Scrivi cosa vuoi creare.",
+    aiCreating: "✨ Sto creando la tua immagine...",
+    aiLimitReached: "Hai usato la tua generazione con IA di oggi.",
+    aiServiceBusy: "Il limite giornaliero di generazioni IA è stato raggiunto. Riprova domani.",
+    aiQuotaLoading: "Verifica in corso...",
+    aiQuotaMsg: (r, a) => `${r} di ${a} generazioni IA disponibili oggi`,
+    aiUpsellTitle: "✨ Hai usato la tua generazione gratuita di oggi",
+    aiUpsellDesc: "Pro sblocca molte più generazioni al giorno, oltre a risoluzione e durata maggiori in tutti gli strumenti.",
+    aiUpsellBtn: "Vedi i piani",
     altZero: "Anteprima del GIF animato generato da zero",
     aiNote: "Vuoi usare immagini generate dall'IA (ChatGPT/DALL·E, Sora)? Scarica le immagini o i fotogrammi generati e uniscili qui nella scheda <b>Foto</b>, il montaggio finale resta 100% locale.",
     footerText: "Nessuna foto, video o registrazione lascia il tuo computer. Tutto viene elaborato nel tuo browser con normale JavaScript.",
@@ -2049,6 +2296,11 @@ function applyTranslations(){
     const key = el.getAttribute('data-i18n-title');
     el.title = t(key);
   });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+  });
+  /* o rótulo do botão de gerar muda entre "Gerar GIF" e "Criar com IA" */
+  if (typeof updateZeroButtonLabel === 'function') updateZeroButtonLabel();
   $('pageTitle').textContent = t('pageTitle');
   document.title = t('pageTitle');
   $('metaDesc').setAttribute('content', t('metaDesc'));
@@ -3188,10 +3440,140 @@ document.querySelectorAll('#zeroChoices button').forEach(btn => {
     document.querySelectorAll('#zeroChoices button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     zeroKind = btn.dataset.kind;
+    const isAi = zeroKind === 'ia';
     $('zeroTextField').style.display = zeroKind === 'texto' ? 'block' : 'none';
+    $('aiPanel').style.display = isAi ? 'block' : 'none';
+    /* Cor e velocidade não fazem sentido no modo IA (o movimento vem dos
+       botões próprios dele); escondemos em vez de deixar controles inertes. */
+    $('zeroColor').closest('.field').style.display = isAi ? 'none' : 'block';
+    $('zeroSpeed').closest('.field').style.display = isAi ? 'none' : 'block';
+    $('aiSourceWrap').style.display = isAi && aiImage ? 'block' : 'none';
     if (zeroKind === 'confete') confettiParticles = makeConfetti();
+    if (isAi) refreshAiQuota();
+    updateZeroButtonLabel();
   });
 });
+
+/* =========================================================
+   MODO IA — "A IA cria. O GIF Local aperfeiçoa."
+   A IA devolve uma IMAGEM PARADA. Todo o movimento, a paleta,
+   a compressão e o GIF final são feitos aqui no navegador.
+   Isso não é uma limitação contornada: é a arquitetura. Não
+   existe geração de vídeo gratuita, e o GIF Local já sabe
+   transformar quadros em GIF otimizado melhor do que valeria
+   pagar por vídeo para depois jogar 99% dos quadros fora.
+   ========================================================= */
+let aiImage = null;          /* HTMLImageElement gerado pela IA */
+let aiStyle = '';
+let aiMotion = 'zoomin';
+
+document.querySelectorAll('#aiStyles button').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('#aiStyles button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    aiStyle = b.dataset.style;
+  });
+});
+document.querySelectorAll('#aiMotions button').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('#aiMotions button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    aiMotion = b.dataset.motion;
+  });
+});
+
+$('aiUpsellBtn').addEventListener('click', () => {
+  const plans = document.getElementById('planos');
+  if (plans) plans.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+function aiLicenseKey(){
+  const rec = readStoredLicense();
+  return rec && rec.licenseKey ? rec.licenseKey : '';
+}
+
+async function refreshAiQuota(){
+  const el = $('aiQuota');
+  if (!el || !LICENSE_BACKEND_CONFIGURED) return;
+  el.textContent = t('aiQuotaLoading');
+  try {
+    const url = LICENSE_API_BASE + '/ai/quota?deviceId=' + encodeURIComponent(getOrCreateDeviceId()) +
+      '&licenseKey=' + encodeURIComponent(aiLicenseKey());
+    const res = await fetch(url);
+    const d = await res.json();
+    if (d.serviceBusy) {
+      el.textContent = t('aiServiceBusy');
+      $('aiUpsell').style.display = 'none';
+      return;
+    }
+    el.textContent = t('aiQuotaMsg', d.remaining, d.allowed);
+    $('aiUpsell').style.display = (d.remaining <= 0 && d.tier === 'free') ? 'block' : 'none';
+  } catch (e) {
+    el.textContent = '';
+  }
+}
+
+/* Move a câmera sobre a imagem gerada. Todos os caminhos são funções de
+   p (0→1) e voltam ao ponto inicial no fim do laço quando faz sentido,
+   para o GIF emendar sem pulo. */
+function aiCameraRect(motion, p, iw, ih, aspect){
+  /* área visível dentro da imagem original, em pixels da própria imagem */
+  const maxW = Math.min(iw, ih * aspect);
+  const maxH = maxW / aspect;
+  let zoom, cx, cy;
+  const ping = 1 - Math.abs(2 * p - 1); /* 0→1→0, garante loop perfeito */
+  switch (motion) {
+    case 'zoomout': zoom = 0.78 + 0.22 * ping; cx = 0.5; cy = 0.5; break;
+    case 'panright': zoom = 0.82; cx = 0.5 + 0.16 * Math.sin(p * Math.PI * 2); cy = 0.5; break;
+    case 'pandown': zoom = 0.82; cx = 0.5; cy = 0.5 + 0.16 * Math.sin(p * Math.PI * 2); break;
+    case 'kenburns':
+      zoom = 0.8 + 0.14 * ping;
+      cx = 0.5 + 0.07 * Math.sin(p * Math.PI * 2);
+      cy = 0.5 - 0.05 * Math.sin(p * Math.PI * 2);
+      break;
+    case 'zoomin':
+    default: zoom = 1 - 0.22 * ping; cx = 0.5; cy = 0.5; break;
+  }
+  const w = maxW * zoom, h = maxH * zoom;
+  /* trava dentro da imagem para nunca aparecer borda vazia */
+  const x = Math.max(0, Math.min(iw - w, cx * iw - w / 2));
+  const y = Math.max(0, Math.min(ih - h, cy * ih - h / 2));
+  return { x, y, w, h };
+}
+
+async function generateAiImage(){
+  const promptRaw = $('aiPrompt').value.trim();
+  if (!promptRaw) { setProgress('zero', t('aiNeedPrompt'), undefined); return false; }
+  const prompt = aiStyle ? (promptRaw + ', ' + aiStyle) : promptRaw;
+  setProgress('zero', t('aiCreating'), 10);
+  const res = await fetch(LICENSE_API_BASE + '/ai/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt, deviceId: getOrCreateDeviceId(), licenseKey: aiLicenseKey() }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    if (data.error === 'AI_LIMIT_REACHED') {
+      setProgress('zero', t('aiLimitReached'), undefined);
+      $('aiUpsell').style.display = 'block';
+    } else if (data.error === 'AI_SERVICE_BUSY') {
+      setProgress('zero', t('aiServiceBusy'), undefined);
+    } else {
+      setProgress('zero', t('errorPrefix') + (data.message || data.error), undefined);
+    }
+    return false;
+  }
+  aiImage = await loadImage('data:image/jpeg;base64,' + data.image);
+  $('aiSourceImg').src = aiImage.src;
+  $('aiSourceWrap').style.display = 'block';
+  refreshAiQuota();
+  return true;
+}
+
+function updateZeroButtonLabel(){
+  const span = $('zeroBtn').querySelector('span');
+  if (span) span.textContent = zeroKind === 'ia' ? t('aiGenerateBtn') : t('zeroBtn');
+}
 
 /* Utilitários de cor para o sombreamento das animações: clarear/escurecer
    a cor que o usuário escolheu, para gradientes e sombras coerentes. */
@@ -3244,6 +3626,25 @@ confettiParticles = makeConfetti();
 const ZERO_FONT_STACK = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
 
 function drawZeroFrame(ctx, w, h, tt, opts){
+  if (opts.kind === 'ia') {
+    ctx.fillStyle = '#0e0e14';
+    ctx.fillRect(0, 0, w, h);
+    if (!opts.image) {
+      ctx.fillStyle = 'rgba(255,255,255,0.45)';
+      ctx.font = '600 15px ' + ZERO_FONT_STACK;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(t('aiPreviewEmpty'), w / 2, h / 2);
+      return;
+    }
+    const iw = opts.image.naturalWidth || opts.image.width;
+    const ih = opts.image.naturalHeight || opts.image.height;
+    const r = aiCameraRect(opts.motion, tt, iw, ih, w / h);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(opts.image, r.x, r.y, r.w, r.h, 0, 0, w, h);
+    return;
+  }
   if (opts.kind === 'texto') {
     /* Fundo com leve gradiente radial, para o texto não flutuar num vazio. */
     const bg = ctx.createRadialGradient(w / 2, h / 2, 40, w / 2, h / 2, Math.max(w, h) * 0.75);
@@ -3419,7 +3820,8 @@ function previewLoop(){
   const loopMs = 3200 - speed * 260;
   const tt = ((performance.now() - previewStart) % loopMs) / loopMs;
   drawZeroFrame(previewCtx, previewCanvas.width, previewCanvas.height, tt, {
-    kind: zeroKind, color: $('zeroColor').value, text: $('zeroText').value, particles: confettiParticles
+    kind: zeroKind, color: $('zeroColor').value, text: $('zeroText').value, particles: confettiParticles,
+    image: aiImage, motion: aiMotion
   });
   requestAnimationFrame(previewLoop);
 }
@@ -3431,6 +3833,13 @@ $('zeroBtn').addEventListener('click', async () => {
   if (!canCreateGif()) { showUpgradePrompt('zero'); return; }
   $('zeroBtn').disabled = true;
   try{
+    /* No modo IA, gera a imagem primeiro (única etapa que sai do
+       dispositivo). Se falhar ou bater no limite, para aqui sem
+       consumir a cota de GIFs do dia. */
+    if (zeroKind === 'ia') {
+      const ok = await generateAiImage();
+      if (!ok) { $('zeroBtn').disabled = false; return; }
+    }
     setProgress('zero', t('progGeneratingFrames'), 5);
     const w = previewCanvas.width, h = previewCanvas.height;
     const canvas = document.createElement('canvas');
@@ -3444,7 +3853,8 @@ $('zeroBtn').addEventListener('click', async () => {
        cada quadro extra custava ~120 KB; agora custa poucos KB. */
     const frameCount = 32;
     const delay = Math.round(loopMs / frameCount);
-    const opts = { kind: zeroKind, color: $('zeroColor').value, text: $('zeroText').value, particles: confettiParticles };
+    const opts = { kind: zeroKind, color: $('zeroColor').value, text: $('zeroText').value, particles: confettiParticles,
+      image: aiImage, motion: aiMotion };
     const frames = [];
     for (let i = 0; i < frameCount; i++) {
       drawZeroFrame(ctx, w, h, i / frameCount, opts);

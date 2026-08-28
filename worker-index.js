@@ -414,11 +414,16 @@ async function handleAdminSetStatus(request, env, licenseId) {
 const AI_MODEL = '@cf/black-forest-labs/flux-1-schnell';
 const AI_STEPS = 4; /* schnell é treinado para 4 passos; mais que isso gasta neurons sem ganho */
 
-const AI_DAILY_LIMIT = { free: 2, pro: 25, full: 80 };
+const AI_DAILY_LIMIT = { free: 1, pro: 25, full: 80 };
 
-/* ~43 neurons por imagem 512x512 em 4 passos → 200 imagens ≈ 8.600 neurons,
-   deixando folga dentro dos 10.000/dia gratuitos. */
-const AI_GLOBAL_DAILY_CAP = 200;
+/* MEDIDO em produção (painel Workers AI): 345,6 neurons para 2 imagens =
+   172,8 por imagem. O flux-1-schnell gera 1024x1024 fixo — são 4 tiles de
+   512x512, e o custo dos passos é por tile, não por imagem:
+     4 tiles x 4,80  +  4 passos x 4 tiles x 9,60  =  172,8
+   O modelo não aceita width/height, então não dá para pedir menor.
+   10.000 neurons/dia gratuitos ÷ 172,8 = 57 imagens/dia. Fixamos 55 para
+   deixar margem — passar disso não quebra nada, mas sai do gratuito. */
+const AI_GLOBAL_DAILY_CAP = 55;
 
 const BACKEND_PLAN_TO_TIER = { apoiador: 'pro', profissional: 'full', empresa: 'full' };
 
