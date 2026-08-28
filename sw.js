@@ -2,7 +2,7 @@
    Faz cache do app inteiro no primeiro acesso, para funcionar de verdade
    offline depois — inclusive instalado como app (PWA) — sem nenhuma
    chamada de rede para processar fotos, vídeos ou gravações. */
-const CACHE_NAME = 'gif-local-v3';
+const CACHE_NAME = 'gif-local-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -32,6 +32,17 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  /* NUNCA interceptar chamadas para outros domínios (a API de licenciamento
+     e de geração com IA). Este service worker existe para deixar o APP
+     disponível offline — respostas de API não são conteúdo estático e não
+     devem ir para o cache.
+     Sem esta linha, todo GET para a API passava por cache.put(), que rejeita
+     em respostas de outra origem e derrubava a requisição inteira com
+     "Failed to fetch". Sintoma real: consulta de cota da IA e a tela de
+     "gerenciar dispositivos" simplesmente não funcionavam — enquanto POST
+     (ativar licença) funcionava, porque sai na linha acima. */
+  if (new URL(event.request.url).origin !== self.location.origin) return;
 
   /* Documento HTML (navegação): sempre tenta a rede primeiro, para que uma
      atualização do site apareça na próxima visita — só usa o cache se
