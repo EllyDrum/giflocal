@@ -287,6 +287,58 @@ async function handleLicenseBySession(request, env) {
   return json(license);
 }
 
+/* Reenvio da chave para o e-mail da compra ("perdi minha chave").
+
+   Regra de ouro deste endpoint: ele NUNCA revela se um e-mail existe ou
+   não na base. A resposta é sempre a mesma, exista ou não. Quem pede o
+   reenvio não recebe a chave na resposta — a chave sai só pelo e-mail
+   que já estava gravado na compra. Assim o endpoint não vira nem uma
+   ferramenta de descobrir clientes, nem uma de roubar chaves alheias:
+   pedir o reenvio do e-mail de outra pessoa só faz o e-mail chegar a
+   ela, não a quem pediu. */
+async function handleResendLicense(request, env) {
+  const body = await readJson(request);
+  const email = body && typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+
+  const generic = json({
+    ok: true,
+    message: 'Se houver uma compra com esse e-mail, a chave foi reenviada para ele.',
+  });
+
+  if (!email || !email.includes('@') || email.length > 254) return generic;
+
+  const rows = await env.DB.prepare(
+    `SELECT l.license_id, l.license_key, l.plan
+       FROM licenses l
+       JOIN customers c ON c.customer_id = l.customer_id
+      WHERE lower(c.email) = ?
+        AND l.status IN ('PENDING','ACTIVE')
+      ORDER BY l.purchased_at DESC
+      LIMIT 3`
+  )
+    .bind(email)
+    .all();
+
+  const list = (rows && rows.results) || [];
+  for (const lic of list) {
+    const mail = await sendLicenseEmail(env, { to: email, licenseKey: lic.license_key, plan: lic.plan });
+    await logEvent(env, {
+      licenseId: lic.license_id,
+      event: 'WEBHOOK',
+      detail: `reenvio pedido pelo cliente: ${mail.ok ? 'OK' : 'FALHOU'} — ${mail.detail}`,
+      request,
+    });
+  }
+
+  if (!list.length) {
+    /* Registramos a tentativa sem licença para dar visibilidade a quem
+       pagou e não recebeu (ou digitou o e-mail errado). */
+    await logEvent(env, { event: 'WEBHOOK', detail: 'reenvio pedido para e-mail sem licença ativa', request });
+  }
+
+  return generic;
+}
+
 /* ---- Stripe webhook ---- */
 
 async function verifyStripeSignature(request, env, rawBody) {
@@ -340,6 +392,90 @@ const AMOUNT_PLAN = {
   USD: { 229: 'apoiador', 699: 'profissional' },
   EUR: { 209: 'apoiador', 629: 'profissional' },
 };
+
+/* ====================== entrega da chave por e-mail ======================
+
+   Antes disto, a chave só aparecia na página obrigado.html logo depois do
+   pagamento. Quem fechasse a aba antes dela carregar tinha pago e ficado
+   sem nada — sem segundo canal, sem autoatendimento. Este é o segundo
+   canal.
+
+   Deliberadamente tolerante a falha: se o e-mail não sair, a licença JÁ
+   está gravada e a página de obrigado continua funcionando. O erro vai
+   para o activation_log e nunca sobe como exceção — se este handler
+   lançasse, o Stripe re-tentaria o webhook e criaríamos uma segunda
+   licença para a mesma compra.
+
+   Sem RESEND_API_KEY configurado, tudo aqui vira no-op silencioso: o
+   comportamento volta a ser exatamente o de antes, nada quebra. */
+
+const PLAN_LABEL = { apoiador: 'Pro', profissional: 'Full', empresa: 'Full' };
+
+function licenseEmailHtml(licenseKey, plan) {
+  const label = PLAN_LABEL[plan] || 'Pro';
+  return `<!doctype html><html><body style="margin:0;padding:24px;background:#f6f7f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1a1a1a">
+<div style="max-width:520px;margin:0 auto;background:#fff;border-radius:12px;padding:32px">
+<h1 style="margin:0 0 8px;font-size:20px">Sua chave do GIF Local ${label}</h1>
+<p style="margin:0 0 24px;font-size:15px;line-height:1.5;color:#444">Obrigado pela compra. Guarde este e-mail: ele é o seu comprovante e a sua chave.</p>
+<div style="background:#f2f4f7;border:1px solid #dfe3e8;border-radius:8px;padding:16px;text-align:center;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:19px;letter-spacing:1px;font-weight:600">${licenseKey}</div>
+<p style="margin:24px 0 8px;font-size:15px;line-height:1.5;color:#444">Para ativar:</p>
+<ol style="margin:0 0 24px;padding-left:20px;font-size:15px;line-height:1.7;color:#444">
+<li>Abra <a href="https://giflocal.pages.dev/" style="color:#4f46e5">giflocal.pages.dev</a></li>
+<li>Clique em <strong>Ativar licença</strong></li>
+<li>Cole a chave acima</li>
+</ol>
+<p style="margin:0;font-size:13px;line-height:1.6;color:#777">O GIF Local processa tudo no seu navegador — suas imagens e vídeos nunca são enviados para a internet. A chave só libera os recursos; ela não muda isso.</p>
+</div></body></html>`;
+}
+
+function licenseEmailText(licenseKey, plan) {
+  const label = PLAN_LABEL[plan] || 'Pro';
+  return [
+    `Sua chave do GIF Local ${label}`,
+    '',
+    'Obrigado pela compra. Guarde este e-mail: ele e o seu comprovante e a sua chave.',
+    '',
+    `CHAVE: ${licenseKey}`,
+    '',
+    'Para ativar:',
+    '1. Abra https://giflocal.pages.dev/',
+    '2. Clique em "Ativar licenca"',
+    '3. Cole a chave acima',
+  ].join('\n');
+}
+
+/* Devolve { ok, detail } — NUNCA lança. Quem chama decide o que logar. */
+async function sendLicenseEmail(env, { to, licenseKey, plan }) {
+  if (!env.RESEND_API_KEY) return { ok: false, detail: 'RESEND_API_KEY ausente — envio desativado' };
+  if (!to) return { ok: false, detail: 'sem e-mail de destino' };
+
+  const from = env.LICENSE_EMAIL_FROM || 'GIF Local <onboarding@resend.dev>';
+  const label = PLAN_LABEL[plan] || 'Pro';
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from,
+        to: [to],
+        subject: `Sua chave do GIF Local ${label}`,
+        html: licenseEmailHtml(licenseKey, plan),
+        text: licenseEmailText(licenseKey, plan),
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      return { ok: false, detail: `Resend HTTP ${res.status}: ${body.slice(0, 300)}` };
+    }
+    return { ok: true, detail: 'e-mail enviado' };
+  } catch (e) {
+    return { ok: false, detail: `falha de rede ao chamar Resend: ${String(e && e.message ? e.message : e)}` };
+  }
+}
 
 function resolvePlanFromSession(session) {
   const meta = session.metadata && session.metadata.plan;
@@ -399,6 +535,16 @@ async function handleStripeWebhook(request, env) {
       .run();
 
     await logEvent(env, { licenseId, event: 'WEBHOOK', detail: 'checkout.session.completed -> licença criada', request });
+
+    /* Segundo canal de entrega. Falha aqui não pode derrubar o webhook:
+       a licença já existe e a página de obrigado já consegue buscá-la. */
+    const mail = await sendLicenseEmail(env, { to: email, licenseKey, plan });
+    await logEvent(env, {
+      licenseId,
+      event: 'WEBHOOK',
+      detail: `entrega por e-mail: ${mail.ok ? 'OK' : 'FALHOU'} — ${mail.detail}`,
+      request,
+    });
   } else if (event.type === 'charge.refunded' || event.type === 'charge.dispute.created') {
     const obj = event.data.object;
     const paymentIntent = obj.payment_intent;
@@ -619,6 +765,7 @@ export default {
       if (url.pathname === '/license/devices' && request.method === 'GET') return await handleListDevices(request, env);
       if (url.pathname === '/device/deactivate' && request.method === 'POST') return await handleDeactivateDevice(request, env);
       if (url.pathname === '/license-by-session' && request.method === 'GET') return await handleLicenseBySession(request, env);
+      if (url.pathname === '/license/resend' && request.method === 'POST') return await handleResendLicense(request, env);
       if (url.pathname === '/webhooks/stripe' && request.method === 'POST') return await handleStripeWebhook(request, env);
       if (url.pathname === '/ai/generate' && request.method === 'POST') return await handleAiGenerate(request, env);
       if (url.pathname === '/ai/quota' && request.method === 'GET') return await handleAiQuota(request, env);
