@@ -761,8 +761,10 @@
         <div class="plan-price" id="planProPrice2">R$ 29,90</div>
         <div class="plan-price-note" data-i18n="planOneTime">pagamento único</div>
         <ul class="plan-feats">
-          <li data-i18n="planProF1">Tudo do Apoiador</li>
-          <li data-i18n="planProF2">Suporte prioritário por e-mail</li>
+          <li data-i18n-html="planProF1">Tudo do Pro, em até <b>3 dispositivos</b></li>
+          <li data-i18n="planProF2">Gravação até 4K, sem limite de duração</li>
+          <li data-i18n="planProF3">80 gerações com IA por dia</li>
+          <li data-i18n="planProF4">Suporte prioritário por e-mail</li>
         </ul>
         <p class="charge-currency-note" id="planProChargeNote"></p>
         <div class="pay-buttons">
@@ -1252,13 +1254,13 @@ const I18N = {
     createAnotherBtn: "Criar outro",
     plansTitle: "Planos", plansDesc: "Comece grátis. Faça upgrade quando quiser mais.",
     plansCurrencyNote: "Valores aproximados, apenas como referência. A cobrança é sempre feita em reais (R$); a conversão para sua moeda é feita pela operadora do cartão ou provedor de pagamento.",
-    planFreeName: "Grátis", planFreePrice: "R$ 0",
-    planFreeF1: "Todos os 4 modos de criação", planFreeF2: "Sem marca d'água", planFreeF3: "3 GIFs grátis por dia",
+    planFreeName: "Free", planFreePrice: "R$ 0",
+    planFreeF1: "Todos os 4 modos de criação", planFreeF2: "Sem marca d'água", planFreeF3: "3 GIFs por dia · 1 geração com IA",
     planFreeCta: "Começar agora",
-    planProName: "Profissional", planProPrice: "Em breve",
-    planProF1: "Tudo do Apoiador", planProF2: "Suporte prioritário por e-mail",
-    planSupName: "Apoiador", planOneTime: "pagamento único", planPopularBadge: "Popular",
-    planSupF0: "<b>Uso ilimitado</b>, sem limite diário", planSupF1: "Apoie o desenvolvimento do projeto", planSupF2: "Novidades em primeira mão por e-mail",
+    planProName: "Full", planProPrice: "Em breve",
+    planProF1: "Tudo do Pro, em até <b>3 dispositivos</b>", planProF2: "Gravação até 4K, sem limite de duração", planProF3: "80 gerações com IA por dia", planProF4: "Suporte prioritário por e-mail",
+    planSupName: "Pro", planOneTime: "pagamento único", planPopularBadge: "Popular",
+    planSupF0: "<b>GIFs ilimitados</b>, sem limite diário", planSupF1: "25 gerações com IA por dia", planSupF2: "1 dispositivo",
     planProCta: "Quero ser avisado",
     payWithStripe: "Pagar com Stripe", payWithLemonSqueezy: "Pagar com Lemon Squeezy", payWithPayPal: "Pagar com PayPal",
     helpBtnTitle: "Reportar um problema", helpEmailSubject: "GIF Local - Reportar um problema",
@@ -1269,7 +1271,7 @@ const I18N = {
     usageCounterMsg: (used, total) => `${used} de ${total} GIFs grátis hoje`,
     limitReachedMsg: "Você já criou seus 3 GIFs grátis de hoje. Role para baixo para desbloquear uso ilimitado.",
     proStatusFree: "Free", proOnlyOptionSuffix: " 🔒 PRO",
-    planFreeF4: "Resolução até 480px", planSupF3: "Resolução alta, até 1280px",
+    planFreeF4: "GIF até 480px · gravação 720p, 60s", planSupF3: "GIF até 1280px · gravação 1080p, 10 min",
     licenseFreeTitle: "GIF Local PRO", licenseFreeDesc: "Seu aplicativo está funcionando em modo gratuito.",
     licenseActivateBtn: "Ativar licença", licenseBuyBtn: "Comprar GIF Local PRO",
     licenseActivateTitle: "Ativar licença", licenseActivateDesc: "Cole a chave que você recebeu após a compra.",
@@ -1413,12 +1415,12 @@ const I18N = {
     plansTitle: "Plans", plansDesc: "Start free. Upgrade whenever you want more.",
     plansCurrencyNote: "Approximate reference prices only. You are always charged in Brazilian Reais (R$); your card issuer or payment provider converts it to your currency.",
     planFreeName: "Free", planFreePrice: "$0",
-    planFreeF1: "All 4 creation modes", planFreeF2: "No watermark", planFreeF3: "3 free GIFs a day",
+    planFreeF1: "All 4 creation modes", planFreeF2: "No watermark", planFreeF3: "3 GIFs a day · 1 AI generation",
     planFreeCta: "Get started",
-    planProName: "Professional", planProPrice: "Coming soon",
-    planProF1: "Everything in Supporter", planProF2: "Priority email support",
-    planSupName: "Supporter", planOneTime: "one-time payment", planPopularBadge: "Popular",
-    planSupF0: "<b>Unlimited use</b>, no daily limit", planSupF1: "Support the project's development", planSupF2: "Get news first, by email",
+    planProName: "Full", planProPrice: "Coming soon",
+    planProF1: "Everything in Pro, on up to <b>3 devices</b>", planProF2: "Recording up to 4K, no duration cap", planProF3: "80 AI generations a day", planProF4: "Priority email support",
+    planSupName: "Pro", planOneTime: "one-time payment", planPopularBadge: "Popular",
+    planSupF0: "<b>Unlimited GIFs</b>, no daily limit", planSupF1: "25 AI generations a day", planSupF2: "1 device",
     planProCta: "Notify me",
     payWithStripe: "Pay with Stripe", payWithLemonSqueezy: "Pay with Lemon Squeezy", payWithPayPal: "Pay with PayPal",
     helpBtnTitle: "Report a problem", helpEmailSubject: "GIF Local - Report a problem",
@@ -1429,7 +1431,7 @@ const I18N = {
     usageCounterMsg: (used, total) => `${used} of ${total} free GIFs today`,
     limitReachedMsg: "You've made your 3 free GIFs for today. Scroll down to unlock unlimited use.",
     proStatusFree: "Free", proOnlyOptionSuffix: " 🔒 PRO",
-    planFreeF4: "Resolution up to 480px", planSupF3: "High resolution, up to 1280px",
+    planFreeF4: "GIF up to 480px · 720p recording, 60s", planSupF3: "GIF up to 1280px · 1080p recording, 10 min",
     licenseFreeTitle: "GIF Local PRO", licenseFreeDesc: "Your app is currently running in free mode.",
     licenseActivateBtn: "Activate license", licenseBuyBtn: "Buy GIF Local PRO",
     licenseActivateTitle: "Activate license", licenseActivateDesc: "Paste the key you received after purchase.",
@@ -1572,13 +1574,13 @@ const I18N = {
     createAnotherBtn: "Crear otro",
     plansTitle: "Planes", plansDesc: "Empieza gratis. Mejora cuando quieras más.",
     plansCurrencyNote: "Precios de referencia aproximados. El cobro siempre se hace en reales brasileños (R$); tu banco o el proveedor de pago lo convierte a tu moneda.",
-    planFreeName: "Gratis", planFreePrice: "$0",
-    planFreeF1: "Los 4 modos de creación", planFreeF2: "Sin marca de agua", planFreeF3: "3 GIFs gratis al día",
+    planFreeName: "Free", planFreePrice: "$0",
+    planFreeF1: "Los 4 modos de creación", planFreeF2: "Sin marca de agua", planFreeF3: "3 GIFs al día · 1 generación con IA",
     planFreeCta: "Empezar ahora",
-    planProName: "Profesional", planProPrice: "Próximamente",
-    planProF1: "Todo lo de Colaborador", planProF2: "Soporte prioritario por correo",
-    planSupName: "Colaborador", planOneTime: "pago único", planPopularBadge: "Popular",
-    planSupF0: "<b>Uso ilimitado</b>, sin límite diario", planSupF1: "Apoya el desarrollo del proyecto", planSupF2: "Novedades primero, por correo",
+    planProName: "Full", planProPrice: "Próximamente",
+    planProF1: "Todo lo de Pro, en hasta <b>3 dispositivos</b>", planProF2: "Grabación hasta 4K, sin límite de duración", planProF3: "80 generaciones con IA al día", planProF4: "Soporte prioritario por correo",
+    planSupName: "Pro", planOneTime: "pago único", planPopularBadge: "Popular",
+    planSupF0: "<b>GIFs ilimitados</b>, sin límite diario", planSupF1: "25 generaciones con IA al día", planSupF2: "1 dispositivo",
     planProCta: "Avísame",
     payWithStripe: "Pagar con Stripe", payWithLemonSqueezy: "Pagar con Lemon Squeezy", payWithPayPal: "Pagar con PayPal",
     helpBtnTitle: "Reportar un problema", helpEmailSubject: "GIF Local - Reportar un problema",
@@ -1589,7 +1591,7 @@ const I18N = {
     usageCounterMsg: (used, total) => `${used} de ${total} GIFs gratis hoy`,
     limitReachedMsg: "Ya creaste tus 3 GIFs gratis de hoy. Baja para desbloquear uso ilimitado.",
     proStatusFree: "Free", proOnlyOptionSuffix: " 🔒 PRO",
-    planFreeF4: "Resolución hasta 480px", planSupF3: "Resolución alta, hasta 1280px",
+    planFreeF4: "GIF hasta 480px · grabación 720p, 60s", planSupF3: "GIF hasta 1280px · grabación 1080p, 10 min",
     licenseFreeTitle: "GIF Local PRO", licenseFreeDesc: "Tu aplicación está funcionando en modo gratuito.",
     licenseActivateBtn: "Activar licencia", licenseBuyBtn: "Comprar GIF Local PRO",
     licenseActivateTitle: "Activar licencia", licenseActivateDesc: "Pega la clave que recibiste tras la compra.",
@@ -1732,13 +1734,13 @@ const I18N = {
     createAnotherBtn: "Créer un autre",
     plansTitle: "Formules", plansDesc: "Commencez gratuitement. Passez à un forfait supérieur quand vous voulez.",
     plansCurrencyNote: "Prix de référence approximatifs. Le paiement est toujours effectué en réals brésiliens (R$) ; votre banque ou le prestataire de paiement le convertit dans votre devise.",
-    planFreeName: "Gratuit", planFreePrice: "0 €",
+    planFreeName: "Free", planFreePrice: "0 €",
     planFreeF1: "Les 4 modes de création", planFreeF2: "Sans filigrane", planFreeF3: "3 GIF gratuits par jour",
     planFreeCta: "Commencer",
-    planProName: "Professionnel", planProPrice: "Bientôt disponible",
-    planProF1: "Tout ce qui est dans Supporter", planProF2: "Support prioritaire par e-mail",
-    planSupName: "Supporter", planOneTime: "paiement unique", planPopularBadge: "Populaire",
-    planSupF0: "<b>Usage illimité</b>, sans limite quotidienne", planSupF1: "Soutenez le développement du projet", planSupF2: "Nouveautés en avant-première par e-mail",
+    planProName: "Full", planProPrice: "Bientôt disponible",
+    planProF1: "Tout ce qui est dans Pro, sur jusqu'à <b>3 appareils</b>", planProF2: "Enregistrement jusqu'à 4K, sans limite de durée", planProF3: "80 générations IA par jour", planProF4: "Support prioritaire par e-mail",
+    planSupName: "Pro", planOneTime: "paiement unique", planPopularBadge: "Populaire",
+    planSupF0: "<b>GIF illimités</b>, sans limite quotidienne", planSupF1: "25 générations IA par jour", planSupF2: "1 appareil",
     planProCta: "Me prévenir",
     payWithStripe: "Payer avec Stripe", payWithLemonSqueezy: "Payer avec Lemon Squeezy", payWithPayPal: "Payer avec PayPal",
     helpBtnTitle: "Signaler un problème", helpEmailSubject: "GIF Local - Signaler un problème",
@@ -1749,7 +1751,7 @@ const I18N = {
     usageCounterMsg: (used, total) => `${used} sur ${total} GIF gratuits aujourd'hui`,
     limitReachedMsg: "Vous avez créé vos 3 GIF gratuits du jour. Faites défiler pour débloquer l'usage illimité.",
     proStatusFree: "Free", proOnlyOptionSuffix: " 🔒 PRO",
-    planFreeF4: "Résolution jusqu'à 480px", planSupF3: "Haute résolution, jusqu'à 1280px",
+    planFreeF4: "GIF jusqu'à 480px · enregistrement 720p, 60s", planSupF3: "GIF jusqu'à 1280px · enregistrement 1080p, 10 min",
     licenseFreeTitle: "GIF Local PRO", licenseFreeDesc: "Votre application fonctionne actuellement en mode gratuit.",
     licenseActivateBtn: "Activer la licence", licenseBuyBtn: "Acheter GIF Local PRO",
     licenseActivateTitle: "Activer la licence", licenseActivateDesc: "Collez la clé reçue après l'achat.",
@@ -1892,13 +1894,13 @@ const I18N = {
     createAnotherBtn: "Weiteres erstellen",
     plansTitle: "Tarife", plansDesc: "Kostenlos starten. Jederzeit upgraden, wenn Sie mehr möchten.",
     plansCurrencyNote: "Ungefähre Richtwerte. Die Abrechnung erfolgt immer in brasilianischen Real (R$); Ihre Bank oder der Zahlungsanbieter rechnet in Ihre Währung um.",
-    planFreeName: "Kostenlos", planFreePrice: "0 €",
+    planFreeName: "Free", planFreePrice: "0 €",
     planFreeF1: "Alle 4 Erstellungsmodi", planFreeF2: "Kein Wasserzeichen", planFreeF3: "3 kostenlose GIFs pro Tag",
     planFreeCta: "Jetzt starten",
-    planProName: "Professionell", planProPrice: "Demnächst",
-    planProF1: "Alles aus Unterstützer", planProF2: "Priorisierter E-Mail-Support",
-    planSupName: "Unterstützer", planOneTime: "einmalige Zahlung", planPopularBadge: "Beliebt",
-    planSupF0: "<b>Unbegrenzte Nutzung</b>, kein Tageslimit", planSupF1: "Unterstütze die Entwicklung des Projekts", planSupF2: "Neuigkeiten zuerst per E-Mail",
+    planProName: "Full", planProPrice: "Demnächst",
+    planProF1: "Alles aus Pro, auf bis zu <b>3 Geräten</b>", planProF2: "Aufnahme bis 4K, ohne Zeitlimit", planProF3: "80 KI-Generierungen pro Tag", planProF4: "Priorisierter E-Mail-Support",
+    planSupName: "Pro", planOneTime: "einmalige Zahlung", planPopularBadge: "Beliebt",
+    planSupF0: "<b>Unbegrenzte GIFs</b>, kein Tageslimit", planSupF1: "25 KI-Generierungen pro Tag", planSupF2: "1 Gerät",
     planProCta: "Benachrichtigt mich",
     payWithStripe: "Mit Stripe bezahlen", payWithLemonSqueezy: "Mit Lemon Squeezy bezahlen", payWithPayPal: "Mit PayPal bezahlen",
     helpBtnTitle: "Problem melden", helpEmailSubject: "GIF Local - Problem melden",
@@ -1909,7 +1911,7 @@ const I18N = {
     usageCounterMsg: (used, total) => `${used} von ${total} kostenlosen GIFs heute`,
     limitReachedMsg: "Du hast heute schon 3 kostenlose GIFs erstellt. Scrolle nach unten, um unbegrenzte Nutzung freizuschalten.",
     proStatusFree: "Free", proOnlyOptionSuffix: " 🔒 PRO",
-    planFreeF4: "Auflösung bis 480px", planSupF3: "Hohe Auflösung, bis 1280px",
+    planFreeF4: "GIF bis 480px · Aufnahme 720p, 60s", planSupF3: "GIF bis 1280px · Aufnahme 1080p, 10 Min.",
     licenseFreeTitle: "GIF Local PRO", licenseFreeDesc: "Deine App läuft aktuell im kostenlosen Modus.",
     licenseActivateBtn: "Lizenz aktivieren", licenseBuyBtn: "GIF Local PRO kaufen",
     licenseActivateTitle: "Lizenz aktivieren", licenseActivateDesc: "Füge den nach dem Kauf erhaltenen Schlüssel ein.",
@@ -2052,13 +2054,13 @@ const I18N = {
     createAnotherBtn: "Creane un altro",
     plansTitle: "Piani", plansDesc: "Inizia gratis. Passa a un piano superiore quando vuoi di più.",
     plansCurrencyNote: "Prezzi di riferimento approssimativi. L'addebito avviene sempre in real brasiliani (R$); la conversione nella tua valuta è fatta dalla tua banca o dal fornitore di pagamento.",
-    planFreeName: "Gratis", planFreePrice: "0 €",
+    planFreeName: "Free", planFreePrice: "0 €",
     planFreeF1: "Tutte e 4 le modalità di creazione", planFreeF2: "Senza filigrana", planFreeF3: "3 GIF gratuiti al giorno",
     planFreeCta: "Inizia ora",
-    planProName: "Professionale", planProPrice: "Prossimamente",
-    planProF1: "Tutto di Sostenitore", planProF2: "Supporto prioritario via e-mail",
-    planSupName: "Sostenitore", planOneTime: "pagamento unico", planPopularBadge: "Popolare",
-    planSupF0: "<b>Uso illimitato</b>, senza limite giornaliero", planSupF1: "Sostieni lo sviluppo del progetto", planSupF2: "Novità in anteprima via e-mail",
+    planProName: "Full", planProPrice: "Prossimamente",
+    planProF1: "Tutto di Pro, su massimo <b>3 dispositivi</b>", planProF2: "Registrazione fino a 4K, senza limite di durata", planProF3: "80 generazioni IA al giorno", planProF4: "Supporto prioritario via e-mail",
+    planSupName: "Pro", planOneTime: "pagamento unico", planPopularBadge: "Popolare",
+    planSupF0: "<b>GIF illimitati</b>, senza limite giornaliero", planSupF1: "25 generazioni IA al giorno", planSupF2: "1 dispositivo",
     planProCta: "Avvisami",
     payWithStripe: "Paga con Stripe", payWithLemonSqueezy: "Paga con Lemon Squeezy", payWithPayPal: "Paga con PayPal",
     helpBtnTitle: "Segnala un problema", helpEmailSubject: "GIF Local - Segnala un problema",
@@ -2069,7 +2071,7 @@ const I18N = {
     usageCounterMsg: (used, total) => `${used} di ${total} GIF gratuiti oggi`,
     limitReachedMsg: "Hai già creato i tuoi 3 GIF gratuiti di oggi. Scorri in basso per sbloccare l'uso illimitato.",
     proStatusFree: "Free", proOnlyOptionSuffix: " 🔒 PRO",
-    planFreeF4: "Risoluzione fino a 480px", planSupF3: "Alta risoluzione, fino a 1280px",
+    planFreeF4: "GIF fino a 480px · registrazione 720p, 60s", planSupF3: "GIF fino a 1280px · registrazione 1080p, 10 min",
     licenseFreeTitle: "GIF Local PRO", licenseFreeDesc: "La tua app sta funzionando in modalità gratuita.",
     licenseActivateBtn: "Attiva licenza", licenseBuyBtn: "Acquista GIF Local PRO",
     licenseActivateTitle: "Attiva licenza", licenseActivateDesc: "Incolla la chiave ricevuta dopo l'acquisto.",
@@ -3847,11 +3849,23 @@ $('zeroBtn').addEventListener('click', async () => {
     const ctx = canvas.getContext('2d');
     const speed = parseInt($('zeroSpeed').value, 10);
     const loopMs = 3200 - speed * 260;
-    /* 32 quadros e paleta cheia (256 cores): as animações agora têm
-       gradientes e sombras, que precisam de cores para não "escadinha".
-       Ficou viável porque o LZW real comprime de verdade — antes disso,
-       cada quadro extra custava ~120 KB; agora custa poucos KB. */
-    const frameCount = 32;
+    /* 32 quadros e paleta cheia (255 cores): as animações desenhadas por
+       código têm gradientes e sombras, que precisam de cores para não
+       "escadinha". Ficou viável porque o LZW real comprime de verdade.
+
+       O modo IA é o caso oposto e precisa de outros números. O conteúdo
+       é fotográfico (milhares de cores, dithering pesado) e a câmera se
+       move, então o frame differencing não ajuda: qualquer movimento
+       reamostra TODOS os pixels, e nenhum quadro repete o anterior.
+       Medido com uma imagem real da IA, a 400x300:
+         32 quadros / 255 cores → 3,09 MB
+         20 quadros / 128 cores → 1,69 MB   ← escolhido
+         20 quadros /  64 cores → 1,41 MB   (só 17% menor, perde muita cor)
+       Reduzir a amplitude do movimento não mudou nada (1,70 MB), o que
+       confirma que o custo está nos quadros e no dithering, não no movimento.
+       20 quadros num movimento lento de câmera continuam suaves. */
+    const isAi = zeroKind === 'ia';
+    const frameCount = isAi ? 20 : 32;
     const delay = Math.round(loopMs / frameCount);
     const opts = { kind: zeroKind, color: $('zeroColor').value, text: $('zeroText').value, particles: confettiParticles,
       image: aiImage, motion: aiMotion };
@@ -3862,7 +3876,7 @@ $('zeroBtn').addEventListener('click', async () => {
       if (i % 4 === 0) await tick();
     }
     const delaysMs = frames.map(() => delay);
-    const blob = await framesToGif(frames, w, h, delaysMs, 'alta', (text, pct) => setProgress('zero', text, pct));
+    const blob = await framesToGif(frames, w, h, delaysMs, isAi ? 'media' : 'alta', (text, pct) => setProgress('zero', text, pct));
     setResult('zero', blob, frames.length, (frames.length * delay) / 1000);
   } catch (err) {
     setProgress('zero', t('errorPrefix') + err.message, undefined);
