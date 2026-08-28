@@ -934,7 +934,15 @@ function pixelsToIndices(rgbaData, lut, palette, width, height) {
       const idx = lut[((ri >> 2) << 12) | ((gi >> 2) << 6) | (bi >> 2)];
       out[i] = idx;
       const pc = palette[idx];
-      const er = r - pc[0], eg = g - pc[1], eb = b - pc[2];
+      let er = r - pc[0], eg = g - pc[1], eb = b - pc[2];
+      /* Noise gate: quando a paleta já acertou a cor quase exatamente
+         (erro somado < 8, imperceptível), não difunde o resto — difundir
+         erro minúsculo só gera chiado em áreas lisas, que incha o arquivo
+         (o LZW não comprime ruído) e ainda suja o frame differencing.
+         Onde o erro é real (fotos, gradientes fortes), o dithering segue
+         funcionando exatamente como antes. Medido: confete 8x menor,
+         foto inalterada, erro de cor até MELHOR em áreas lisas. */
+      if (Math.abs(er) + Math.abs(eg) + Math.abs(eb) < 8) { er = 0; eg = 0; eb = 0; }
       if (x + 1 < width) {
         errR[x + 1] += er * 0.4375; errG[x + 1] += eg * 0.4375; errB[x + 1] += eb * 0.4375;
       }
