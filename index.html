@@ -2136,13 +2136,17 @@ function updatePlanPrices(){
    comercial exibido na interface:
      apoiador     -> pro   (já vendido, R$9,90 · 1 dispositivo)
      profissional -> full  (já vendido, R$29,90 · 3 dispositivos)
-     empresa      -> ainda sem tier comercial equivalente — o
-                     backend já reserva esse plano (10 dispositivos),
-                     mas ele nunca teve Payment Link nem card na UI.
+     empresa      -> full  (10 dispositivos). Não tem Payment Link
+                     nem card na UI: é o plano das licenças emitidas
+                     à mão — a do próprio dono/administrador e
+                     eventuais vendas negociadas direto. Sem esta
+                     linha, o `|| 'pro'` do getCurrentTier() rebaixava
+                     silenciosamente uma licença `empresa` para Pro.
    ========================================================= */
 const BACKEND_PLAN_TO_TIER = {
   apoiador: 'pro',
   profissional: 'full',
+  empresa: 'full',
 };
 
 const PLANS = {
