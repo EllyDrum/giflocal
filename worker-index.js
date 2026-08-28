@@ -312,6 +312,49 @@ async function verifyStripeSignature(request, env, rawBody) {
   return expectedHex === parts.v1;
 }
 
+/* De qual plano é cada Payment Link.
+   O painel do Stripe NÃO permite definir metadata num Payment Link — isso
+   só existe pela API, que exigiria uma chave secreta em circulação. Então
+   identificamos o plano pelo ID do próprio link, que vem dentro do evento
+   `checkout.session.completed`.
+   Isso na verdade é melhor que metadata: o ID é o link que a pessoa
+   realmente usou para pagar, então não tem como ficar dessincronizado de
+   uma configuração que alguém esqueceu de atualizar. */
+const PAYMENT_LINK_PLAN = {
+  // Full (backend: profissional) — 3 dispositivos
+  plink_1U7j2HFV7byOqCPVUEBAGC4v: 'profissional', // EUR 6,29
+  plink_1U7iweFV7byOqCPVaw5oBSRg: 'profissional', // USD 6,99
+  plink_1TwrkmFV7byOqCPVgTy4U7DN: 'profissional', // BRL 29,90
+  // Pro (backend: apoiador) — 1 dispositivo
+  plink_1U7j0rFV7byOqCPVAsglGAaw: 'apoiador', // EUR 2,09
+  plink_1U7iuRFV7byOqCPVICXHBGiT: 'apoiador', // USD 2,29
+  plink_1Twrf7FV7byOqCPVq0ZTZRp8: 'apoiador', // BRL 9,90
+};
+
+/* Rede de segurança: se um dia criarem um Payment Link novo e esquecerem
+   de mapeá-lo acima, ainda dá para deduzir o plano pelo valor pago, em
+   centavos. Melhor emitir a licença certa do que deixar um cliente que
+   pagou sem receber nada. */
+const AMOUNT_PLAN = {
+  BRL: { 990: 'apoiador', 2990: 'profissional' },
+  USD: { 229: 'apoiador', 699: 'profissional' },
+  EUR: { 209: 'apoiador', 629: 'profissional' },
+};
+
+function resolvePlanFromSession(session) {
+  const meta = session.metadata && session.metadata.plan;
+  if (meta && PLAN_DEVICES[meta]) return meta;
+
+  const link = typeof session.payment_link === 'string'
+    ? session.payment_link
+    : session.payment_link && session.payment_link.id;
+  if (link && PAYMENT_LINK_PLAN[link]) return PAYMENT_LINK_PLAN[link];
+
+  const cur = String(session.currency || '').toUpperCase();
+  const byAmount = AMOUNT_PLAN[cur] && AMOUNT_PLAN[cur][session.amount_total];
+  return byAmount || null;
+}
+
 async function handleStripeWebhook(request, env) {
   const rawBody = await request.text();
   const validSig = await verifyStripeSignature(request, env, rawBody);
@@ -322,10 +365,17 @@ async function handleStripeWebhook(request, env) {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     const email = session.customer_details?.email || session.customer_email;
-    const plan = (session.metadata && session.metadata.plan) || null;
+    const plan = resolvePlanFromSession(session);
     if (!email || !plan || !PLAN_DEVICES[plan]) {
-      await logEvent(env, { event: 'WEBHOOK', detail: `checkout.session.completed sem email/plan válido (session ${session.id})`, request });
-      return json({ ok: true, warning: 'plan/email ausente — verifique metadata do Payment Link' });
+      /* Registramos o suficiente para emitir a licença à mão depois: sem
+         isso, um cliente que pagou ficaria sem licença e sem rastro do
+         porquê. */
+      await logEvent(env, {
+        event: 'WEBHOOK',
+        detail: `checkout.session.completed sem plano identificado — session=${session.id} link=${session.payment_link || '-'} valor=${session.amount_total} ${session.currency} email=${email || '-'}`,
+        request,
+      });
+      return json({ ok: true, warning: 'plano não identificado — ver activation_log e emitir manualmente' });
     }
 
     let customer = await env.DB.prepare('SELECT * FROM customers WHERE email = ?').bind(email).first();
