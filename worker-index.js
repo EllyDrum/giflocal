@@ -5,7 +5,47 @@
  * A chave privada NUNCA fica neste arquivo — vem de env.LICENSE_PRIVATE_KEY_JWK (secret).
  */
 
+/* O site é servido em DOIS domínios: giflocal.com (o domínio de verdade,
+   para onde os Payment Links do Stripe mandam o cliente) e
+   giflocal.pages.dev (a URL do Cloudflare Pages). Enquanto aqui só
+   constava o pages.dev, TUDO que passa por esta API estava quebrado em
+   giflocal.com — ativar licença, gerenciar dispositivos, gerar com IA —
+   com um "Failed to fetch" seco no navegador, porque o CORS recusava a
+   resposta. A requisição chegava ao servidor; era a resposta que o
+   navegador jogava fora.
+
+   ALLOWED_ORIGIN continua sendo o padrão para quem chega sem cabeçalho
+   Origin (curl, webhook do Stripe). */
 const ALLOWED_ORIGIN = 'https://giflocal.pages.dev';
+const ALLOWED_ORIGINS = [
+  'https://giflocal.com',
+  'https://www.giflocal.com',
+  'https://giflocal.pages.dev',
+];
+
+function resolveOrigin(request) {
+  const origin = request && request.headers ? request.headers.get('Origin') : null;
+  return origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGIN;
+}
+
+/* Corrige o Access-Control-Allow-Origin de uma resposta já pronta.
+
+   Feito num lugar só, na saída do roteador, de propósito: a alternativa
+   seria passar o request por json()/err() e por todos os handlers. Um
+   "origem atual" em variável de módulo seria mais curto e ERRADO — no
+   Workers o mesmo isolate atende requisições concorrentes, e duas
+   chamadas de domínios diferentes poderiam trocar de origem uma com a
+   outra. */
+function withCors(response, request) {
+  const headers = new Headers(response.headers);
+  headers.set('Access-Control-Allow-Origin', resolveOrigin(request));
+  headers.append('Vary', 'Origin'); // senão um cache serviria a resposta de um domínio para o outro
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
 
 // Nomes batem com os planos já existentes nos Payment Links do Stripe
 // (ver worker/README.md, passo 6, sobre como marcar metadata.plan em cada link).
@@ -756,28 +796,33 @@ export default {
     const url = new URL(request.url);
 
     if (request.method === 'OPTIONS') {
-      return new Response(null, { headers: corsHeaders() });
+      return withCors(new Response(null, { headers: corsHeaders() }), request);
     }
 
     try {
-      if (url.pathname === '/activate' && request.method === 'POST') return await handleActivate(request, env);
-      if (url.pathname === '/validate' && request.method === 'POST') return await handleValidate(request, env);
-      if (url.pathname === '/license/devices' && request.method === 'GET') return await handleListDevices(request, env);
-      if (url.pathname === '/device/deactivate' && request.method === 'POST') return await handleDeactivateDevice(request, env);
-      if (url.pathname === '/license-by-session' && request.method === 'GET') return await handleLicenseBySession(request, env);
-      if (url.pathname === '/license/resend' && request.method === 'POST') return await handleResendLicense(request, env);
-      if (url.pathname === '/webhooks/stripe' && request.method === 'POST') return await handleStripeWebhook(request, env);
-      if (url.pathname === '/ai/generate' && request.method === 'POST') return await handleAiGenerate(request, env);
-      if (url.pathname === '/ai/quota' && request.method === 'GET') return await handleAiQuota(request, env);
-
-      const adminMatch = url.pathname.match(/^\/admin\/license\/([^/]+)(\/status)?$/);
-      if (adminMatch && request.method === 'GET' && !adminMatch[2]) return await handleAdminGetLicense(request, env, adminMatch[1]);
-      if (adminMatch && request.method === 'POST' && adminMatch[2] === '/status')
-        return await handleAdminSetStatus(request, env, adminMatch[1]);
-
-      return err('NOT_FOUND', 'Rota não encontrada', 404);
+      return withCors(await route(request, env, url), request);
     } catch (e) {
-      return err('INTERNAL_ERROR', String(e && e.message ? e.message : e), 500);
+      return withCors(err('INTERNAL_ERROR', String(e && e.message ? e.message : e), 500), request);
     }
   },
 };
+
+async function route(request, env, url) {
+  if (url.pathname === '/activate' && request.method === 'POST') return await handleActivate(request, env);
+  if (url.pathname === '/validate' && request.method === 'POST') return await handleValidate(request, env);
+  if (url.pathname === '/license/devices' && request.method === 'GET') return await handleListDevices(request, env);
+  if (url.pathname === '/device/deactivate' && request.method === 'POST') return await handleDeactivateDevice(request, env);
+  if (url.pathname === '/license-by-session' && request.method === 'GET') return await handleLicenseBySession(request, env);
+  if (url.pathname === '/license/resend' && request.method === 'POST') return await handleResendLicense(request, env);
+  if (url.pathname === '/webhooks/stripe' && request.method === 'POST') return await handleStripeWebhook(request, env);
+  if (url.pathname === '/ai/generate' && request.method === 'POST') return await handleAiGenerate(request, env);
+  if (url.pathname === '/ai/quota' && request.method === 'GET') return await handleAiQuota(request, env);
+
+  const adminMatch = url.pathname.match(/^\/admin\/license\/([^/]+)(\/status)?$/);
+  if (adminMatch && request.method === 'GET' && !adminMatch[2]) return await handleAdminGetLicense(request, env, adminMatch[1]);
+  if (adminMatch && request.method === 'POST' && adminMatch[2] === '/status')
+    return await handleAdminSetStatus(request, env, adminMatch[1]);
+
+  return err('NOT_FOUND', 'Rota não encontrada', 404);
+}
+
