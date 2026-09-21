@@ -147,7 +147,17 @@
      com a ferramenta nem parecer um paywall disfarçado. */
   .support-box{max-width:520px; margin:24px auto 0; padding:22px 24px; background:var(--card); border:1px solid var(--line); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm);}
   .support-soon{margin:0; font-size:14px; color:var(--ink-soft);}
-  .founder-note{max-width:640px; margin:20px auto 0; font-size:14px; line-height:1.6; padding:14px 18px; border-radius:var(--radius-lg); background:color-mix(in srgb, var(--primary) 8%, transparent); border:1px solid color-mix(in srgb, var(--primary) 25%, transparent);}
+  /* Mesma largura da .support-box (520px). Estava em 640px e por isso
+     as duas caixas empilhadas não batiam a borda: a de baixo aparecia
+     mais larga e deslocada em relação à de cima. */
+  /* Seletor duplo de propósito: o elemento também tem a classe .desc,
+     cuja regra "margin:0 0 22px" vinha depois e anulava o auto das
+     laterais. Resultado: a caixa ficava encostada à esquerda enquanto
+     a de apoio estava centralizada. Não bastava .desc.founder-note:
+     a regra .plans > .desc tem a MESMA especificidade e vem depois no
+     arquivo, então vencia pelo desempate de ordem. Daí o seletor mais
+     específico .plans > .desc.founder-note. */
+  .plans > .desc.founder-note, .founder-note{max-width:520px; margin:20px auto 0; font-size:14px; line-height:1.6; padding:14px 18px; border-radius:var(--radius-lg); background:color-mix(in srgb, var(--primary) 8%, transparent); border:1px solid color-mix(in srgb, var(--primary) 25%, transparent);}
 
   .how-it-works{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:34px; padding:18px 20px; background:var(--card); border:1px solid var(--line); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm);}
   .how-step{display:flex; align-items:center; gap:10px; flex:1; min-width:190px;}
@@ -727,7 +737,7 @@
             <button data-motion="kenburns" data-i18n="aiMotionKen">Cinematográfico</button>
           </div>
         </div>
-        <div class="ai-privacy" data-i18n="aiPrivacyNote">🔒 Sua descrição é enviada para o serviço de IA para gerar a imagem. A animação, a otimização e o GIF continuam sendo feitos no seu navegador — nenhum arquivo seu é enviado.</div>
+        <div class="ai-privacy" data-i18n="aiPrivacyNote">🔒 Sua descrição é enviada para o serviço de IA para gerar a imagem. A animação, a otimização e o GIF continuam sendo feitos no seu navegador. Nenhum arquivo seu é enviado.</div>
         <div class="ai-quota" id="aiQuota"></div>
         <div class="ai-upsell" id="aiUpsell" style="display:none;">
           <h4 data-i18n="aiUpsellTitle">✨ Você usou sua geração gratuita de hoje</h4>
@@ -807,7 +817,7 @@
        ============================================================ -->
   <section class="plans" id="apoiar">
     <h2 data-i18n="supportTitle">Apoie o GIF Local</h2>
-    <p class="desc" data-i18n="supportDesc">Todas as ferramentas são gratuitas e continuam assim. Não há cadastro, marca d'água nem limite diário. Se o GIF Local resolveu o seu problema, você pode contribuir — é voluntário e não desbloqueia nada, porque não há nada bloqueado.</p>
+    <p class="desc" data-i18n="supportDesc">Todas as ferramentas são gratuitas e continuam assim. Não há cadastro, marca d'água nem limite diário. Se o GIF Local resolveu o seu problema, você pode contribuir. É voluntário e não desbloqueia nada, porque não há nada bloqueado.</p>
 
     <div class="support-box" id="supportBox">
       <!-- Estado fechado: só o convite. O QR Code só é desenhado quando
@@ -846,7 +856,7 @@
       </div>
     </div>
 
-    <p class="desc founder-note" id="founderNote" style="display:none;" data-i18n="founderNote">★ Você é um Apoiador Fundador — apoiou o projeto quando ele ainda era pago. Obrigado. Sua licença continua válida e nada foi tirado de você: agora todo mundo tem o que você comprou.</p>
+    <p class="desc founder-note" id="founderNote" style="display:none;" data-i18n="founderNote">★ Você é um Apoiador Fundador. Apoiou o projeto quando ele ainda era pago. Obrigado. Sua licença continua válida e nada foi tirado de você: agora todo mundo tem o que você comprou.</p>
 
   </section>
 
@@ -1229,14 +1239,14 @@ const I18N = {
     telaH2: "Gravação de tela → GIF", telaDesc: "Grave a tela agora, ou envie uma gravação que você já fez.",
     telaStartRecBtn: "Iniciar gravação da tela", telaStopRecBtn: "Parar gravação",
     telaUploadLabel: "Ou envie um vídeo já gravado",
-    telaFallbackMsg: "Este navegador ou dispositivo não permite gravar a tela diretamente aqui (no celular isso é uma limitação do sistema, não do site). Grave a tela com o gravador nativo do seu aparelho (Windows, Mac, iPhone ou Android) e envie o arquivo abaixo — ou use \"Gravar pela câmera\" para gravar direto por aqui.",
+    telaFallbackMsg: "Este navegador ou dispositivo não permite gravar a tela diretamente aqui (no celular isso é uma limitação do sistema, não do site). Grave a tela com o gravador nativo do seu aparelho (Windows, Mac, iPhone ou Android) e envie o arquivo abaixo, ou use \"Gravar pela câmera\" para gravar direto por aqui.",
     telaRecordingMsg: "Gravando... clique em \"Parar gravação\" quando terminar.",
     telaReadyMsg: "Gravação pronta. Ajuste o trecho abaixo e gere o GIF.",
     telaDownloadVideo: "Baixar vídeo (qualidade máxima)",
-    telaVideoHintMsg: (size) => `Vídeo original em qualidade total (${size}) — sem conversão, sem perda de cor.`,
+    telaVideoHintMsg: (size) => `Vídeo original em qualidade total (${size}), sem conversão e sem perda de cor.`,
     telaRecordingLeft: (clock) => `Gravando... ${clock} restantes. Clique em "Parar gravação" quando terminar.`,
     telaRecordingElapsed: (clock) => `Gravando... ${clock}. Clique em "Parar gravação" quando terminar.`,
-    telaLimitReached: (sec) => `Limite de ${sec}s do plano Free atingido — sua gravação foi salva.`,
+    telaLimitReached: (sec) => `Limite de ${sec}s do plano Free atingido. Sua gravação foi salva.`,
     telaLimitUpgradeMsg: (freeSec, proMin) => `O plano Free grava até ${freeSec}s em 720p. O Pro grava até ${proMin} minutos em 1080p.`,
     telaCantStart: "Não foi possível iniciar a gravação. Envie um vídeo já gravado abaixo.",
     cameraStartRecBtn: "Gravar pela câmera", cameraStopRecBtn: "Parar gravação",
@@ -1268,7 +1278,7 @@ const I18N = {
     aiMotionPanH: "Panorâmica",
     aiMotionPanV: "Vertical",
     aiMotionKen: "Cinematográfico",
-    aiPrivacyNote: "🔒 Sua descrição é enviada para o serviço de IA para gerar a imagem. A animação, a otimização e o GIF continuam sendo feitos no seu navegador — nenhum arquivo seu é enviado.",
+    aiPrivacyNote: "🔒 Sua descrição é enviada para o serviço de IA para gerar a imagem. A animação, a otimização e o GIF continuam sendo feitos no seu navegador. Nenhum arquivo seu é enviado.",
     aiGenerateBtn: "Criar GIF com IA",
     aiPreviewEmpty: "Descreva sua ideia e clique em Criar",
     aiSourceHint: "Imagem gerada. Agora o GIF Local cria o movimento.",
@@ -1340,8 +1350,8 @@ const I18N = {
     limitReachedMsg: "Você já criou seus 3 GIFs grátis de hoje. Role para baixo para desbloquear uso ilimitado.",
     proStatusFree: "Grátis", proOnlyOptionSuffix: "",
     supportTitle: "Apoie o GIF Local",
-    supportDesc: "Todas as ferramentas são gratuitas e continuam assim. Não há cadastro, marca d'água nem limite diário. Se o GIF Local resolveu o seu problema, você pode contribuir — é voluntário e não desbloqueia nada, porque não há nada bloqueado.",
-    founderNote: "★ Você é um Apoiador Fundador — apoiou o projeto quando ele ainda era pago. Obrigado. Sua licença continua válida e nada foi tirado de você: agora todo mundo tem o que você comprou.",
+    supportDesc: "Todas as ferramentas são gratuitas e continuam assim. Não há cadastro, marca d'água nem limite diário. Se o GIF Local resolveu o seu problema, você pode contribuir. É voluntário e não desbloqueia nada, porque não há nada bloqueado.",
+    founderNote: "★ Você é um Apoiador Fundador. Apoiou o projeto quando ele ainda era pago. Obrigado. Sua licença continua válida e nada foi tirado de você: agora todo mundo tem o que você comprou.",
     licenseFreeDesc: "Todas as ferramentas já estão liberadas para você. Não é preciso licença nem cadastro.",
     licenseBuyBtn: "Apoiar o projeto",
     licenseFreeTitle: "GIF Local",
@@ -1360,7 +1370,7 @@ const I18N = {
     supportOpen: "☕ Quero apoiar",
     supportClose: "Fechar",
     founderBadge: "★ Apoiador Fundador",
-    founderBadgeTitle: "Você apoiou o GIF Local quando ele ainda era pago. Obrigado — todas as ferramentas agora são gratuitas para todos.",
+    founderBadgeTitle: "Você apoiou o GIF Local quando ele ainda era pago. Obrigado! Todas as ferramentas agora são gratuitas para todos.",
     planFreeF4: "GIF até 480px · gravação 720p, 60s", planSupF3: "GIF até 1280px · gravação 1080p, 10 min",
     licenseActivateBtn: "Ativar licença",
     licenseActivateTitle: "Ativar licença", licenseActivateDesc: "Cole a chave que você recebeu após a compra.",
@@ -1410,14 +1420,14 @@ const I18N = {
     telaH2: "Screen recording → GIF", telaDesc: "Record your screen now, or upload a recording you already made.",
     telaStartRecBtn: "Start screen recording", telaStopRecBtn: "Stop recording",
     telaUploadLabel: "Or upload an existing recording",
-    telaFallbackMsg: "This browser or device doesn't allow recording the screen directly here (on mobile that's a system limitation, not the site's). Record your screen with your device's built-in recorder (Windows, Mac, iPhone or Android) and upload the file below — or use \"Record with camera\" to record right here.",
+    telaFallbackMsg: "This browser or device doesn't allow recording the screen directly here (on mobile that's a system limitation, not the site's). Record your screen with your device's built-in recorder (Windows, Mac, iPhone or Android) and upload the file below, or use \"Record with camera\" to record right here.",
     telaRecordingMsg: "Recording... click \"Stop recording\" when you're done.",
     telaReadyMsg: "Recording ready. Adjust the segment below and generate the GIF.",
     telaDownloadVideo: "Download video (best quality)",
-    telaVideoHintMsg: (size) => `Original full-quality video (${size}) — no conversion, no color loss.`,
+    telaVideoHintMsg: (size) => `Original full-quality video (${size}), with no conversion and no color loss.`,
     telaRecordingLeft: (clock) => `Recording... ${clock} left. Click "Stop recording" when you\u0027re done.`,
     telaRecordingElapsed: (clock) => `Recording... ${clock}. Click "Stop recording" when you\u0027re done.`,
-    telaLimitReached: (sec) => `Free plan limit of ${sec}s reached — your recording was saved.`,
+    telaLimitReached: (sec) => `Free plan limit of ${sec}s reached. Your recording was saved.`,
     telaLimitUpgradeMsg: (freeSec, proMin) => `Free records up to ${freeSec}s at 720p. Pro records up to ${proMin} minutes at 1080p.`,
     telaCantStart: "Couldn't start the recording. Upload an already recorded video below.",
     cameraStartRecBtn: "Record with camera", cameraStopRecBtn: "Stop recording",
@@ -1449,7 +1459,7 @@ const I18N = {
     aiMotionPanH: "Pan",
     aiMotionPanV: "Vertical",
     aiMotionKen: "Cinematic",
-    aiPrivacyNote: "🔒 Your description is sent to the AI service to generate the image. The animation, optimization and GIF are still done in your browser — none of your files are uploaded.",
+    aiPrivacyNote: "🔒 Your description is sent to the AI service to generate the image. The animation, optimization and GIF are still done in your browser. None of your files are uploaded.",
     aiGenerateBtn: "Create GIF with AI",
     aiPreviewEmpty: "Describe your idea and click Create",
     aiSourceHint: "Image generated. Now GIF Local creates the motion.",
@@ -1521,8 +1531,8 @@ const I18N = {
     limitReachedMsg: "You've made your 3 free GIFs for today. Scroll down to unlock unlimited use.",
     proStatusFree: "Free", proOnlyOptionSuffix: "",
     supportTitle: "Support GIF Local",
-    supportDesc: "Every tool is free and stays that way. No sign-up, no watermark, no daily limit. If GIF Local solved your problem, you can chip in — it is voluntary and unlocks nothing, because nothing is locked.",
-    founderNote: "★ You are a Founding Supporter — you backed the project while it was still paid. Thank you. Your licence remains valid and nothing was taken from you: everyone now has what you bought.",
+    supportDesc: "Every tool is free and stays that way. No sign-up, no watermark, no daily limit. If GIF Local solved your problem, you can chip in. It is voluntary and unlocks nothing, because nothing is locked.",
+    founderNote: "★ You are a Founding Supporter. You backed the project while it was still paid. Thank you. Your licence remains valid and nothing was taken from you: everyone now has what you bought.",
     licenseFreeDesc: "Every tool is already unlocked for you. No licence or sign-up needed.",
     licenseBuyBtn: "Support the project",
     licenseFreeTitle: "GIF Local",
@@ -1541,7 +1551,7 @@ const I18N = {
     supportOpen: "☕ I want to support",
     supportClose: "Close",
     founderBadge: "★ Founding Supporter",
-    founderBadgeTitle: "You backed GIF Local when it was still paid. Thank you — every tool is now free for everyone.",
+    founderBadgeTitle: "You backed GIF Local when it was still paid. Thank you! Every tool is now free for everyone.",
     planFreeF4: "GIF up to 480px · 720p recording, 60s", planSupF3: "GIF up to 1280px · 1080p recording, 10 min",
     licenseActivateBtn: "Activate license",
     licenseActivateTitle: "Activate license", licenseActivateDesc: "Paste the key you received after purchase.",
@@ -1591,14 +1601,14 @@ const I18N = {
     telaH2: "Grabación de pantalla → GIF", telaDesc: "Graba la pantalla ahora, o sube una grabación que ya hayas hecho.",
     telaStartRecBtn: "Iniciar grabación de pantalla", telaStopRecBtn: "Detener grabación",
     telaUploadLabel: "O sube una grabación ya hecha",
-    telaFallbackMsg: "Este navegador o dispositivo no permite grabar la pantalla directamente aquí (en el celular eso es una limitación del sistema, no del sitio). Graba la pantalla con el grabador nativo de tu dispositivo (Windows, Mac, iPhone o Android) y sube el archivo abajo — o usa \"Grabar con la cámara\" para grabar directamente aquí.",
+    telaFallbackMsg: "Este navegador o dispositivo no permite grabar la pantalla directamente aquí (en el celular eso es una limitación del sistema, no del sitio). Graba la pantalla con el grabador nativo de tu dispositivo (Windows, Mac, iPhone o Android) y sube el archivo abajo, o usa \"Grabar con la cámara\" para grabar directamente aquí.",
     telaRecordingMsg: "Grabando... haz clic en \"Detener grabación\" cuando termines.",
     telaReadyMsg: "Grabación lista. Ajusta el fragmento abajo y genera el GIF.",
     telaDownloadVideo: "Descargar video (máxima calidad)",
-    telaVideoHintMsg: (size) => `Video original en calidad total (${size}) — sin conversión, sin pérdida de color.`,
+    telaVideoHintMsg: (size) => `Video original en calidad total (${size}), sin conversión y sin pérdida de color.`,
     telaRecordingLeft: (clock) => `Grabando... quedan ${clock}. Haz clic en "Detener grabación" cuando termines.`,
     telaRecordingElapsed: (clock) => `Grabando... ${clock}. Haz clic en "Detener grabación" cuando termines.`,
-    telaLimitReached: (sec) => `Límite de ${sec}s del plan Free alcanzado — tu grabación se guardó.`,
+    telaLimitReached: (sec) => `Límite de ${sec}s del plan Free alcanzado. Tu grabación se guardó.`,
     telaLimitUpgradeMsg: (freeSec, proMin) => `Free graba hasta ${freeSec}s en 720p. Pro graba hasta ${proMin} minutos en 1080p.`,
     telaCantStart: "No se pudo iniciar la grabación. Sube un vídeo ya grabado abajo.",
     cameraStartRecBtn: "Grabar con la cámara", cameraStopRecBtn: "Detener grabación",
@@ -1630,7 +1640,7 @@ const I18N = {
     aiMotionPanH: "Panorámica",
     aiMotionPanV: "Vertical",
     aiMotionKen: "Cinematográfico",
-    aiPrivacyNote: "🔒 Tu descripción se envía al servicio de IA para generar la imagen. La animación, la optimización y el GIF se siguen haciendo en tu navegador — ningún archivo tuyo se sube.",
+    aiPrivacyNote: "🔒 Tu descripción se envía al servicio de IA para generar la imagen. La animación, la optimización y el GIF se siguen haciendo en tu navegador. Ningún archivo tuyo se sube.",
     aiGenerateBtn: "Crear GIF con IA",
     aiPreviewEmpty: "Describe tu idea y haz clic en Crear",
     aiSourceHint: "Imagen generada. Ahora GIF Local crea el movimiento.",
@@ -1702,8 +1712,8 @@ const I18N = {
     limitReachedMsg: "Ya creaste tus 3 GIFs gratis de hoy. Baja para desbloquear uso ilimitado.",
     proStatusFree: "Gratis", proOnlyOptionSuffix: "",
     supportTitle: "Apoya GIF Local",
-    supportDesc: "Todas las herramientas son gratuitas y seguirán siéndolo. Sin registro, sin marca de agua, sin límite diario. Si GIF Local resolvió tu problema, puedes contribuir — es voluntario y no desbloquea nada, porque nada está bloqueado.",
-    founderNote: "★ Eres un Mecenas Fundador — apoyaste el proyecto cuando aún era de pago. Gracias. Tu licencia sigue siendo válida y no se te quitó nada: ahora todos tienen lo que compraste.",
+    supportDesc: "Todas las herramientas son gratuitas y seguirán siéndolo. Sin registro, sin marca de agua, sin límite diario. Si GIF Local resolvió tu problema, puedes contribuir. Es voluntario y no desbloquea nada, porque nada está bloqueado.",
+    founderNote: "★ Eres un Mecenas Fundador. Apoyaste el proyecto cuando aún era de pago. Gracias. Tu licencia sigue siendo válida y no se te quitó nada: ahora todos tienen lo que compraste.",
     licenseFreeDesc: "Todas las herramientas ya están disponibles para ti. No necesitas licencia ni registro.",
     licenseBuyBtn: "Apoyar el proyecto",
     licenseFreeTitle: "GIF Local",
@@ -1722,7 +1732,7 @@ const I18N = {
     supportOpen: "☕ Quiero apoyar",
     supportClose: "Cerrar",
     founderBadge: "★ Mecenas Fundador",
-    founderBadgeTitle: "Apoyaste GIF Local cuando aún era de pago. Gracias — todas las herramientas ahora son gratuitas para todos.",
+    founderBadgeTitle: "Apoyaste GIF Local cuando aún era de pago. ¡Gracias! Todas las herramientas ahora son gratuitas para todos.",
     planFreeF4: "GIF hasta 480px · grabación 720p, 60s", planSupF3: "GIF hasta 1280px · grabación 1080p, 10 min",
     licenseActivateBtn: "Activar licencia",
     licenseActivateTitle: "Activar licencia", licenseActivateDesc: "Pega la clave que recibiste tras la compra.",
@@ -1772,14 +1782,14 @@ const I18N = {
     telaH2: "Enregistrement d'écran → GIF", telaDesc: "Enregistrez l'écran maintenant, ou envoyez un enregistrement déjà fait.",
     telaStartRecBtn: "Démarrer l'enregistrement d'écran", telaStopRecBtn: "Arrêter l'enregistrement",
     telaUploadLabel: "Ou envoyez un enregistrement déjà fait",
-    telaFallbackMsg: "Ce navigateur ou cet appareil ne permet pas d'enregistrer l'écran directement ici (sur mobile, c'est une limitation du système, pas du site). Enregistrez l'écran avec l'enregistreur natif de votre appareil (Windows, Mac, iPhone ou Android) et envoyez le fichier ci-dessous — ou utilisez « Enregistrer avec la caméra » pour enregistrer directement ici.",
+    telaFallbackMsg: "Ce navigateur ou cet appareil ne permet pas d'enregistrer l'écran directement ici (sur mobile, c'est une limitation du système, pas du site). Enregistrez l'écran avec l'enregistreur natif de votre appareil (Windows, Mac, iPhone ou Android) et envoyez le fichier ci-dessous, ou utilisez « Enregistrer avec la caméra » pour enregistrer directement ici.",
     telaRecordingMsg: "Enregistrement en cours... cliquez sur « Arrêter l'enregistrement » quand vous avez terminé.",
     telaReadyMsg: "Enregistrement prêt. Ajustez le passage ci-dessous et générez le GIF.",
     telaDownloadVideo: "Télécharger la vidéo (qualité maximale)",
-    telaVideoHintMsg: (size) => `Vidéo originale en qualité totale (${size}) — sans conversion, sans perte de couleur.`,
+    telaVideoHintMsg: (size) => `Vidéo originale en qualité totale (${size}), sans conversion ni perte de couleur.`,
     telaRecordingLeft: (clock) => `Enregistrement... ${clock} restantes. Cliquez sur « Arrêter l\u2019enregistrement » quand vous avez terminé.`,
     telaRecordingElapsed: (clock) => `Enregistrement... ${clock}. Cliquez sur « Arrêter l\u2019enregistrement » quand vous avez terminé.`,
-    telaLimitReached: (sec) => `Limite de ${sec}s du plan Free atteinte — votre enregistrement a été sauvegardé.`,
+    telaLimitReached: (sec) => `Limite de ${sec}s du plan Free atteinte. Votre enregistrement a été sauvegardé.`,
     telaLimitUpgradeMsg: (freeSec, proMin) => `Free enregistre jusqu\u2019à ${freeSec}s en 720p. Pro enregistre jusqu\u2019à ${proMin} minutes en 1080p.`,
     cameraStartRecBtn: "Enregistrer avec la caméra", cameraStopRecBtn: "Arrêter l'enregistrement",
     cameraFlipBtn: "Changer de caméra",
@@ -1811,7 +1821,7 @@ const I18N = {
     aiMotionPanH: "Panoramique",
     aiMotionPanV: "Vertical",
     aiMotionKen: "Cinématographique",
-    aiPrivacyNote: "🔒 Votre description est envoyée au service d\u2019IA pour générer l\u2019image. L\u2019animation, l\u2019optimisation et le GIF restent faits dans votre navigateur — aucun de vos fichiers n\u2019est envoyé.",
+    aiPrivacyNote: "🔒 Votre description est envoyée au service d\u2019IA pour générer l\u2019image. L\u2019animation, l\u2019optimisation et le GIF restent faits dans votre navigateur. Aucun de vos fichiers n\u2019est envoyé.",
     aiGenerateBtn: "Créer un GIF avec l\u2019IA",
     aiPreviewEmpty: "Décrivez votre idée et cliquez sur Créer",
     aiSourceHint: "Image générée. GIF Local crée maintenant le mouvement.",
@@ -1883,8 +1893,8 @@ const I18N = {
     limitReachedMsg: "Vous avez créé vos 3 GIF gratuits du jour. Faites défiler pour débloquer l'usage illimité.",
     proStatusFree: "Gratuit", proOnlyOptionSuffix: "",
     supportTitle: "Soutenir GIF Local",
-    supportDesc: "Tous les outils sont gratuits et le resteront. Sans inscription, sans filigrane, sans limite quotidienne. Si GIF Local a résolu votre problème, vous pouvez contribuer — c'est volontaire et cela ne débloque rien, car rien n'est bloqué.",
-    founderNote: "★ Vous êtes un Soutien Fondateur — vous avez soutenu le projet quand il était encore payant. Merci. Votre licence reste valide et rien ne vous a été retiré : tout le monde a désormais ce que vous avez acheté.",
+    supportDesc: "Tous les outils sont gratuits et le resteront. Sans inscription, sans filigrane, sans limite quotidienne. Si GIF Local a résolu votre problème, vous pouvez contribuer. C'est volontaire et cela ne débloque rien, car rien n'est bloqué.",
+    founderNote: "★ Vous êtes un Soutien Fondateur. Vous avez soutenu le projet quand il était encore payant. Merci. Votre licence reste valide et rien ne vous a été retiré : tout le monde a désormais ce que vous avez acheté.",
     licenseFreeDesc: "Tous les outils sont déjà débloqués pour vous. Aucune licence ni inscription nécessaire.",
     licenseBuyBtn: "Soutenir le projet",
     licenseFreeTitle: "GIF Local",
@@ -1903,7 +1913,7 @@ const I18N = {
     supportOpen: "☕ Je veux soutenir",
     supportClose: "Fermer",
     founderBadge: "★ Soutien Fondateur",
-    founderBadgeTitle: "Vous avez soutenu GIF Local quand il était encore payant. Merci — tous les outils sont désormais gratuits pour tous.",
+    founderBadgeTitle: "Vous avez soutenu GIF Local quand il était encore payant. Merci ! Tous les outils sont désormais gratuits pour tous.",
     planFreeF4: "GIF jusqu'à 480px · enregistrement 720p, 60s", planSupF3: "GIF jusqu'à 1280px · enregistrement 1080p, 10 min",
     licenseActivateBtn: "Activer la licence",
     licenseActivateTitle: "Activer la licence", licenseActivateDesc: "Collez la clé reçue après l'achat.",
@@ -1953,14 +1963,14 @@ const I18N = {
     telaH2: "Bildschirmaufnahme → GIF", telaDesc: "Nehmen Sie jetzt den Bildschirm auf oder laden Sie eine bereits vorhandene Aufnahme hoch.",
     telaStartRecBtn: "Bildschirmaufnahme starten", telaStopRecBtn: "Aufnahme stoppen",
     telaUploadLabel: "Oder laden Sie eine bereits aufgenommene Aufnahme hoch",
-    telaFallbackMsg: "Dieser Browser oder dieses Gerät erlaubt es nicht, den Bildschirm direkt hier aufzunehmen (auf dem Handy ist das eine Systemeinschränkung, keine Einschränkung der Website). Nehmen Sie den Bildschirm mit dem integrierten Rekorder Ihres Geräts auf (Windows, Mac, iPhone oder Android) und laden Sie die Datei unten hoch — oder nutzen Sie „Mit Kamera aufnehmen“, um direkt hier aufzunehmen.",
+    telaFallbackMsg: "Dieser Browser oder dieses Gerät erlaubt es nicht, den Bildschirm direkt hier aufzunehmen (auf dem Handy ist das eine Systemeinschränkung, keine Einschränkung der Website). Nehmen Sie den Bildschirm mit dem integrierten Rekorder Ihres Geräts auf (Windows, Mac, iPhone oder Android) und laden Sie die Datei unten hoch, oder nutzen Sie „Mit Kamera aufnehmen“, um direkt hier aufzunehmen.",
     telaRecordingMsg: "Aufnahme läuft... klicken Sie auf „Aufnahme stoppen“, wenn Sie fertig sind.",
     telaReadyMsg: "Aufnahme bereit. Passen Sie den Ausschnitt unten an und erstellen Sie das GIF.",
     telaDownloadVideo: "Video herunterladen (beste Qualität)",
-    telaVideoHintMsg: (size) => `Originalvideo in voller Qualität (${size}) — ohne Konvertierung, ohne Farbverlust.`,
+    telaVideoHintMsg: (size) => `Originalvideo in voller Qualität (${size}), ohne Konvertierung und ohne Farbverlust.`,
     telaRecordingLeft: (clock) => `Aufnahme läuft... noch ${clock}. Klicken Sie auf „Aufnahme stoppen“, wenn Sie fertig sind.`,
     telaRecordingElapsed: (clock) => `Aufnahme läuft... ${clock}. Klicken Sie auf „Aufnahme stoppen“, wenn Sie fertig sind.`,
-    telaLimitReached: (sec) => `Limit von ${sec}s im Free-Tarif erreicht — Ihre Aufnahme wurde gespeichert.`,
+    telaLimitReached: (sec) => `Limit von ${sec}s im Free-Tarif erreicht. Ihre Aufnahme wurde gespeichert.`,
     telaLimitUpgradeMsg: (freeSec, proMin) => `Free nimmt bis zu ${freeSec}s in 720p auf. Pro nimmt bis zu ${proMin} Minuten in 1080p auf.`,
     cameraStartRecBtn: "Mit Kamera aufnehmen", cameraStopRecBtn: "Aufnahme stoppen",
     cameraFlipBtn: "Kamera wechseln",
@@ -1992,7 +2002,7 @@ const I18N = {
     aiMotionPanH: "Schwenk",
     aiMotionPanV: "Vertikal",
     aiMotionKen: "Filmisch",
-    aiPrivacyNote: "🔒 Ihre Beschreibung wird an den KI-Dienst gesendet, um das Bild zu erzeugen. Animation, Optimierung und GIF bleiben in Ihrem Browser — keine Ihrer Dateien wird hochgeladen.",
+    aiPrivacyNote: "🔒 Ihre Beschreibung wird an den KI-Dienst gesendet, um das Bild zu erzeugen. Animation, Optimierung und GIF bleiben in Ihrem Browser. Keine Ihrer Dateien wird hochgeladen.",
     aiGenerateBtn: "GIF mit KI erstellen",
     aiPreviewEmpty: "Beschreiben Sie Ihre Idee und klicken Sie auf Erstellen",
     aiSourceHint: "Bild erzeugt. Jetzt erstellt GIF Local die Bewegung.",
@@ -2064,8 +2074,8 @@ const I18N = {
     limitReachedMsg: "Du hast heute schon 3 kostenlose GIFs erstellt. Scrolle nach unten, um unbegrenzte Nutzung freizuschalten.",
     proStatusFree: "Kostenlos", proOnlyOptionSuffix: "",
     supportTitle: "GIF Local unterstützen",
-    supportDesc: "Alle Werkzeuge sind kostenlos und bleiben es. Keine Anmeldung, kein Wasserzeichen, kein Tageslimit. Wenn GIF Local Ihr Problem gelöst hat, können Sie etwas beitragen — freiwillig, und es schaltet nichts frei, denn nichts ist gesperrt.",
-    founderNote: "★ Sie sind ein Gründungsunterstützer — Sie haben das Projekt unterstützt, als es noch kostenpflichtig war. Danke. Ihre Lizenz bleibt gültig und Ihnen wurde nichts weggenommen: alle haben jetzt, was Sie gekauft haben.",
+    supportDesc: "Alle Werkzeuge sind kostenlos und bleiben es. Keine Anmeldung, kein Wasserzeichen, kein Tageslimit. Wenn GIF Local Ihr Problem gelöst hat, können Sie etwas beitragen. Es ist freiwillig und schaltet nichts frei, denn nichts ist gesperrt.",
+    founderNote: "★ Sie sind ein Gründungsunterstützer. Sie haben das Projekt unterstützt, als es noch kostenpflichtig war. Danke. Ihre Lizenz bleibt gültig und Ihnen wurde nichts weggenommen: alle haben jetzt, was Sie gekauft haben.",
     licenseFreeDesc: "Alle Werkzeuge sind für Sie bereits freigeschaltet. Keine Lizenz, keine Anmeldung nötig.",
     licenseBuyBtn: "Projekt unterstützen",
     licenseFreeTitle: "GIF Local",
@@ -2084,7 +2094,7 @@ const I18N = {
     supportOpen: "☕ Ich möchte unterstützen",
     supportClose: "Schließen",
     founderBadge: "★ Gründungsunterstützer",
-    founderBadgeTitle: "Sie haben GIF Local unterstützt, als es noch kostenpflichtig war. Danke — alle Werkzeuge sind jetzt für alle kostenlos.",
+    founderBadgeTitle: "Sie haben GIF Local unterstützt, als es noch kostenpflichtig war. Danke! Alle Werkzeuge sind jetzt für alle kostenlos.",
     planFreeF4: "GIF bis 480px · Aufnahme 720p, 60s", planSupF3: "GIF bis 1280px · Aufnahme 1080p, 10 Min.",
     licenseActivateBtn: "Lizenz aktivieren",
     licenseActivateTitle: "Lizenz aktivieren", licenseActivateDesc: "Füge den nach dem Kauf erhaltenen Schlüssel ein.",
@@ -2134,14 +2144,14 @@ const I18N = {
     telaH2: "Registrazione schermo → GIF", telaDesc: "Registra lo schermo ora, oppure carica una registrazione già fatta.",
     telaStartRecBtn: "Avvia registrazione schermo", telaStopRecBtn: "Ferma registrazione",
     telaUploadLabel: "Oppure carica una registrazione già fatta",
-    telaFallbackMsg: "Questo browser o dispositivo non consente di registrare lo schermo direttamente qui (sul cellulare è una limitazione del sistema, non del sito). Registra lo schermo con il registratore nativo del tuo dispositivo (Windows, Mac, iPhone o Android) e carica il file qui sotto — oppure usa \"Registra con la fotocamera\" per registrare direttamente qui.",
+    telaFallbackMsg: "Questo browser o dispositivo non consente di registrare lo schermo direttamente qui (sul cellulare è una limitazione del sistema, non del sito). Registra lo schermo con il registratore nativo del tuo dispositivo (Windows, Mac, iPhone o Android) e carica il file qui sotto, oppure usa \"Registra con la fotocamera\" per registrare direttamente qui.",
     telaRecordingMsg: "Registrazione in corso... clicca su \"Ferma registrazione\" quando hai finito.",
     telaReadyMsg: "Registrazione pronta. Regola il segmento qui sotto e genera il GIF.",
     telaDownloadVideo: "Scarica video (qualità massima)",
-    telaVideoHintMsg: (size) => `Video originale in qualità piena (${size}) — senza conversione, senza perdita di colore.`,
+    telaVideoHintMsg: (size) => `Video originale in qualità piena (${size}), senza conversione e senza perdita di colore.`,
     telaRecordingLeft: (clock) => `Registrazione... ${clock} rimanenti. Clicca su "Ferma registrazione" quando hai finito.`,
     telaRecordingElapsed: (clock) => `Registrazione... ${clock}. Clicca su "Ferma registrazione" quando hai finito.`,
-    telaLimitReached: (sec) => `Limite di ${sec}s del piano Free raggiunto — la registrazione è stata salvata.`,
+    telaLimitReached: (sec) => `Limite di ${sec}s del piano Free raggiunto. La registrazione è stata salvata.`,
     telaLimitUpgradeMsg: (freeSec, proMin) => `Free registra fino a ${freeSec}s in 720p. Pro registra fino a ${proMin} minuti in 1080p.`,
     cameraStartRecBtn: "Registra con la fotocamera", cameraStopRecBtn: "Ferma registrazione",
     cameraFlipBtn: "Cambia fotocamera",
@@ -2173,7 +2183,7 @@ const I18N = {
     aiMotionPanH: "Panoramica",
     aiMotionPanV: "Verticale",
     aiMotionKen: "Cinematografico",
-    aiPrivacyNote: "🔒 La tua descrizione viene inviata al servizio di IA per generare l\u2019immagine. Animazione, ottimizzazione e GIF restano nel tuo browser — nessun tuo file viene caricato.",
+    aiPrivacyNote: "🔒 La tua descrizione viene inviata al servizio di IA per generare l\u2019immagine. Animazione, ottimizzazione e GIF restano nel tuo browser. Nessun tuo file viene caricato.",
     aiGenerateBtn: "Crea GIF con IA",
     aiPreviewEmpty: "Descrivi la tua idea e clicca su Crea",
     aiSourceHint: "Immagine generata. Ora GIF Local crea il movimento.",
@@ -2245,8 +2255,8 @@ const I18N = {
     limitReachedMsg: "Hai già creato i tuoi 3 GIF gratuiti di oggi. Scorri in basso per sbloccare l'uso illimitato.",
     proStatusFree: "Gratis", proOnlyOptionSuffix: "",
     supportTitle: "Sostieni GIF Local",
-    supportDesc: "Tutti gli strumenti sono gratuiti e lo restano. Nessuna registrazione, nessuna filigrana, nessun limite giornaliero. Se GIF Local ha risolto il tuo problema, puoi contribuire — è volontario e non sblocca nulla, perché nulla è bloccato.",
-    founderNote: "★ Sei un Sostenitore Fondatore — hai sostenuto il progetto quando era ancora a pagamento. Grazie. La tua licenza resta valida e non ti è stato tolto nulla: ora tutti hanno ciò che hai comprato.",
+    supportDesc: "Tutti gli strumenti sono gratuiti e lo restano. Nessuna registrazione, nessuna filigrana, nessun limite giornaliero. Se GIF Local ha risolto il tuo problema, puoi contribuire. È volontario e non sblocca nulla, perché nulla è bloccato.",
+    founderNote: "★ Sei un Sostenitore Fondatore. Hai sostenuto il progetto quando era ancora a pagamento. Grazie. La tua licenza resta valida e non ti è stato tolto nulla: ora tutti hanno ciò che hai comprato.",
     licenseFreeDesc: "Tutti gli strumenti sono già sbloccati per te. Nessuna licenza né registrazione.",
     licenseBuyBtn: "Sostieni il progetto",
     licenseFreeTitle: "GIF Local",
@@ -2265,7 +2275,7 @@ const I18N = {
     supportOpen: "☕ Voglio sostenere",
     supportClose: "Chiudi",
     founderBadge: "★ Sostenitore Fondatore",
-    founderBadgeTitle: "Hai sostenuto GIF Local quando era ancora a pagamento. Grazie — tutti gli strumenti ora sono gratuiti per tutti.",
+    founderBadgeTitle: "Hai sostenuto GIF Local quando era ancora a pagamento. Grazie! Tutti gli strumenti ora sono gratuiti per tutti.",
     planFreeF4: "GIF fino a 480px · registrazione 720p, 60s", planSupF3: "GIF fino a 1280px · registrazione 1080p, 10 min",
     licenseActivateBtn: "Attiva licenza",
     licenseActivateTitle: "Attiva licenza", licenseActivateDesc: "Incolla la chiave ricevuta dopo l'acquisto.",

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#6C4CF5">
 <meta name="robots" content="noindex">
-<title>Obrigado pela compra — GIF Local</title>
+<title>Obrigado pela compra | GIF Local</title>
 <style>
   :root{
     --bg:#faf9fd; --card:#ffffff; --ink:#181521; --ink-soft:#655f72; --ink-faint:#8b859a;
@@ -42,7 +42,7 @@
 
     <div id="readyState" class="hidden">
       <h1>✓ Pagamento confirmado!</h1>
-      <p>Esta é a sua chave de licença do GIF Local PRO. Guarde-a — ela também dá pra ativar em outro dispositivo depois, dentro do limite do seu plano.</p>
+      <p>Esta é a sua chave de licença do GIF Local PRO. Guarde-a: ela também dá pra ativar em outro dispositivo depois, dentro do limite do seu plano.</p>
       <div class="key-box" id="keyBox">-</div>
       <div class="status" id="copyStatus"></div>
       <button class="btn" id="copyBtn" type="button">Copiar chave</button>
@@ -51,7 +51,7 @@
 
     <div id="errorState" class="hidden">
       <h1>Ainda processando</h1>
-      <p id="errorMsg">Seu pagamento foi recebido, mas a licença ainda está sendo gerada. Isso normalmente leva só alguns segundos — tentando de novo automaticamente.</p>
+      <p id="errorMsg">Seu pagamento foi recebido, mas a licença ainda está sendo gerada. Isso normalmente leva só alguns segundos. Tentando de novo automaticamente.</p>
       <button class="btn secondary" id="retryBtn" type="button">Tentar de novo agora</button>
     </div>
   </div>
@@ -69,7 +69,7 @@
 
   var attempts = 0;
   function fetchLicense(){
-    if (!sessionId) { show('errorState'); document.getElementById('errorMsg').textContent = 'Link incompleto — falta o identificador da compra.'; return; }
+    if (!sessionId) { show('errorState'); document.getElementById('errorMsg').textContent = 'Link incompleto: falta o identificador da compra.'; return; }
     attempts++;
     fetch(LICENSE_API_BASE + '/license-by-session?session_id=' + encodeURIComponent(sessionId))
       .then(function(res){ return res.json().then(function(data){ return { ok: res.ok, data: data }; }); })
@@ -98,7 +98,7 @@
     var status = document.getElementById('copyStatus');
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(key).then(function(){ status.textContent = 'Copiado!'; status.className = 'status'; })
-        .catch(function(){ status.textContent = 'Não foi possível copiar — selecione o texto manualmente.'; status.className = 'status error'; });
+        .catch(function(){ status.textContent = 'Não foi possível copiar. Selecione o texto manualmente.'; status.className = 'status error'; });
     } else {
       status.textContent = 'Selecione o texto acima manualmente para copiar.';
       status.className = 'status error';
