@@ -126,6 +126,9 @@
   .support-qr{display:flex; justify-content:center; margin:0 auto 14px; line-height:0;}
   .support-qr svg{border-radius:10px; border:1px solid var(--line); max-width:100%; height:auto;}
   .support-hint{font-size:13px; color:var(--ink-soft); margin:0 0 14px;}
+  /* .oculto tira da vista sem tirar do documento: precisa continuar
+     selecionável para o execCommand de emergência funcionar. */
+  .support-code.oculto{position:absolute; left:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;}
   .support-code{width:100%; box-sizing:border-box; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11px; line-height:1.45; padding:10px; border:1px solid var(--line); border-radius:10px; background:var(--bg-soft); color:var(--ink-soft); resize:none; margin-bottom:12px;}
   .support-intl{font-size:13px; margin:16px 0 0; color:var(--ink-soft);}
   .support-privacy{font-size:12px; line-height:1.6; color:var(--ink-faint); margin:16px 0 0;}
@@ -807,28 +810,40 @@
     <p class="desc" data-i18n="supportDesc">Todas as ferramentas são gratuitas e continuam assim. Não há cadastro, marca d'água nem limite diário. Se o GIF Local resolveu o seu problema, você pode contribuir — é voluntário e não desbloqueia nada, porque não há nada bloqueado.</p>
 
     <div class="support-box" id="supportBox">
-      <div class="support-values" id="supportValues" role="group" aria-label="Valor sugerido">
-        <button type="button" data-v="5">R$ 5</button>
-        <button type="button" data-v="10">R$ 10</button>
-        <button type="button" data-v="20">R$ 20</button>
-        <button type="button" data-v="50">R$ 50</button>
-        <button type="button" data-v="" class="is-on" data-i18n="supportOther">Outro valor</button>
+      <!-- Estado fechado: só o convite. O QR Code só é desenhado quando
+           alguém de fato diz que quer apoiar — um QR grande sempre aberto
+           ocupa a tela e pressiona quem só veio usar a ferramenta. -->
+      <button class="btn" id="supportOpen" type="button" data-i18n="supportOpen">☕ Quero apoiar</button>
+
+      <div class="support-panel" id="supportPanel" hidden>
+        <div class="support-values" id="supportValues" role="group" aria-label="Valor sugerido">
+          <button type="button" data-v="5">R$ 5</button>
+          <button type="button" data-v="10">R$ 10</button>
+          <button type="button" data-v="20">R$ 20</button>
+          <button type="button" data-v="50">R$ 50</button>
+          <button type="button" data-v="" class="is-on" data-i18n="supportOther">Outro valor</button>
+        </div>
+
+        <div class="support-qr" id="supportQr" aria-live="polite"></div>
+        <p class="support-hint" data-i18n="supportScan">Abra o app do seu banco, escolha PIX e aponte a câmera para o código. No computador, use o botão de copiar.</p>
+
+        <!-- O código "copia e cola" fica fora da vista: é uma tira enorme de
+             caracteres que polui a seção e deixa a chave exposta na tela.
+             Ele continua no DOM, selecionável, porque é ele que alimenta o
+             botão de copiar quando a API de área de transferência falha —
+             e nesse caso ele aparece, para dar uma saída manual. -->
+        <label class="sr-only" for="supportCode" data-i18n="supportCodeLabel">Código PIX copia e cola</label>
+        <textarea id="supportCode" class="support-code oculto" readonly rows="3" spellcheck="false" tabindex="-1" aria-hidden="true"></textarea>
+        <button class="btn" id="supportCopy" type="button" data-i18n="supportCopy">Copiar código PIX</button>
+
+        <p class="support-intl" id="supportIntl" style="display:none;">
+          <span data-i18n="supportIntlText">Fora do Brasil?</span>
+          <a id="supportPaypal" href="#" rel="noopener" target="_blank" data-i18n="supportPaypal">Apoiar via PayPal</a>
+        </p>
+
+        <p class="support-privacy" data-i18n="supportPrivacy">O pagamento vai direto de você para o projeto. O GIF Local não processa, não armazena e não vê nenhum dado do seu pagamento.</p>
+        <button class="support-dismiss" id="supportClose" type="button" data-i18n="supportClose">Fechar</button>
       </div>
-
-      <div class="support-qr" id="supportQr" aria-live="polite"></div>
-      <p class="support-hint" data-i18n="supportScan">Abra o app do seu banco, escolha PIX e aponte a câmera. Ou copie o código abaixo.</p>
-
-      <label class="sr-only" for="supportCode" data-i18n="supportCodeLabel">Código PIX copia e cola</label>
-      <textarea id="supportCode" class="support-code" readonly rows="2" spellcheck="false"></textarea>
-      <button class="btn" id="supportCopy" type="button" data-i18n="supportCopy">Copiar código PIX</button>
-
-      <p class="support-intl" id="supportIntl" style="display:none;">
-        <span data-i18n="supportIntlText">Fora do Brasil?</span>
-        <a id="supportPaypal" href="#" rel="noopener" target="_blank" data-i18n="supportPaypal">Apoiar via PayPal</a>
-      </p>
-
-      <p class="support-privacy" data-i18n="supportPrivacy">O pagamento vai direto de você para o projeto. O GIF Local não processa, não armazena e não vê nenhum dado do seu pagamento.</p>
-      <button class="support-dismiss" id="supportDismiss" type="button" data-i18n="supportDismiss">Não quero contribuir agora</button>
     </div>
 
     <p class="desc founder-note" id="founderNote" style="display:none;" data-i18n="founderNote">★ Você é um Apoiador Fundador — apoiou o projeto quando ele ainda era pago. Obrigado. Sua licença continua válida e nada foi tirado de você: agora todo mundo tem o que você comprou.</p>
@@ -1331,7 +1346,7 @@ const I18N = {
     licenseBuyBtn: "Apoiar o projeto",
     licenseFreeTitle: "GIF Local",
     supportOther: "Outro valor",
-    supportScan: "Abra o app do seu banco, escolha PIX e aponte a câmera. Ou copie o código abaixo.",
+    supportScan: "Abra o app do seu banco, escolha PIX e aponte a câmera para o código. No computador, use o botão de copiar.",
     supportCodeLabel: "Código PIX copia e cola",
     supportCopy: "Copiar código PIX",
     supportCopied: "Copiado!",
@@ -1339,10 +1354,11 @@ const I18N = {
     supportIntlText: "Fora do Brasil?",
     supportPaypal: "Apoiar via PayPal",
     supportPrivacy: "O pagamento vai direto de você para o projeto. O GIF Local não processa, não armazena e não vê nenhum dado do seu pagamento.",
-    supportDismiss: "Não quero contribuir agora",
     nudgeText: "O GIF Local te ajudou? Ele é gratuito e sem anúncios.",
     nudgeYes: "☕ Apoiar o projeto",
     nudgeNo: "Agora não",
+    supportOpen: "☕ Quero apoiar",
+    supportClose: "Fechar",
     founderBadge: "★ Apoiador Fundador",
     founderBadgeTitle: "Você apoiou o GIF Local quando ele ainda era pago. Obrigado — todas as ferramentas agora são gratuitas para todos.",
     planFreeF4: "GIF até 480px · gravação 720p, 60s", planSupF3: "GIF até 1280px · gravação 1080p, 10 min",
@@ -1511,7 +1527,7 @@ const I18N = {
     licenseBuyBtn: "Support the project",
     licenseFreeTitle: "GIF Local",
     supportOther: "Other amount",
-    supportScan: "Open your bank app, choose PIX and point the camera. Or copy the code below.",
+    supportScan: "Open your bank app, choose PIX and point the camera at the code. On a computer, use the copy button.",
     supportCodeLabel: "PIX copy-and-paste code",
     supportCopy: "Copy PIX code",
     supportCopied: "Copied!",
@@ -1519,10 +1535,11 @@ const I18N = {
     supportIntlText: "Outside Brazil?",
     supportPaypal: "Support via PayPal",
     supportPrivacy: "The payment goes straight from you to the project. GIF Local does not process, store or see any of your payment details.",
-    supportDismiss: "I'd rather not contribute now",
     nudgeText: "Did GIF Local help you? It is free and ad-free.",
     nudgeYes: "☕ Support the project",
     nudgeNo: "Not now",
+    supportOpen: "☕ I want to support",
+    supportClose: "Close",
     founderBadge: "★ Founding Supporter",
     founderBadgeTitle: "You backed GIF Local when it was still paid. Thank you — every tool is now free for everyone.",
     planFreeF4: "GIF up to 480px · 720p recording, 60s", planSupF3: "GIF up to 1280px · 1080p recording, 10 min",
@@ -1691,7 +1708,7 @@ const I18N = {
     licenseBuyBtn: "Apoyar el proyecto",
     licenseFreeTitle: "GIF Local",
     supportOther: "Otro importe",
-    supportScan: "Abre la app de tu banco, elige PIX y apunta la cámara. O copia el código de abajo.",
+    supportScan: "Abre la app de tu banco, elige PIX y apunta la cámara al código. En el ordenador, usa el botón de copiar.",
     supportCodeLabel: "Código PIX para copiar y pegar",
     supportCopy: "Copiar código PIX",
     supportCopied: "¡Copiado!",
@@ -1699,10 +1716,11 @@ const I18N = {
     supportIntlText: "¿Fuera de Brasil?",
     supportPaypal: "Apoyar con PayPal",
     supportPrivacy: "El pago va directo de ti al proyecto. GIF Local no procesa, no almacena ni ve ningún dato de tu pago.",
-    supportDismiss: "Prefiero no contribuir ahora",
     nudgeText: "¿Te ayudó GIF Local? Es gratuito y sin anuncios.",
     nudgeYes: "☕ Apoyar el proyecto",
     nudgeNo: "Ahora no",
+    supportOpen: "☕ Quiero apoyar",
+    supportClose: "Cerrar",
     founderBadge: "★ Mecenas Fundador",
     founderBadgeTitle: "Apoyaste GIF Local cuando aún era de pago. Gracias — todas las herramientas ahora son gratuitas para todos.",
     planFreeF4: "GIF hasta 480px · grabación 720p, 60s", planSupF3: "GIF hasta 1280px · grabación 1080p, 10 min",
@@ -1871,7 +1889,7 @@ const I18N = {
     licenseBuyBtn: "Soutenir le projet",
     licenseFreeTitle: "GIF Local",
     supportOther: "Autre montant",
-    supportScan: "Ouvrez l'application de votre banque, choisissez PIX et visez avec l'appareil photo. Ou copiez le code ci-dessous.",
+    supportScan: "Ouvrez l'application de votre banque, choisissez PIX et visez le code. Sur ordinateur, utilisez le bouton copier.",
     supportCodeLabel: "Code PIX à copier-coller",
     supportCopy: "Copier le code PIX",
     supportCopied: "Copié !",
@@ -1879,10 +1897,11 @@ const I18N = {
     supportIntlText: "Hors du Brésil ?",
     supportPaypal: "Soutenir via PayPal",
     supportPrivacy: "Le paiement va directement de vous au projet. GIF Local ne traite, ne stocke et ne voit aucune donnée de votre paiement.",
-    supportDismiss: "Je préfère ne pas contribuer maintenant",
     nudgeText: "GIF Local vous a aidé ? Il est gratuit et sans publicité.",
     nudgeYes: "☕ Soutenir le projet",
     nudgeNo: "Pas maintenant",
+    supportOpen: "☕ Je veux soutenir",
+    supportClose: "Fermer",
     founderBadge: "★ Soutien Fondateur",
     founderBadgeTitle: "Vous avez soutenu GIF Local quand il était encore payant. Merci — tous les outils sont désormais gratuits pour tous.",
     planFreeF4: "GIF jusqu'à 480px · enregistrement 720p, 60s", planSupF3: "GIF jusqu'à 1280px · enregistrement 1080p, 10 min",
@@ -2051,7 +2070,7 @@ const I18N = {
     licenseBuyBtn: "Projekt unterstützen",
     licenseFreeTitle: "GIF Local",
     supportOther: "Anderer Betrag",
-    supportScan: "Öffnen Sie Ihre Banking-App, wählen Sie PIX und richten Sie die Kamera darauf. Oder kopieren Sie den Code unten.",
+    supportScan: "Öffnen Sie Ihre Banking-App, wählen Sie PIX und richten Sie die Kamera auf den Code. Am Computer nutzen Sie die Kopier-Schaltfläche.",
     supportCodeLabel: "PIX-Code zum Kopieren",
     supportCopy: "PIX-Code kopieren",
     supportCopied: "Kopiert!",
@@ -2059,10 +2078,11 @@ const I18N = {
     supportIntlText: "Außerhalb Brasiliens?",
     supportPaypal: "Mit PayPal unterstützen",
     supportPrivacy: "Die Zahlung geht direkt von Ihnen an das Projekt. GIF Local verarbeitet, speichert und sieht keine Ihrer Zahlungsdaten.",
-    supportDismiss: "Ich möchte jetzt nicht beitragen",
     nudgeText: "Hat GIF Local Ihnen geholfen? Es ist kostenlos und werbefrei.",
     nudgeYes: "☕ Projekt unterstützen",
     nudgeNo: "Jetzt nicht",
+    supportOpen: "☕ Ich möchte unterstützen",
+    supportClose: "Schließen",
     founderBadge: "★ Gründungsunterstützer",
     founderBadgeTitle: "Sie haben GIF Local unterstützt, als es noch kostenpflichtig war. Danke — alle Werkzeuge sind jetzt für alle kostenlos.",
     planFreeF4: "GIF bis 480px · Aufnahme 720p, 60s", planSupF3: "GIF bis 1280px · Aufnahme 1080p, 10 Min.",
@@ -2231,7 +2251,7 @@ const I18N = {
     licenseBuyBtn: "Sostieni il progetto",
     licenseFreeTitle: "GIF Local",
     supportOther: "Altro importo",
-    supportScan: "Apri l'app della tua banca, scegli PIX e inquadra con la fotocamera. Oppure copia il codice qui sotto.",
+    supportScan: "Apri l'app della tua banca, scegli PIX e inquadra il codice. Su computer, usa il pulsante copia.",
     supportCodeLabel: "Codice PIX da copiare e incollare",
     supportCopy: "Copia codice PIX",
     supportCopied: "Copiato!",
@@ -2239,10 +2259,11 @@ const I18N = {
     supportIntlText: "Fuori dal Brasile?",
     supportPaypal: "Sostieni con PayPal",
     supportPrivacy: "Il pagamento va direttamente da te al progetto. GIF Local non elabora, non memorizza e non vede alcun dato del tuo pagamento.",
-    supportDismiss: "Preferisco non contribuire ora",
     nudgeText: "GIF Local ti è stato utile? È gratuito e senza pubblicità.",
     nudgeYes: "☕ Sostieni il progetto",
     nudgeNo: "Non ora",
+    supportOpen: "☕ Voglio sostenere",
+    supportClose: "Chiudi",
     founderBadge: "★ Sostenitore Fondatore",
     founderBadgeTitle: "Hai sostenuto GIF Local quando era ancora a pagamento. Grazie — tutti gli strumenti ora sono gratuiti per tutti.",
     planFreeF4: "GIF fino a 480px · registrazione 720p, 60s", planSupF3: "GIF fino a 1280px · registrazione 1080p, 10 min",
@@ -2762,8 +2783,36 @@ function renderApoio(){
   });
 }
 
+/* O painel de pagamento começa fechado e só é montado na primeira vez
+   que alguém pede. Dois motivos: um QR Code grande sempre visível domina
+   a página e parece cobrança; e gerar o QR custa um trabalho de CPU que
+   não faz sentido pagar em toda visita de quem nunca vai doar. */
+let apoioMontado = false;
+
+function abrirApoio(){
+  const painel = $('supportPanel');
+  if (!painel) return;
+  painel.hidden = false;
+  const abrir = $('supportOpen');
+  if (abrir) abrir.style.display = 'none';
+  if (!apoioMontado) { apoioMontado = true; renderApoio(); }
+}
+
+function fecharApoio(){
+  const painel = $('supportPanel');
+  if (painel) painel.hidden = true;
+  const abrir = $('supportOpen');
+  if (abrir) abrir.style.display = '';
+}
+
 function ligaApoio(){
-  if (!$('supportQr')) return;
+  if (!$('supportPanel')) return;
+
+  const abrir = $('supportOpen');
+  if (abrir) abrir.addEventListener('click', abrirApoio);
+  const fechar = $('supportClose');
+  if (fechar) fechar.addEventListener('click', fecharApoio);
+
   document.querySelectorAll('#supportValues button').forEach((b) => {
     b.addEventListener('click', () => {
       const v = b.getAttribute('data-v');
@@ -2771,22 +2820,25 @@ function ligaApoio(){
       renderApoio();
     });
   });
+
   const copiar = $('supportCopy');
   if (copiar) copiar.addEventListener('click', async () => {
     const txt = apoioPayload();
     let ok = false;
     try { await navigator.clipboard.writeText(txt); ok = true; }
     catch (e) {
-      /* navigator.clipboard falha sem HTTPS ou sem permissão; o campo
-         de texto visível é a saída de emergência para copiar na mão. */
+      /* navigator.clipboard falha sem HTTPS ou sem permissão; o campo de
+         texto visível é a saída de emergência para copiar na mão. */
       const campo = $('supportCode');
       if (campo) { campo.select(); try { ok = document.execCommand('copy'); } catch (e2) {} }
     }
     copiar.textContent = ok ? t('supportCopied') : t('supportCopyFail');
+    /* Se nem a API nem o execCommand funcionaram, revelamos o código para
+       a pessoa copiar na mão — melhor um campo feio do que um botão que
+       não faz nada. */
+    if (!ok) { const campo = $('supportCode'); if (campo) { campo.classList.remove('oculto'); campo.removeAttribute('aria-hidden'); campo.removeAttribute('tabindex'); } }
     setTimeout(() => { copiar.textContent = t('supportCopy'); }, 2200);
   });
-  const naoQuero = $('supportDismiss');
-  if (naoQuero) naoQuero.addEventListener('click', () => { esconderConviteApoio(true); });
 
   if (PAYPAL_ME) {
     const intl = $('supportIntl');
@@ -2796,7 +2848,6 @@ function ligaApoio(){
       if (a) a.href = 'https://www.paypal.com/paypalme/' + PAYPAL_ME;
     }
   }
-  renderApoio();
 }
 
 /* --- convite depois do download, nunca antes ---------------------------
@@ -2826,6 +2877,9 @@ function ligaConvitesDeDownload(){
     if (btn) btn.addEventListener('click', () => { setTimeout(() => mostrarConviteApoio(p), 900); });
     const ir = $(p + 'NudgeBtn');
     if (ir) ir.addEventListener('click', () => {
+      /* Quem clicou aqui já disse que quer apoiar: rolar até a seção e
+         deixá-la fechada obrigaria a um segundo clique sem motivo. */
+      abrirApoio();
       const alvo = document.getElementById('apoiar');
       if (alvo) alvo.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
