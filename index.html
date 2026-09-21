@@ -105,9 +105,11 @@
   .usage-badge.usage-badge--full{color:var(--amber);}
   .usage-badge.usage-badge--full .usage-fill{background:var(--amber);}
 
-  @keyframes upgradePulse{ 0%,100%{box-shadow:0 0 0 0 color-mix(in srgb, var(--primary) 45%, transparent);} 50%{box-shadow:0 0 0 10px color-mix(in srgb, var(--primary) 0%, transparent);} }
-  .plans.upgrade-pulse{animation:upgradePulse 1.4s ease-out 2; border-radius:var(--radius-lg);}
-  @media (prefers-reduced-motion: reduce){ .plans.upgrade-pulse{animation:none;} }
+  /* Bloco de apoio voluntário. Sóbrio de propósito: não deve competir
+     com a ferramenta nem parecer um paywall disfarçado. */
+  .support-box{max-width:520px; margin:24px auto 0; padding:22px 24px; background:var(--card); border:1px solid var(--line); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm);}
+  .support-soon{margin:0; font-size:14px; color:var(--ink-soft);}
+  .founder-note{max-width:640px; margin:20px auto 0; font-size:14px; line-height:1.6; padding:14px 18px; border-radius:var(--radius-lg); background:color-mix(in srgb, var(--primary) 8%, transparent); border:1px solid color-mix(in srgb, var(--primary) 25%, transparent);}
 
   .how-it-works{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:34px; padding:18px 20px; background:var(--card); border:1px solid var(--line); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm);}
   .how-step{display:flex; align-items:center; gap:10px; flex:1; min-width:190px;}
@@ -715,71 +717,28 @@
 
   <div class="note" id="aiNoteEl" data-i18n-html="aiNote">Quer usar imagens geradas por IA (ChatGPT/DALL·E, Sora)? Baixe as imagens ou quadros gerados e junte-os aqui mesmo na aba <b>Fotos</b>, a montagem final continua 100% local.</div>
 
-  <section class="plans" id="planos">
-    <h2 data-i18n="plansTitle">Planos</h2>
-    <p class="desc" data-i18n="plansDesc">Comece grátis. Faça upgrade quando quiser mais.</p>
-    <p class="desc plans-currency-note" data-i18n="plansCurrencyNote">Preços em reais (R$). No pagamento, seu cartão é cobrado automaticamente convertido para sua moeda local.</p>
-    <div class="plans-grid plans-grid-3">
-      <div class="plan-card">
-        <div class="plan-name" data-i18n="planFreeName">Grátis</div>
-        <div class="plan-price" data-i18n="planFreePrice">R$ 0</div>
-        <ul class="plan-feats">
-          <li data-i18n="planFreeF1">Todos os 4 modos de criação</li>
-          <li data-i18n="planFreeF2">Sem marca d'água</li>
-          <li data-i18n="planFreeF3">3 GIFs grátis por dia</li>
-          <li data-i18n="planFreeF4">Resolução até 480px</li>
-        </ul>
-        <a href="#tabs" class="btn secondary" data-i18n="planFreeCta">Começar agora</a>
-        <p class="pay-note pay-note-placeholder" aria-hidden="true" data-i18n="payNote">Pagamento seguro processado pelo provedor. Aceita cartão de qualquer país.</p>
-      </div>
-      <div class="plan-card">
-        <div class="plan-name" data-i18n="planSupName">Apoiador</div>
-        <div class="plan-price" id="planSupPrice">R$ 9,90</div>
-        <div class="plan-price-note" data-i18n="planOneTime">pagamento único</div>
-        <ul class="plan-feats">
-          <li data-i18n-html="planSupF0"><b>Uso ilimitado</b>, sem limite diário</li>
-          <li data-i18n="planSupF3">Resolução alta, até 1280px</li>
-          <li data-i18n="planSupF1">Apoie o desenvolvimento do projeto</li>
-          <li data-i18n="planSupF2">Novidades em primeira mão por e-mail</li>
-        </ul>
-        <p class="charge-currency-note" id="planSupChargeNote"></p>
-        <div class="pay-buttons">
-          <button class="btn pay-btn" id="planSupBtnStripe" type="button">
-            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16 0C7.163 0 0 7.163 0 16s7.163 16 16 16 16-7.163 16-16S24.837 0 16 0z" fill="#635bff"/><path d="M14.85 12.573c0-.815.67-1.13 1.78-1.13 1.59 0 3.6.483 5.19 1.34V8.14c-1.74-.69-3.46-.96-5.19-.96-4.24 0-7.06 2.214-7.06 5.913 0 5.76 7.94 4.84 7.94 7.33 0 .966-.84 1.28-2.01 1.28-1.74 0-3.97-.716-5.73-1.68v4.71c1.95.836 3.92 1.19 5.73 1.19 4.34 0 7.33-2.147 7.33-5.897-.02-6.22-7.98-5.11-7.98-7.457z" fill="#fff"/></svg>
-            <span data-i18n="payWithStripe">Pagar com Stripe</span>
-          </button>
-          <button class="btn secondary pay-btn" id="planSupBtnPayPal" type="button">
-            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="32" height="32" rx="6" fill="#fff"/><path d="M12.5 23l.6-3.6h-3L12.4 8h6.4c2.9 0 4.7 1.5 4.3 4.1-.4 2.9-2.6 4.5-5.5 4.5h-2l-.7 4.4h-2.4z" fill="#003087"/><path d="M20.3 12.6c-.4 2.9-2.6 4.5-5.5 4.5h-2l-.9 5.9h2.2l.6-3.6h1.9c2.9 0 5.1-1.6 5.5-4.5.2-1.4-.1-2.5-.9-3.3.3.3.5.6.6 1z" fill="#009cde"/></svg>
-            <span data-i18n="payWithPayPal">Pagar com PayPal</span>
-          </button>
-        </div>
-        <p class="pay-note" data-i18n="payNote">Pagamento seguro processado pelo provedor. Aceita cartão de qualquer país.</p>
-      </div>
-      <div class="plan-card plan-pro">
-        <div class="plan-badge" data-i18n="planPopularBadge">Popular</div>
-        <div class="plan-name" data-i18n="planProName">Profissional</div>
-        <div class="plan-price" id="planProPrice2">R$ 29,90</div>
-        <div class="plan-price-note" data-i18n="planOneTime">pagamento único</div>
-        <ul class="plan-feats">
-          <li data-i18n-html="planProF1">Tudo do Pro, em até <b>3 dispositivos</b></li>
-          <li data-i18n="planProF2">Gravação até 4K, sem limite de duração</li>
-          <li data-i18n="planProF3">80 gerações com IA por dia</li>
-          <li data-i18n="planProF4">Suporte prioritário por e-mail</li>
-        </ul>
-        <p class="charge-currency-note" id="planProChargeNote"></p>
-        <div class="pay-buttons">
-          <button class="btn pay-btn" id="planProBtnStripe" type="button">
-            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16 0C7.163 0 0 7.163 0 16s7.163 16 16 16 16-7.163 16-16S24.837 0 16 0z" fill="#635bff"/><path d="M14.85 12.573c0-.815.67-1.13 1.78-1.13 1.59 0 3.6.483 5.19 1.34V8.14c-1.74-.69-3.46-.96-5.19-.96-4.24 0-7.06 2.214-7.06 5.913 0 5.76 7.94 4.84 7.94 7.33 0 .966-.84 1.28-2.01 1.28-1.74 0-3.97-.716-5.73-1.68v4.71c1.95.836 3.92 1.19 5.73 1.19 4.34 0 7.33-2.147 7.33-5.897-.02-6.22-7.98-5.11-7.98-7.457z" fill="#fff"/></svg>
-            <span data-i18n="payWithStripe">Pagar com Stripe</span>
-          </button>
-          <button class="btn secondary pay-btn" id="planProBtnPayPal" type="button">
-            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="32" height="32" rx="6" fill="#fff"/><path d="M12.5 23l.6-3.6h-3L12.4 8h6.4c2.9 0 4.7 1.5 4.3 4.1-.4 2.9-2.6 4.5-5.5 4.5h-2l-.7 4.4h-2.4z" fill="#003087"/><path d="M20.3 12.6c-.4 2.9-2.6 4.5-5.5 4.5h-2l-.9 5.9h2.2l.6-3.6h1.9c2.9 0 5.1-1.6 5.5-4.5.2-1.4-.1-2.5-.9-3.3.3.3.5.6.6 1z" fill="#009cde"/></svg>
-            <span data-i18n="payWithPayPal">Pagar com PayPal</span>
-          </button>
-        </div>
-        <p class="pay-note" data-i18n="payNote">Pagamento seguro processado pelo provedor. Aceita cartão de qualquer país.</p>
-      </div>
+  <!-- ============================================================
+       APOIO VOLUNTÁRIO (antes: seção "Planos")
+
+       Em setembro/2026 as ferramentas deixaram de ser pagas. Manter
+       cards de preço vendendo o que virou gratuito seria enganar quem
+       chega. A seção foi substituída por apoio voluntário: nada aqui
+       desbloqueia nada, e nenhuma ferramenta depende de pagamento.
+
+       Os botões de compra foram removidos, e não só ocultados: eram
+       Payment Links ativos que continuariam cobrando R$ 9,90 e
+       R$ 29,90 por recursos que agora são livres.
+       ============================================================ -->
+  <section class="plans" id="apoiar">
+    <h2 data-i18n="supportTitle">Apoie o GIF Local</h2>
+    <p class="desc" data-i18n="supportDesc">Todas as ferramentas são gratuitas e continuam assim. Não há cadastro, marca d'água nem limite diário. Se o GIF Local resolveu o seu problema, você pode contribuir — é voluntário e não desbloqueia nada, porque não há nada bloqueado.</p>
+
+    <div class="support-box" id="supportBox">
+      <p class="support-soon" id="supportSoon" data-i18n="supportSoon">A opção de apoio por PIX está sendo preparada.</p>
     </div>
+
+    <p class="desc founder-note" id="founderNote" style="display:none;" data-i18n="founderNote">★ Você é um Apoiador Fundador — apoiou o projeto quando ele ainda era pago. Obrigado. Sua licença continua válida e nada foi tirado de você: agora todo mundo tem o que você comprou.</p>
+
   </section>
 
   <footer class="end" id="privacidade" data-i18n="footerText">Nenhuma foto, vídeo ou gravação sai do seu computador. Tudo é processado no seu navegador com JavaScript comum.</footer>
@@ -795,11 +754,11 @@
     <button class="license-close" id="licenseCloseBtn" type="button" aria-label="Fechar">&times;</button>
 
     <div class="license-state" id="licenseStateFree">
-      <h3 data-i18n="licenseFreeTitle">GIF Local PRO</h3>
-      <p class="hint" data-i18n="licenseFreeDesc">Seu aplicativo está funcionando em modo gratuito.</p>
+      <h3 data-i18n="licenseFreeTitle">GIF Local</h3>
+      <p class="hint" data-i18n="licenseFreeDesc">Todas as ferramentas já estão liberadas para você. Não é preciso licença nem cadastro.</p>
       <div class="btn-row">
         <button class="btn" id="licenseShowActivateBtn" type="button" data-i18n="licenseActivateBtn">Ativar licença</button>
-        <a class="btn secondary" href="#planos" id="licenseBuyBtn" data-i18n="licenseBuyBtn">Comprar GIF Local PRO</a>
+        <a class="btn secondary" href="#apoiar" id="licenseBuyBtn" data-i18n="licenseBuyBtn">Apoiar o projeto</a>
       </div>
     </div>
 
@@ -1270,10 +1229,18 @@ const I18N = {
     chargedAsBrl: (amt) => `Cobrado como ${amt} (BRL)`,
     usageCounterMsg: (used, total) => `${used} de ${total} GIFs grátis hoje`,
     limitReachedMsg: "Você já criou seus 3 GIFs grátis de hoje. Role para baixo para desbloquear uso ilimitado.",
-    proStatusFree: "Free", proOnlyOptionSuffix: " 🔒 PRO",
+    proStatusFree: "Grátis", proOnlyOptionSuffix: "",
+    supportTitle: "Apoie o GIF Local",
+    supportDesc: "Todas as ferramentas são gratuitas e continuam assim. Não há cadastro, marca d'água nem limite diário. Se o GIF Local resolveu o seu problema, você pode contribuir — é voluntário e não desbloqueia nada, porque não há nada bloqueado.",
+    supportSoon: "A opção de apoio por PIX está sendo preparada.",
+    founderNote: "★ Você é um Apoiador Fundador — apoiou o projeto quando ele ainda era pago. Obrigado. Sua licença continua válida e nada foi tirado de você: agora todo mundo tem o que você comprou.",
+    licenseFreeDesc: "Todas as ferramentas já estão liberadas para você. Não é preciso licença nem cadastro.",
+    licenseBuyBtn: "Apoiar o projeto",
+    licenseFreeTitle: "GIF Local",
+    founderBadge: "★ Apoiador Fundador",
+    founderBadgeTitle: "Você apoiou o GIF Local quando ele ainda era pago. Obrigado — todas as ferramentas agora são gratuitas para todos.",
     planFreeF4: "GIF até 480px · gravação 720p, 60s", planSupF3: "GIF até 1280px · gravação 1080p, 10 min",
-    licenseFreeTitle: "GIF Local PRO", licenseFreeDesc: "Seu aplicativo está funcionando em modo gratuito.",
-    licenseActivateBtn: "Ativar licença", licenseBuyBtn: "Comprar GIF Local PRO",
+    licenseActivateBtn: "Ativar licença",
     licenseActivateTitle: "Ativar licença", licenseActivateDesc: "Cole a chave que você recebeu após a compra.",
     licenseSubmitBtn: "Ativar", licenseCancelBtn: "Cancelar", licenseActivating: "Ativando...",
     licenseActiveTitle: "✓ GIF Local PRO ativado",
@@ -1430,10 +1397,18 @@ const I18N = {
     chargedAsBrl: (amt) => `Charged as ${amt} (BRL)`,
     usageCounterMsg: (used, total) => `${used} of ${total} free GIFs today`,
     limitReachedMsg: "You've made your 3 free GIFs for today. Scroll down to unlock unlimited use.",
-    proStatusFree: "Free", proOnlyOptionSuffix: " 🔒 PRO",
+    proStatusFree: "Free", proOnlyOptionSuffix: "",
+    supportTitle: "Support GIF Local",
+    supportDesc: "Every tool is free and stays that way. No sign-up, no watermark, no daily limit. If GIF Local solved your problem, you can chip in — it is voluntary and unlocks nothing, because nothing is locked.",
+    supportSoon: "PIX support is being set up.",
+    founderNote: "★ You are a Founding Supporter — you backed the project while it was still paid. Thank you. Your licence remains valid and nothing was taken from you: everyone now has what you bought.",
+    licenseFreeDesc: "Every tool is already unlocked for you. No licence or sign-up needed.",
+    licenseBuyBtn: "Support the project",
+    licenseFreeTitle: "GIF Local",
+    founderBadge: "★ Founding Supporter",
+    founderBadgeTitle: "You backed GIF Local when it was still paid. Thank you — every tool is now free for everyone.",
     planFreeF4: "GIF up to 480px · 720p recording, 60s", planSupF3: "GIF up to 1280px · 1080p recording, 10 min",
-    licenseFreeTitle: "GIF Local PRO", licenseFreeDesc: "Your app is currently running in free mode.",
-    licenseActivateBtn: "Activate license", licenseBuyBtn: "Buy GIF Local PRO",
+    licenseActivateBtn: "Activate license",
     licenseActivateTitle: "Activate license", licenseActivateDesc: "Paste the key you received after purchase.",
     licenseSubmitBtn: "Activate", licenseCancelBtn: "Cancel", licenseActivating: "Activating...",
     licenseActiveTitle: "✓ GIF Local PRO activated",
@@ -1590,10 +1565,18 @@ const I18N = {
     chargedAsBrl: (amt) => `Se cobra como ${amt} (BRL)`,
     usageCounterMsg: (used, total) => `${used} de ${total} GIFs gratis hoy`,
     limitReachedMsg: "Ya creaste tus 3 GIFs gratis de hoy. Baja para desbloquear uso ilimitado.",
-    proStatusFree: "Free", proOnlyOptionSuffix: " 🔒 PRO",
+    proStatusFree: "Gratis", proOnlyOptionSuffix: "",
+    supportTitle: "Apoya GIF Local",
+    supportDesc: "Todas las herramientas son gratuitas y seguirán siéndolo. Sin registro, sin marca de agua, sin límite diario. Si GIF Local resolvió tu problema, puedes contribuir — es voluntario y no desbloquea nada, porque nada está bloqueado.",
+    supportSoon: "La opción de apoyo por PIX se está preparando.",
+    founderNote: "★ Eres un Mecenas Fundador — apoyaste el proyecto cuando aún era de pago. Gracias. Tu licencia sigue siendo válida y no se te quitó nada: ahora todos tienen lo que compraste.",
+    licenseFreeDesc: "Todas las herramientas ya están disponibles para ti. No necesitas licencia ni registro.",
+    licenseBuyBtn: "Apoyar el proyecto",
+    licenseFreeTitle: "GIF Local",
+    founderBadge: "★ Mecenas Fundador",
+    founderBadgeTitle: "Apoyaste GIF Local cuando aún era de pago. Gracias — todas las herramientas ahora son gratuitas para todos.",
     planFreeF4: "GIF hasta 480px · grabación 720p, 60s", planSupF3: "GIF hasta 1280px · grabación 1080p, 10 min",
-    licenseFreeTitle: "GIF Local PRO", licenseFreeDesc: "Tu aplicación está funcionando en modo gratuito.",
-    licenseActivateBtn: "Activar licencia", licenseBuyBtn: "Comprar GIF Local PRO",
+    licenseActivateBtn: "Activar licencia",
     licenseActivateTitle: "Activar licencia", licenseActivateDesc: "Pega la clave que recibiste tras la compra.",
     licenseSubmitBtn: "Activar", licenseCancelBtn: "Cancelar", licenseActivating: "Activando...",
     licenseActiveTitle: "✓ GIF Local PRO activado",
@@ -1750,10 +1733,18 @@ const I18N = {
     chargedAsBrl: (amt) => `Facturé comme ${amt} (BRL)`,
     usageCounterMsg: (used, total) => `${used} sur ${total} GIF gratuits aujourd'hui`,
     limitReachedMsg: "Vous avez créé vos 3 GIF gratuits du jour. Faites défiler pour débloquer l'usage illimité.",
-    proStatusFree: "Free", proOnlyOptionSuffix: " 🔒 PRO",
+    proStatusFree: "Gratuit", proOnlyOptionSuffix: "",
+    supportTitle: "Soutenir GIF Local",
+    supportDesc: "Tous les outils sont gratuits et le resteront. Sans inscription, sans filigrane, sans limite quotidienne. Si GIF Local a résolu votre problème, vous pouvez contribuer — c'est volontaire et cela ne débloque rien, car rien n'est bloqué.",
+    supportSoon: "L'option de soutien par PIX est en préparation.",
+    founderNote: "★ Vous êtes un Soutien Fondateur — vous avez soutenu le projet quand il était encore payant. Merci. Votre licence reste valide et rien ne vous a été retiré : tout le monde a désormais ce que vous avez acheté.",
+    licenseFreeDesc: "Tous les outils sont déjà débloqués pour vous. Aucune licence ni inscription nécessaire.",
+    licenseBuyBtn: "Soutenir le projet",
+    licenseFreeTitle: "GIF Local",
+    founderBadge: "★ Soutien Fondateur",
+    founderBadgeTitle: "Vous avez soutenu GIF Local quand il était encore payant. Merci — tous les outils sont désormais gratuits pour tous.",
     planFreeF4: "GIF jusqu'à 480px · enregistrement 720p, 60s", planSupF3: "GIF jusqu'à 1280px · enregistrement 1080p, 10 min",
-    licenseFreeTitle: "GIF Local PRO", licenseFreeDesc: "Votre application fonctionne actuellement en mode gratuit.",
-    licenseActivateBtn: "Activer la licence", licenseBuyBtn: "Acheter GIF Local PRO",
+    licenseActivateBtn: "Activer la licence",
     licenseActivateTitle: "Activer la licence", licenseActivateDesc: "Collez la clé reçue après l'achat.",
     licenseSubmitBtn: "Activer", licenseCancelBtn: "Annuler", licenseActivating: "Activation...",
     licenseActiveTitle: "✓ GIF Local PRO activé",
@@ -1910,10 +1901,18 @@ const I18N = {
     chargedAsBrl: (amt) => `Abgerechnet als ${amt} (BRL)`,
     usageCounterMsg: (used, total) => `${used} von ${total} kostenlosen GIFs heute`,
     limitReachedMsg: "Du hast heute schon 3 kostenlose GIFs erstellt. Scrolle nach unten, um unbegrenzte Nutzung freizuschalten.",
-    proStatusFree: "Free", proOnlyOptionSuffix: " 🔒 PRO",
+    proStatusFree: "Kostenlos", proOnlyOptionSuffix: "",
+    supportTitle: "GIF Local unterstützen",
+    supportDesc: "Alle Werkzeuge sind kostenlos und bleiben es. Keine Anmeldung, kein Wasserzeichen, kein Tageslimit. Wenn GIF Local Ihr Problem gelöst hat, können Sie etwas beitragen — freiwillig, und es schaltet nichts frei, denn nichts ist gesperrt.",
+    supportSoon: "Die Unterstützung per PIX wird gerade eingerichtet.",
+    founderNote: "★ Sie sind ein Gründungsunterstützer — Sie haben das Projekt unterstützt, als es noch kostenpflichtig war. Danke. Ihre Lizenz bleibt gültig und Ihnen wurde nichts weggenommen: alle haben jetzt, was Sie gekauft haben.",
+    licenseFreeDesc: "Alle Werkzeuge sind für Sie bereits freigeschaltet. Keine Lizenz, keine Anmeldung nötig.",
+    licenseBuyBtn: "Projekt unterstützen",
+    licenseFreeTitle: "GIF Local",
+    founderBadge: "★ Gründungsunterstützer",
+    founderBadgeTitle: "Sie haben GIF Local unterstützt, als es noch kostenpflichtig war. Danke — alle Werkzeuge sind jetzt für alle kostenlos.",
     planFreeF4: "GIF bis 480px · Aufnahme 720p, 60s", planSupF3: "GIF bis 1280px · Aufnahme 1080p, 10 Min.",
-    licenseFreeTitle: "GIF Local PRO", licenseFreeDesc: "Deine App läuft aktuell im kostenlosen Modus.",
-    licenseActivateBtn: "Lizenz aktivieren", licenseBuyBtn: "GIF Local PRO kaufen",
+    licenseActivateBtn: "Lizenz aktivieren",
     licenseActivateTitle: "Lizenz aktivieren", licenseActivateDesc: "Füge den nach dem Kauf erhaltenen Schlüssel ein.",
     licenseSubmitBtn: "Aktivieren", licenseCancelBtn: "Abbrechen", licenseActivating: "Wird aktiviert...",
     licenseActiveTitle: "✓ GIF Local PRO aktiviert",
@@ -2070,10 +2069,18 @@ const I18N = {
     chargedAsBrl: (amt) => `Addebitato come ${amt} (BRL)`,
     usageCounterMsg: (used, total) => `${used} di ${total} GIF gratuiti oggi`,
     limitReachedMsg: "Hai già creato i tuoi 3 GIF gratuiti di oggi. Scorri in basso per sbloccare l'uso illimitato.",
-    proStatusFree: "Free", proOnlyOptionSuffix: " 🔒 PRO",
+    proStatusFree: "Gratis", proOnlyOptionSuffix: "",
+    supportTitle: "Sostieni GIF Local",
+    supportDesc: "Tutti gli strumenti sono gratuiti e lo restano. Nessuna registrazione, nessuna filigrana, nessun limite giornaliero. Se GIF Local ha risolto il tuo problema, puoi contribuire — è volontario e non sblocca nulla, perché nulla è bloccato.",
+    supportSoon: "L'opzione di sostegno tramite PIX è in preparazione.",
+    founderNote: "★ Sei un Sostenitore Fondatore — hai sostenuto il progetto quando era ancora a pagamento. Grazie. La tua licenza resta valida e non ti è stato tolto nulla: ora tutti hanno ciò che hai comprato.",
+    licenseFreeDesc: "Tutti gli strumenti sono già sbloccati per te. Nessuna licenza né registrazione.",
+    licenseBuyBtn: "Sostieni il progetto",
+    licenseFreeTitle: "GIF Local",
+    founderBadge: "★ Sostenitore Fondatore",
+    founderBadgeTitle: "Hai sostenuto GIF Local quando era ancora a pagamento. Grazie — tutti gli strumenti ora sono gratuiti per tutti.",
     planFreeF4: "GIF fino a 480px · registrazione 720p, 60s", planSupF3: "GIF fino a 1280px · registrazione 1080p, 10 min",
-    licenseFreeTitle: "GIF Local PRO", licenseFreeDesc: "La tua app sta funzionando in modalità gratuita.",
-    licenseActivateBtn: "Attiva licenza", licenseBuyBtn: "Acquista GIF Local PRO",
+    licenseActivateBtn: "Attiva licenza",
     licenseActivateTitle: "Attiva licenza", licenseActivateDesc: "Incolla la chiave ricevuta dopo l'acquisto.",
     licenseSubmitBtn: "Attiva", licenseCancelBtn: "Annulla", licenseActivating: "Attivazione...",
     licenseActiveTitle: "✓ GIF Local PRO attivato",
@@ -2105,19 +2112,9 @@ const PLAN_PRICES = {
   de: { sup: '€ 2,09', pro: '€ 6,29' },
   it: { sup: '€ 2,09', pro: '€ 6,29' },
 };
-function updatePlanPrices(){
-  const p = PLAN_PRICES[currentLang] || PLAN_PRICES.pt;
-  $('planSupPrice').textContent = p.sup;
-  $('planProPrice2').textContent = p.pro;
-  /* Cada idioma agora tem um link Stripe/PayPal próprio na moeda exibida
-     (BRL para pt, USD para en, EUR para es/fr/de/it), então o valor
-     mostrado é o valor de fato cobrado — não precisa mais do aviso de
-     "cobrado em BRL". */
-  const supNote = $('planSupChargeNote');
-  const proNote = $('planProChargeNote');
-  if (supNote) supNote.textContent = '';
-  if (proNote) proNote.textContent = '';
-}
+/* Não há mais preços na página: as ferramentas são gratuitas.
+   A função continua porque o trocador de idioma a chama. */
+function updatePlanPrices(){}
 
 /* =========================================================
    MODELO CENTRAL DE PLANOS — Free / Pro / Full
@@ -2149,51 +2146,51 @@ const BACKEND_PLAN_TO_TIER = {
   empresa: 'full',
 };
 
+/* TODAS AS FERRAMENTAS SÃO GRATUITAS.
+
+   O GIF Local processa tudo no navegador de quem usa. Não existe
+   servidor de processamento, então um GIF a mais não custa nada a
+   ninguém — cobrar por ele era uma escassez inventada, não uma
+   escassez real. Em setembro/2026 os limites foram removidos.
+
+   Os três tiers continuam existindo por um motivo só: quem comprou
+   Apoiador (R$ 9,90) ou Profissional (R$ 29,90) quando os recursos
+   eram pagos não pode simplesmente descobrir que agora é de graça.
+   A licença dessas pessoas segue válida e passa a valer como
+   reconhecimento — ver FOUNDER_PLANS e o selo "Apoiador Fundador".
+
+   Os campos abaixo ficam idênticos nos três tiers de propósito:
+   assim nenhum caminho do código consegue, por engano, limitar
+   alguém. Se um dia houver um recurso realmente caro, ele nasce
+   como um campo novo aqui, e não como um limite no que já é livre. */
+const UNLIMITED = {
+  dailyGifLimit: Infinity,
+  lockedSizes: [],
+  /* Captura de vídeo (gravação de tela/câmera). captureHeight é o que
+     pedimos ao navegador — 'ideal', não 'exact': se o dispositivo não
+     tiver essa resolução, ele entrega a que tem em vez de falhar.
+     maxRecordingSec = 0 significa sem limite artificial de duração. */
+  captureWidth: 3840,
+  captureHeight: 2160,
+  maxRecordingSec: 0,
+};
+
 const PLANS = {
-  free: {
-    tier: 'free',
-    backendPlan: null,
-    label: 'Free',
-    dailyGifLimit: 3,
-    lockedSizes: ['640', '960', '1280'],
-    /* Captura de vídeo (gravação de tela/câmera). captureHeight é o que
-       pedimos ao navegador — 'ideal', não 'exact': se o dispositivo não
-       tiver essa resolução, ele entrega a que tem em vez de falhar.
-       maxRecordingSec = 0 significa sem limite artificial de duração. */
-    captureWidth: 1280,
-    captureHeight: 720,
-    maxRecordingSec: 60,
-  },
-  pro: {
-    tier: 'pro',
-    backendPlan: 'apoiador',
-    label: 'Pro',
-    dailyGifLimit: Infinity,
-    lockedSizes: [],
-    captureWidth: 1920,
-    captureHeight: 1080,
-    maxRecordingSec: 600,
-  },
-  full: {
-    tier: 'full',
-    backendPlan: 'profissional',
-    label: 'Full',
-    dailyGifLimit: Infinity,
-    lockedSizes: [],
-    captureWidth: 3840,
-    captureHeight: 2160,
-    maxRecordingSec: 0,
-  },
+  free: { tier: 'free', backendPlan: null, label: 'Grátis', ...UNLIMITED },
+  pro: { tier: 'pro', backendPlan: 'apoiador', label: 'Apoiador Fundador', ...UNLIMITED },
+  full: { tier: 'full', backendPlan: 'profissional', label: 'Apoiador Fundador', ...UNLIMITED },
 };
 
 /* =========================================================
-   LIMITE FREEMIUM (3 GIFs grátis por dia)
-   100% client-side (o GIF Local não tem servidor), então isso é
-   fricção honesta, não um bloqueio à prova de burla — localStorage
-   se apaga, aba anônima reseta. Se localStorage estiver bloqueado
-   (ex.: modo privado em alguns navegadores), degradamos com
-   elegância para "sem limite nesta sessão" em vez de travar a
-   ferramenta.
+   CONTAGEM DE USO — sem limite, apenas memória local
+
+   Havia aqui um limite de 3 GIFs por dia. Ele saiu: não existia
+   custo real por trás dele. As funções continuam porque outras
+   partes do código as chamam, e porque a contagem ainda serve para
+   saber a hora certa de convidar alguém a apoiar o projeto (depois
+   que a ferramenta já entregou o resultado, nunca antes).
+
+   Nada aqui bloqueia nada. canCreateGif() retorna sempre true.
    ========================================================= */
 const USAGE_STORAGE_KEY = 'gifLocalUsage';
 let usageTrackingAvailable = true;
@@ -2226,13 +2223,13 @@ function writeUsageState(state){
 }
 
 function getRemainingToday(){
-  if (!usageTrackingAvailable) return Infinity;
-  return Math.max(0, PLANS.free.dailyGifLimit - readUsageState().count);
+  return Infinity; /* sem teto: o processamento é do navegador de quem usa */
 }
 
+/* Nunca bloqueia. Mantida porque é a resposta certa para qualquer
+   código futuro que pergunte "posso gerar?" — a resposta é sim. */
 function canCreateGif(){
-  if (typeof licenseState !== 'undefined' && licenseState.isPro) return true;
-  return !usageTrackingAvailable || getRemainingToday() > 0;
+  return true;
 }
 
 function registerGifCreated(){
@@ -2243,26 +2240,12 @@ function registerGifCreated(){
   updateUsageBadge();
 }
 
+/* A barrinha "2 de 3 GIFs hoje" não existe mais — não há mais um 3.
+   Deixar de mostrar é o ponto: nada de contador pressionando quem
+   só quer usar a ferramenta. */
 function updateUsageBadge(){
   const el = $('usageBadge');
-  if (!el) return;
-  if (!usageTrackingAvailable || (typeof licenseState !== 'undefined' && licenseState.isPro)) { el.classList.remove('show'); return; }
-  const used = Math.min(readUsageState().count, PLANS.free.dailyGifLimit);
-  const pct = Math.round((used / PLANS.free.dailyGifLimit) * 100);
-  el.innerHTML = '<span class="usage-track"><span class="usage-fill" style="width:' + pct + '%"></span></span><span></span>';
-  el.querySelector('span:last-child').textContent = t('usageCounterMsg', used, PLANS.free.dailyGifLimit);
-  el.classList.toggle('usage-badge--full', used >= PLANS.free.dailyGifLimit);
-  el.classList.add('show');
-}
-
-function showUpgradePrompt(prefix){
-  setProgress(prefix, t('limitReachedMsg'), undefined);
-  const plans = document.getElementById('planos');
-  if (!plans) return;
-  plans.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  plans.classList.remove('upgrade-pulse');
-  void plans.offsetWidth; /* reinicia a animação mesmo se já rodou antes */
-  plans.classList.add('upgrade-pulse');
+  if (el) el.classList.remove('show');
 }
 
 function detectLang(){
@@ -2503,7 +2486,15 @@ document.querySelectorAll('#tabs button').forEach(btn => {
    um pedido pago via PayPal precisa de uma licença criada manualmente
    (wrangler d1 execute) depois de confirmar o pagamento. */
 /* Um link/botão por moeda, não por idioma: es/fr/de/it dividem o
-   mesmo link EUR, já que todos usam a mesma moeda. */
+   mesmo link EUR, já que todos usam a mesma moeda.
+
+   ⚠️ SETEMBRO/2026 — NENHUM DESTES LINKS ESTÁ MAIS LIGADO A UM BOTÃO.
+   As ferramentas passaram a ser gratuitas e os cards de preço saíram da
+   página. Os links continuam aqui apenas como inventário: eles seguem
+   ATIVOS no Stripe e no PayPal, e cobrariam de verdade se alguém
+   abrisse a URL. Antes de reaproveitar qualquer um como doação, revise
+   o nome do produto no painel — hoje dizem "GIF Local Pro", o que seria
+   enganoso para uma contribuição voluntária. */
 const CHECKOUT_LINKS = {
   BRL: {
     stripeSup: 'https://buy.stripe.com/bJe5kD95456i9oc6sR8bS02',
@@ -2533,10 +2524,6 @@ function goToCheckout(url){
   if (url) { window.open(url, '_blank', 'noopener'); }
   else { alert(t('planComingSoonMsg')); }
 }
-$('planSupBtnStripe').addEventListener('click', () => goToCheckout(CHECKOUT_LINKS[currentCurrency()].stripeSup));
-$('planSupBtnPayPal').addEventListener('click', () => goToCheckout(CHECKOUT_LINKS[currentCurrency()].paypalSup));
-$('planProBtnStripe').addEventListener('click', () => goToCheckout(CHECKOUT_LINKS[currentCurrency()].stripePro));
-$('planProBtnPayPal').addEventListener('click', () => goToCheckout(CHECKOUT_LINKS[currentCurrency()].paypalPro));
 
 /* =========================================================
    LICENCIAMENTO — GIF Local PRO
@@ -2672,12 +2659,20 @@ async function refreshLicenseState(){
   updateUsageBadge();
 }
 
+/* O chip do topo deixou de anunciar um plano e passou a reconhecer
+   quem apoiou. Para quem nunca comprou ele diz "Grátis" — que agora
+   é a verdade inteira, e não mais "a versão limitada". */
 function updateProStatusBadge(){
   const btn = $('proStatusBtn');
   const label = $('proStatusLabel');
   if (!btn || !label) return;
   btn.classList.toggle('is-pro', licenseState.isPro);
-  label.textContent = licenseState.isPro ? 'PRO' : t('proStatusFree');
+  label.textContent = licenseState.isPro ? t('founderBadge') : t('proStatusFree');
+  btn.title = licenseState.isPro ? t('founderBadgeTitle') : t('licenseFreeTitle');
+  /* O agradecimento na seção de apoio só aparece para quem de fato
+     comprou — para todo o resto seria uma mensagem sem sentido. */
+  const nota = $('founderNote');
+  if (nota) nota.style.display = licenseState.isPro ? 'block' : 'none';
 }
 
 function applyResolutionGate(){
@@ -2965,7 +2960,6 @@ function loadImage(url){
 }
 
 $('fotosBtn').addEventListener('click', async () => {
-  if (!canCreateGif()) { showUpgradePrompt('fotos'); return; }
   $('fotosBtn').disabled = true;
   try{
     setProgress('fotos', t('progLoadingPhotos'), 2);
@@ -3083,7 +3077,6 @@ $('videoInput').addEventListener('change', (e) => {
 });
 
 $('videoBtn').addEventListener('click', async () => {
-  if (!canCreateGif()) { showUpgradePrompt('video'); return; }
   $('videoBtn').disabled = true;
   try{
     const start = parseFloat($('videoStart').value);
@@ -3413,7 +3406,6 @@ $('cameraFlipBtn').addEventListener('click', () => {
 });
 
 $('telaBtn').addEventListener('click', async () => {
-  if (!canCreateGif()) { showUpgradePrompt('tela'); return; }
   $('telaBtn').disabled = true;
   try{
     const start = parseFloat($('telaStart').value);
@@ -3836,7 +3828,6 @@ requestAnimationFrame(previewLoop);
 $('zeroSpeed').addEventListener('input', (e) => { $('zeroSpeedOut').textContent = e.target.value; });
 
 $('zeroBtn').addEventListener('click', async () => {
-  if (!canCreateGif()) { showUpgradePrompt('zero'); return; }
   $('zeroBtn').disabled = true;
   try{
     /* No modo IA, gera a imagem primeiro (única etapa que sai do
