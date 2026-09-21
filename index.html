@@ -111,6 +111,32 @@
   .usage-badge.usage-badge--full{color:var(--amber);}
   .usage-badge.usage-badge--full .usage-fill{background:var(--amber);}
 
+  /* O cabeçalho é fixo: sem scroll-margin, rolar até uma seção deixava
+     o título escondido atrás dele. Vale para qualquer âncora do site. */
+  section[id], [id="apoiar"]{scroll-margin-top:96px;}
+
+  /* --- apoio voluntário --- */
+  .support-values{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:18px;}
+  .support-values button{font:inherit; font-size:13px; font-weight:700; padding:9px 14px; min-height:44px; border-radius:10px; border:1px solid var(--line); background:var(--bg-soft); color:var(--ink-soft); cursor:pointer; transition:.15s;}
+  .support-values button:hover{border-color:var(--primary); color:var(--primary);}
+  .support-values button.is-on{background:var(--primary); border-color:var(--primary); color:#fff;}
+  .support-qr{display:flex; justify-content:center; margin:0 auto 14px; line-height:0;}
+  .support-qr svg{border-radius:10px; border:1px solid var(--line); max-width:100%; height:auto;}
+  .support-hint{font-size:13px; color:var(--ink-soft); margin:0 0 14px;}
+  .support-code{width:100%; box-sizing:border-box; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11px; line-height:1.45; padding:10px; border:1px solid var(--line); border-radius:10px; background:var(--bg-soft); color:var(--ink-soft); resize:none; margin-bottom:12px;}
+  .support-intl{font-size:13px; margin:16px 0 0; color:var(--ink-soft);}
+  .support-privacy{font-size:12px; line-height:1.6; color:var(--ink-faint); margin:16px 0 0;}
+  .support-dismiss{display:inline-block; margin-top:12px; background:none; border:none; padding:12px 8px; min-height:44px; font:inherit; font-size:12.5px; color:var(--ink-faint); text-decoration:underline; cursor:pointer;}
+  .support-dismiss:hover{color:var(--ink-soft);}
+  .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;}
+
+  /* Convite que aparece DEPOIS do download. Discreto de propósito:
+     não é modal, não cobre nada, não interrompe e some de vez se a
+     pessoa dispensar. */
+  .support-nudge{display:none; align-items:center; flex-wrap:wrap; gap:10px; margin-top:14px; padding:12px 14px; font-size:13px; border-radius:var(--radius-lg); background:color-mix(in srgb, var(--primary) 7%, transparent); border:1px solid color-mix(in srgb, var(--primary) 20%, transparent);}
+  .support-nudge .btn.small{padding:8px 12px; font-size:12.5px; min-height:44px;}
+  @media(max-width:480px){ .support-nudge{flex-direction:column; align-items:stretch; text-align:center;} }
+
   /* Bloco de apoio voluntário. Sóbrio de propósito: não deve competir
      com a ferramenta nem parecer um paywall disfarçado. */
   .support-box{max-width:520px; margin:24px auto 0; padding:22px 24px; background:var(--card); border:1px solid var(--line); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm);}
@@ -469,6 +495,11 @@
         </div>
         <div class="btn-row result-actions">
           <a class="btn" id="fotosDownload" download="meu-gif.gif"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 19h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="fotosDownload">Baixar GIF</span></a>
+          <div class="support-nudge" id="fotosNudge" style="display:none;">
+            <span data-i18n="nudgeText">O GIF Local te ajudou? Ele é gratuito e sem anúncios.</span>
+            <button class="btn small" type="button" id="fotosNudgeBtn" data-i18n="nudgeYes">☕ Apoiar o projeto</button>
+            <button class="support-dismiss" type="button" id="fotosNudgeNo" data-i18n="nudgeNo">Agora não</button>
+          </div>
           <button class="btn secondary" id="fotosCopy" type="button"><svg viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.8"/></svg><span data-i18n="copyBtn">Copiar</span></button>
           <button class="btn secondary" id="fotosShare" type="button"><svg viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5" r="2.3" stroke="currentColor" stroke-width="1.8"/><circle cx="6" cy="12" r="2.3" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="19" r="2.3" stroke="currentColor" stroke-width="1.8"/><path d="M8.1 10.8 15.9 6.2M8.1 13.2l7.8 4.6" stroke="currentColor" stroke-width="1.8"/></svg><span data-i18n="shareBtn">Compartilhar</span></button>
           <button class="btn secondary" id="fotosReset" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0 1 13.7-5.7M20 12a8 8 0 0 1-13.7 5.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M17 3v4h-4M7 21v-4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="createAnotherBtn">Criar outro</span></button>
@@ -543,6 +574,11 @@
         </div>
         <div class="btn-row result-actions">
           <a class="btn" id="videoDownload" download="meu-gif.gif"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 19h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="videoDownload">Baixar GIF</span></a>
+          <div class="support-nudge" id="videoNudge" style="display:none;">
+            <span data-i18n="nudgeText">O GIF Local te ajudou? Ele é gratuito e sem anúncios.</span>
+            <button class="btn small" type="button" id="videoNudgeBtn" data-i18n="nudgeYes">☕ Apoiar o projeto</button>
+            <button class="support-dismiss" type="button" id="videoNudgeNo" data-i18n="nudgeNo">Agora não</button>
+          </div>
           <button class="btn secondary" id="videoCopy" type="button"><svg viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.8"/></svg><span data-i18n="copyBtn">Copiar</span></button>
           <button class="btn secondary" id="videoShare" type="button"><svg viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5" r="2.3" stroke="currentColor" stroke-width="1.8"/><circle cx="6" cy="12" r="2.3" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="19" r="2.3" stroke="currentColor" stroke-width="1.8"/><path d="M8.1 10.8 15.9 6.2M8.1 13.2l7.8 4.6" stroke="currentColor" stroke-width="1.8"/></svg><span data-i18n="shareBtn">Compartilhar</span></button>
           <button class="btn secondary" id="videoReset" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0 1 13.7-5.7M20 12a8 8 0 0 1-13.7 5.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M17 3v4h-4M7 21v-4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="createAnotherBtn">Criar outro</span></button>
@@ -632,6 +668,11 @@
         </div>
         <div class="btn-row result-actions">
           <a class="btn" id="telaDownload" download="meu-gif.gif"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 19h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="telaDownload">Baixar GIF</span></a>
+          <div class="support-nudge" id="telaNudge" style="display:none;">
+            <span data-i18n="nudgeText">O GIF Local te ajudou? Ele é gratuito e sem anúncios.</span>
+            <button class="btn small" type="button" id="telaNudgeBtn" data-i18n="nudgeYes">☕ Apoiar o projeto</button>
+            <button class="support-dismiss" type="button" id="telaNudgeNo" data-i18n="nudgeNo">Agora não</button>
+          </div>
           <button class="btn secondary" id="telaCopy" type="button"><svg viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.8"/></svg><span data-i18n="copyBtn">Copiar</span></button>
           <button class="btn secondary" id="telaShare" type="button"><svg viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5" r="2.3" stroke="currentColor" stroke-width="1.8"/><circle cx="6" cy="12" r="2.3" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="19" r="2.3" stroke="currentColor" stroke-width="1.8"/><path d="M8.1 10.8 15.9 6.2M8.1 13.2l7.8 4.6" stroke="currentColor" stroke-width="1.8"/></svg><span data-i18n="shareBtn">Compartilhar</span></button>
           <button class="btn secondary" id="telaReset" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0 1 13.7-5.7M20 12a8 8 0 0 1-13.7 5.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M17 3v4h-4M7 21v-4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="createAnotherBtn">Criar outro</span></button>
@@ -731,6 +772,11 @@
         </div>
         <div class="btn-row result-actions">
           <a class="btn" id="zeroDownload" download="meu-gif.gif"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 19h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="zeroDownload">Baixar GIF</span></a>
+          <div class="support-nudge" id="zeroNudge" style="display:none;">
+            <span data-i18n="nudgeText">O GIF Local te ajudou? Ele é gratuito e sem anúncios.</span>
+            <button class="btn small" type="button" id="zeroNudgeBtn" data-i18n="nudgeYes">☕ Apoiar o projeto</button>
+            <button class="support-dismiss" type="button" id="zeroNudgeNo" data-i18n="nudgeNo">Agora não</button>
+          </div>
           <button class="btn secondary" id="zeroCopy" type="button"><svg viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.8"/></svg><span data-i18n="copyBtn">Copiar</span></button>
           <button class="btn secondary" id="zeroShare" type="button"><svg viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5" r="2.3" stroke="currentColor" stroke-width="1.8"/><circle cx="6" cy="12" r="2.3" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="19" r="2.3" stroke="currentColor" stroke-width="1.8"/><path d="M8.1 10.8 15.9 6.2M8.1 13.2l7.8 4.6" stroke="currentColor" stroke-width="1.8"/></svg><span data-i18n="shareBtn">Compartilhar</span></button>
           <button class="btn secondary" id="zeroReset" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0 1 13.7-5.7M20 12a8 8 0 0 1-13.7 5.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M17 3v4h-4M7 21v-4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="createAnotherBtn">Criar outro</span></button>
@@ -758,7 +804,28 @@
     <p class="desc" data-i18n="supportDesc">Todas as ferramentas são gratuitas e continuam assim. Não há cadastro, marca d'água nem limite diário. Se o GIF Local resolveu o seu problema, você pode contribuir — é voluntário e não desbloqueia nada, porque não há nada bloqueado.</p>
 
     <div class="support-box" id="supportBox">
-      <p class="support-soon" id="supportSoon" data-i18n="supportSoon">A opção de apoio por PIX está sendo preparada.</p>
+      <div class="support-values" id="supportValues" role="group" aria-label="Valor sugerido">
+        <button type="button" data-v="5">R$ 5</button>
+        <button type="button" data-v="10">R$ 10</button>
+        <button type="button" data-v="20">R$ 20</button>
+        <button type="button" data-v="50">R$ 50</button>
+        <button type="button" data-v="" class="is-on" data-i18n="supportOther">Outro valor</button>
+      </div>
+
+      <div class="support-qr" id="supportQr" aria-live="polite"></div>
+      <p class="support-hint" data-i18n="supportScan">Abra o app do seu banco, escolha PIX e aponte a câmera. Ou copie o código abaixo.</p>
+
+      <label class="sr-only" for="supportCode" data-i18n="supportCodeLabel">Código PIX copia e cola</label>
+      <textarea id="supportCode" class="support-code" readonly rows="2" spellcheck="false"></textarea>
+      <button class="btn" id="supportCopy" type="button" data-i18n="supportCopy">Copiar código PIX</button>
+
+      <p class="support-intl" id="supportIntl" style="display:none;">
+        <span data-i18n="supportIntlText">Fora do Brasil?</span>
+        <a id="supportPaypal" href="#" rel="noopener" target="_blank" data-i18n="supportPaypal">Apoiar via PayPal</a>
+      </p>
+
+      <p class="support-privacy" data-i18n="supportPrivacy">O pagamento vai direto de você para o projeto. O GIF Local não processa, não armazena e não vê nenhum dado do seu pagamento.</p>
+      <button class="support-dismiss" id="supportDismiss" type="button" data-i18n="supportDismiss">Não quero contribuir agora</button>
     </div>
 
     <p class="desc founder-note" id="founderNote" style="display:none;" data-i18n="founderNote">★ Você é um Apoiador Fundador — apoiou o projeto quando ele ainda era pago. Obrigado. Sua licença continua válida e nada foi tirado de você: agora todo mundo tem o que você comprou.</p>
@@ -1256,11 +1323,23 @@ const I18N = {
     proStatusFree: "Grátis", proOnlyOptionSuffix: "",
     supportTitle: "Apoie o GIF Local",
     supportDesc: "Todas as ferramentas são gratuitas e continuam assim. Não há cadastro, marca d'água nem limite diário. Se o GIF Local resolveu o seu problema, você pode contribuir — é voluntário e não desbloqueia nada, porque não há nada bloqueado.",
-    supportSoon: "A opção de apoio por PIX está sendo preparada.",
     founderNote: "★ Você é um Apoiador Fundador — apoiou o projeto quando ele ainda era pago. Obrigado. Sua licença continua válida e nada foi tirado de você: agora todo mundo tem o que você comprou.",
     licenseFreeDesc: "Todas as ferramentas já estão liberadas para você. Não é preciso licença nem cadastro.",
     licenseBuyBtn: "Apoiar o projeto",
     licenseFreeTitle: "GIF Local",
+    supportOther: "Outro valor",
+    supportScan: "Abra o app do seu banco, escolha PIX e aponte a câmera. Ou copie o código abaixo.",
+    supportCodeLabel: "Código PIX copia e cola",
+    supportCopy: "Copiar código PIX",
+    supportCopied: "Copiado!",
+    supportCopyFail: "Copie do campo acima",
+    supportIntlText: "Fora do Brasil?",
+    supportPaypal: "Apoiar via PayPal",
+    supportPrivacy: "O pagamento vai direto de você para o projeto. O GIF Local não processa, não armazena e não vê nenhum dado do seu pagamento.",
+    supportDismiss: "Não quero contribuir agora",
+    nudgeText: "O GIF Local te ajudou? Ele é gratuito e sem anúncios.",
+    nudgeYes: "☕ Apoiar o projeto",
+    nudgeNo: "Agora não",
     founderBadge: "★ Apoiador Fundador",
     founderBadgeTitle: "Você apoiou o GIF Local quando ele ainda era pago. Obrigado — todas as ferramentas agora são gratuitas para todos.",
     planFreeF4: "GIF até 480px · gravação 720p, 60s", planSupF3: "GIF até 1280px · gravação 1080p, 10 min",
@@ -1424,11 +1503,23 @@ const I18N = {
     proStatusFree: "Free", proOnlyOptionSuffix: "",
     supportTitle: "Support GIF Local",
     supportDesc: "Every tool is free and stays that way. No sign-up, no watermark, no daily limit. If GIF Local solved your problem, you can chip in — it is voluntary and unlocks nothing, because nothing is locked.",
-    supportSoon: "PIX support is being set up.",
     founderNote: "★ You are a Founding Supporter — you backed the project while it was still paid. Thank you. Your licence remains valid and nothing was taken from you: everyone now has what you bought.",
     licenseFreeDesc: "Every tool is already unlocked for you. No licence or sign-up needed.",
     licenseBuyBtn: "Support the project",
     licenseFreeTitle: "GIF Local",
+    supportOther: "Other amount",
+    supportScan: "Open your bank app, choose PIX and point the camera. Or copy the code below.",
+    supportCodeLabel: "PIX copy-and-paste code",
+    supportCopy: "Copy PIX code",
+    supportCopied: "Copied!",
+    supportCopyFail: "Copy from the field above",
+    supportIntlText: "Outside Brazil?",
+    supportPaypal: "Support via PayPal",
+    supportPrivacy: "The payment goes straight from you to the project. GIF Local does not process, store or see any of your payment details.",
+    supportDismiss: "I'd rather not contribute now",
+    nudgeText: "Did GIF Local help you? It is free and ad-free.",
+    nudgeYes: "☕ Support the project",
+    nudgeNo: "Not now",
     founderBadge: "★ Founding Supporter",
     founderBadgeTitle: "You backed GIF Local when it was still paid. Thank you — every tool is now free for everyone.",
     planFreeF4: "GIF up to 480px · 720p recording, 60s", planSupF3: "GIF up to 1280px · 1080p recording, 10 min",
@@ -1592,11 +1683,23 @@ const I18N = {
     proStatusFree: "Gratis", proOnlyOptionSuffix: "",
     supportTitle: "Apoya GIF Local",
     supportDesc: "Todas las herramientas son gratuitas y seguirán siéndolo. Sin registro, sin marca de agua, sin límite diario. Si GIF Local resolvió tu problema, puedes contribuir — es voluntario y no desbloquea nada, porque nada está bloqueado.",
-    supportSoon: "La opción de apoyo por PIX se está preparando.",
     founderNote: "★ Eres un Mecenas Fundador — apoyaste el proyecto cuando aún era de pago. Gracias. Tu licencia sigue siendo válida y no se te quitó nada: ahora todos tienen lo que compraste.",
     licenseFreeDesc: "Todas las herramientas ya están disponibles para ti. No necesitas licencia ni registro.",
     licenseBuyBtn: "Apoyar el proyecto",
     licenseFreeTitle: "GIF Local",
+    supportOther: "Otro importe",
+    supportScan: "Abre la app de tu banco, elige PIX y apunta la cámara. O copia el código de abajo.",
+    supportCodeLabel: "Código PIX para copiar y pegar",
+    supportCopy: "Copiar código PIX",
+    supportCopied: "¡Copiado!",
+    supportCopyFail: "Cópialo del campo de arriba",
+    supportIntlText: "¿Fuera de Brasil?",
+    supportPaypal: "Apoyar con PayPal",
+    supportPrivacy: "El pago va directo de ti al proyecto. GIF Local no procesa, no almacena ni ve ningún dato de tu pago.",
+    supportDismiss: "Prefiero no contribuir ahora",
+    nudgeText: "¿Te ayudó GIF Local? Es gratuito y sin anuncios.",
+    nudgeYes: "☕ Apoyar el proyecto",
+    nudgeNo: "Ahora no",
     founderBadge: "★ Mecenas Fundador",
     founderBadgeTitle: "Apoyaste GIF Local cuando aún era de pago. Gracias — todas las herramientas ahora son gratuitas para todos.",
     planFreeF4: "GIF hasta 480px · grabación 720p, 60s", planSupF3: "GIF hasta 1280px · grabación 1080p, 10 min",
@@ -1760,11 +1863,23 @@ const I18N = {
     proStatusFree: "Gratuit", proOnlyOptionSuffix: "",
     supportTitle: "Soutenir GIF Local",
     supportDesc: "Tous les outils sont gratuits et le resteront. Sans inscription, sans filigrane, sans limite quotidienne. Si GIF Local a résolu votre problème, vous pouvez contribuer — c'est volontaire et cela ne débloque rien, car rien n'est bloqué.",
-    supportSoon: "L'option de soutien par PIX est en préparation.",
     founderNote: "★ Vous êtes un Soutien Fondateur — vous avez soutenu le projet quand il était encore payant. Merci. Votre licence reste valide et rien ne vous a été retiré : tout le monde a désormais ce que vous avez acheté.",
     licenseFreeDesc: "Tous les outils sont déjà débloqués pour vous. Aucune licence ni inscription nécessaire.",
     licenseBuyBtn: "Soutenir le projet",
     licenseFreeTitle: "GIF Local",
+    supportOther: "Autre montant",
+    supportScan: "Ouvrez l'application de votre banque, choisissez PIX et visez avec l'appareil photo. Ou copiez le code ci-dessous.",
+    supportCodeLabel: "Code PIX à copier-coller",
+    supportCopy: "Copier le code PIX",
+    supportCopied: "Copié !",
+    supportCopyFail: "Copiez depuis le champ ci-dessus",
+    supportIntlText: "Hors du Brésil ?",
+    supportPaypal: "Soutenir via PayPal",
+    supportPrivacy: "Le paiement va directement de vous au projet. GIF Local ne traite, ne stocke et ne voit aucune donnée de votre paiement.",
+    supportDismiss: "Je préfère ne pas contribuer maintenant",
+    nudgeText: "GIF Local vous a aidé ? Il est gratuit et sans publicité.",
+    nudgeYes: "☕ Soutenir le projet",
+    nudgeNo: "Pas maintenant",
     founderBadge: "★ Soutien Fondateur",
     founderBadgeTitle: "Vous avez soutenu GIF Local quand il était encore payant. Merci — tous les outils sont désormais gratuits pour tous.",
     planFreeF4: "GIF jusqu'à 480px · enregistrement 720p, 60s", planSupF3: "GIF jusqu'à 1280px · enregistrement 1080p, 10 min",
@@ -1928,11 +2043,23 @@ const I18N = {
     proStatusFree: "Kostenlos", proOnlyOptionSuffix: "",
     supportTitle: "GIF Local unterstützen",
     supportDesc: "Alle Werkzeuge sind kostenlos und bleiben es. Keine Anmeldung, kein Wasserzeichen, kein Tageslimit. Wenn GIF Local Ihr Problem gelöst hat, können Sie etwas beitragen — freiwillig, und es schaltet nichts frei, denn nichts ist gesperrt.",
-    supportSoon: "Die Unterstützung per PIX wird gerade eingerichtet.",
     founderNote: "★ Sie sind ein Gründungsunterstützer — Sie haben das Projekt unterstützt, als es noch kostenpflichtig war. Danke. Ihre Lizenz bleibt gültig und Ihnen wurde nichts weggenommen: alle haben jetzt, was Sie gekauft haben.",
     licenseFreeDesc: "Alle Werkzeuge sind für Sie bereits freigeschaltet. Keine Lizenz, keine Anmeldung nötig.",
     licenseBuyBtn: "Projekt unterstützen",
     licenseFreeTitle: "GIF Local",
+    supportOther: "Anderer Betrag",
+    supportScan: "Öffnen Sie Ihre Banking-App, wählen Sie PIX und richten Sie die Kamera darauf. Oder kopieren Sie den Code unten.",
+    supportCodeLabel: "PIX-Code zum Kopieren",
+    supportCopy: "PIX-Code kopieren",
+    supportCopied: "Kopiert!",
+    supportCopyFail: "Aus dem Feld oben kopieren",
+    supportIntlText: "Außerhalb Brasiliens?",
+    supportPaypal: "Mit PayPal unterstützen",
+    supportPrivacy: "Die Zahlung geht direkt von Ihnen an das Projekt. GIF Local verarbeitet, speichert und sieht keine Ihrer Zahlungsdaten.",
+    supportDismiss: "Ich möchte jetzt nicht beitragen",
+    nudgeText: "Hat GIF Local Ihnen geholfen? Es ist kostenlos und werbefrei.",
+    nudgeYes: "☕ Projekt unterstützen",
+    nudgeNo: "Jetzt nicht",
     founderBadge: "★ Gründungsunterstützer",
     founderBadgeTitle: "Sie haben GIF Local unterstützt, als es noch kostenpflichtig war. Danke — alle Werkzeuge sind jetzt für alle kostenlos.",
     planFreeF4: "GIF bis 480px · Aufnahme 720p, 60s", planSupF3: "GIF bis 1280px · Aufnahme 1080p, 10 Min.",
@@ -2096,11 +2223,23 @@ const I18N = {
     proStatusFree: "Gratis", proOnlyOptionSuffix: "",
     supportTitle: "Sostieni GIF Local",
     supportDesc: "Tutti gli strumenti sono gratuiti e lo restano. Nessuna registrazione, nessuna filigrana, nessun limite giornaliero. Se GIF Local ha risolto il tuo problema, puoi contribuire — è volontario e non sblocca nulla, perché nulla è bloccato.",
-    supportSoon: "L'opzione di sostegno tramite PIX è in preparazione.",
     founderNote: "★ Sei un Sostenitore Fondatore — hai sostenuto il progetto quando era ancora a pagamento. Grazie. La tua licenza resta valida e non ti è stato tolto nulla: ora tutti hanno ciò che hai comprato.",
     licenseFreeDesc: "Tutti gli strumenti sono già sbloccati per te. Nessuna licenza né registrazione.",
     licenseBuyBtn: "Sostieni il progetto",
     licenseFreeTitle: "GIF Local",
+    supportOther: "Altro importo",
+    supportScan: "Apri l'app della tua banca, scegli PIX e inquadra con la fotocamera. Oppure copia il codice qui sotto.",
+    supportCodeLabel: "Codice PIX da copiare e incollare",
+    supportCopy: "Copia codice PIX",
+    supportCopied: "Copiato!",
+    supportCopyFail: "Copia dal campo qui sopra",
+    supportIntlText: "Fuori dal Brasile?",
+    supportPaypal: "Sostieni con PayPal",
+    supportPrivacy: "Il pagamento va direttamente da te al progetto. GIF Local non elabora, non memorizza e non vede alcun dato del tuo pagamento.",
+    supportDismiss: "Preferisco non contribuire ora",
+    nudgeText: "GIF Local ti è stato utile? È gratuito e senza pubblicità.",
+    nudgeYes: "☕ Sostieni il progetto",
+    nudgeNo: "Non ora",
     founderBadge: "★ Sostenitore Fondatore",
     founderBadgeTitle: "Hai sostenuto GIF Local quando era ancora a pagamento. Grazie — tutti gli strumenti ora sono gratuiti per tutti.",
     planFreeF4: "GIF fino a 480px · registrazione 720p, 60s", planSupF3: "GIF fino a 1280px · registrazione 1080p, 10 min",
@@ -2216,6 +2355,482 @@ const PLANS = {
 
    Nada aqui bloqueia nada. canCreateGif() retorna sempre true.
    ========================================================= */
+/* =====================================================================
+   APOIO VOLUNTÁRIO — PIX e internacional
+   ---------------------------------------------------------------------
+   Nada aqui desbloqueia nada. Todas as ferramentas do GIF Local são
+   gratuitas; este bloco existe só para quem quiser retribuir depois de
+   já ter recebido o resultado.
+
+   O QR Code e o "copia e cola" do PIX são gerados AQUI, no navegador de
+   quem doa. Não há gateway, não há intermediário, não há mensalidade e
+   não há nenhuma chamada de rede: o dinheiro vai direto de uma conta
+   para a outra e o projeto não paga nada por isso.
+
+   Por isso o codificador de QR está escrito à mão logo abaixo — a CSP
+   do site proíbe script de terceiros, e puxar uma biblioteca de CDN
+   contrariaria a promessa de "nada sai do seu navegador".
+
+   Validação: o gerador de BR Code foi conferido contra um analisador
+   EMV independente, e os QRs gerados foram decodificados de volta por
+   um leitor externo (OpenCV) nas versões 1 a 19 — todos idênticos ao
+   original.
+   ===================================================================== */
+
+/* Chave PIX aleatória: esconde CPF, telefone e e-mail do recebedor.
+   O nome do titular, por exigência do Banco Central, sempre aparece
+   para quem paga — no app do banco dele, nunca nesta página. */
+const PIX = {
+  chave: '5b773450-fd7b-40b4-90ac-af162a1dbb02',
+  nome: 'GIF Local',
+  cidade: 'Sao Paulo',
+};
+
+/* Preencher quando o usuário criar o link em paypal.com/paypalme/grab.
+   Enquanto estiver vazio, o bloco internacional nem aparece — melhor
+   não mostrar do que mostrar um botão que não leva a lugar nenhum. */
+const PAYPAL_ME = '';
+
+/* ---- BR Code (PIX estatico) — EMV MPM + CRC16-CCITT-FALSE ---- */
+function emv(id, valor){
+  const v = String(valor);
+  return id + String(v.length).padStart(2, '0') + v;
+}
+
+function crc16(str){
+  let crc = 0xFFFF;
+  for (let i = 0; i < str.length; i++) {
+    crc ^= str.charCodeAt(i) << 8;
+    for (let b = 0; b < 8; b++) {
+      crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) : (crc << 1);
+      crc &= 0xFFFF;
+    }
+  }
+  return crc.toString(16).toUpperCase().padStart(4, '0');
+}
+
+/* Remove acentos e caracteres que o padrao nao aceita em nome/cidade. */
+function limpa(txt, max){
+  return String(txt)
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^A-Za-z0-9 ]/g, '')
+    .trim().slice(0, max).toUpperCase();
+}
+
+function brCode({ chave, nome, cidade, valor, txid }){
+  const mai = emv('00', 'br.gov.bcb.pix') + emv('01', chave);
+  let p = '';
+  p += emv('00', '01');                       // formato
+  p += emv('26', mai);                        // conta do recebedor
+  p += emv('52', '0000');                     // categoria
+  p += emv('53', '986');                      // BRL
+  if (valor) p += emv('54', Number(valor).toFixed(2));
+  p += emv('58', 'BR');
+  p += emv('59', limpa(nome, 25));
+  p += emv('60', limpa(cidade, 15));
+  p += emv('62', emv('05', txid ? limpa(txid, 25) : '***'));
+  p += '6304';
+  return p + crc16(p);
+}
+
+/* =====================================================================
+   Codificador de QR Code — JavaScript puro, sem nenhuma dependencia.
+   Modo byte, nivel de correcao M, versoes 1 a 20 (suficiente para um
+   BR Code PIX, que fica na casa dos 100-160 caracteres).
+   ===================================================================== */
+
+/* nivel M: [ecPorBloco, blocosG1, dadosG1, blocosG2, dadosG2] */
+const EC_M = {
+  1:[10,1,16,0,0],   2:[16,1,28,0,0],   3:[26,1,44,0,0],   4:[18,2,32,0,0],
+  5:[24,2,43,0,0],   6:[16,4,27,0,0],   7:[18,4,31,0,0],   8:[22,2,38,2,39],
+  9:[22,3,36,2,37],  10:[26,4,43,1,44], 11:[30,1,50,4,51], 12:[22,6,36,2,37],
+  13:[22,8,37,1,38], 14:[24,4,40,5,41], 15:[24,5,41,5,42], 16:[28,7,45,3,46],
+  17:[28,10,46,1,47],18:[26,9,43,4,44], 19:[26,3,44,11,45],20:[26,3,41,13,42],
+};
+
+const ALIGN = {
+  1:[],2:[6,18],3:[6,22],4:[6,26],5:[6,30],6:[6,34],7:[6,22,38],8:[6,24,42],
+  9:[6,26,46],10:[6,28,50],11:[6,30,54],12:[6,32,58],13:[6,34,62],
+  14:[6,26,46,66],15:[6,26,48,70],16:[6,26,50,74],17:[6,30,54,78],
+  18:[6,30,56,82],19:[6,30,58,86],20:[6,34,62,90],
+};
+
+/* ---- aritmetica no corpo de Galois GF(256), polinomio 0x11D ---- */
+const EXP = new Uint8Array(512), LOG = new Uint8Array(256);
+(function(){
+  let x = 1;
+  for (let i = 0; i < 255; i++) { EXP[i] = x; LOG[x] = i; x <<= 1; if (x & 0x100) x ^= 0x11D; }
+  for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
+})();
+const mul = (a, b) => (a === 0 || b === 0) ? 0 : EXP[LOG[a] + LOG[b]];
+
+function geradorRS(grau){
+  let g = [1];
+  for (let i = 0; i < grau; i++) {
+    const novo = new Array(g.length + 1).fill(0);
+    for (let j = 0; j < g.length; j++) {
+      novo[j] ^= g[j];
+      novo[j + 1] ^= mul(g[j], EXP[i]);
+    }
+    g = novo;
+  }
+  return g;
+}
+
+function ecc(dados, grau){
+  const g = geradorRS(grau);
+  const r = new Array(dados.length + grau).fill(0);
+  for (let i = 0; i < dados.length; i++) r[i] = dados[i];
+  for (let i = 0; i < dados.length; i++) {
+    const c = r[i];
+    if (!c) continue;
+    for (let j = 0; j < g.length; j++) r[i + j] ^= mul(g[j], c);
+  }
+  return r.slice(dados.length);
+}
+
+/* ---- BCH para format info e version info ---- */
+function bch(valor, gerador, bitsGerador){
+  let v = valor;
+  const alvo = 1 << (bitsGerador - 1);
+  while (v >= alvo) {
+    /* deslocamento = (posicao do bit mais alto de v) - (grau do gerador).
+       Comecar sh em 0 aqui dava um deslocamento a mais e o XOR AUMENTAVA v
+       em vez de reduzi-lo: o format info saia errado e o QR nao decodificava. */
+    let sh = -1, t = v;
+    while (t >= alvo) { t >>= 1; sh++; }
+    v ^= gerador << sh;
+  }
+  return v;
+}
+
+function bitsDeFormato(mascara){
+  /* nivel M = 00 nos 2 bits mais altos */
+  const dados = (0b00 << 3) | mascara;
+  const bits = (dados << 10) | bch(dados << 10, 0b10100110111, 11);
+  return bits ^ 0b101010000010010;
+}
+
+function bitsDeVersao(v){
+  return (v << 12) | bch(v << 12, 0b1111100100101, 13);
+}
+
+/* ---- construcao do fluxo de bits ---- */
+function paraBytes(texto){
+  return Array.from(new TextEncoder().encode(texto));
+}
+
+function escolheVersao(nBytes){
+  for (let v = 1; v <= 20; v++) {
+    const [ecpb, b1, d1, b2, d2] = EC_M[v];
+    const capacidade = b1 * d1 + b2 * d2;
+    const bitsCabecalho = 4 + (v <= 9 ? 8 : 16);
+    if (Math.ceil((bitsCabecalho + nBytes * 8) / 8) <= capacidade) return v;
+  }
+  throw new Error('conteudo grande demais para QR versao 20 nivel M');
+}
+
+function montaCodewords(texto){
+  const bytes = paraBytes(texto);
+  const v = escolheVersao(bytes.length);
+  const [ecpb, b1, d1, b2, d2] = EC_M[v];
+  const totalDados = b1 * d1 + b2 * d2;
+
+  const bits = [];
+  const push = (val, n) => { for (let i = n - 1; i >= 0; i--) bits.push((val >> i) & 1); };
+  push(0b0100, 4);                       // modo byte
+  push(bytes.length, v <= 9 ? 8 : 16);   // contador
+  bytes.forEach((b) => push(b, 8));
+
+  const maxBits = totalDados * 8;
+  for (let i = 0; i < 4 && bits.length < maxBits; i++) bits.push(0);   // terminador
+  while (bits.length % 8) bits.push(0);                                // alinha byte
+  const cw = [];
+  for (let i = 0; i < bits.length; i += 8) {
+    let b = 0;
+    for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j];
+    cw.push(b);
+  }
+  const PAD = [0xEC, 0x11];
+  let k = 0;
+  while (cw.length < totalDados) cw.push(PAD[k++ % 2]);
+
+  /* divide em blocos, calcula ECC de cada um e intercala */
+  const blocos = [];
+  let off = 0;
+  for (let i = 0; i < b1; i++) { blocos.push(cw.slice(off, off + d1)); off += d1; }
+  for (let i = 0; i < b2; i++) { blocos.push(cw.slice(off, off + d2)); off += d2; }
+  const eccs = blocos.map((bl) => ecc(bl, ecpb));
+
+  const saida = [];
+  const maxD = Math.max(d1, d2 || 0);
+  for (let i = 0; i < maxD; i++) for (const bl of blocos) if (i < bl.length) saida.push(bl[i]);
+  for (let i = 0; i < ecpb; i++) for (const e of eccs) saida.push(e[i]);
+  return { v, codewords: saida };
+}
+
+/* ---- matriz ---- */
+function novaMatriz(n){
+  return { n, m: Array.from({length:n}, () => new Int8Array(n).fill(-1)) };
+}
+
+function poeFinder(M, r, c){
+  for (let i = -1; i <= 7; i++) for (let j = -1; j <= 7; j++) {
+    const y = r + i, x = c + j;
+    if (y < 0 || x < 0 || y >= M.n || x >= M.n) continue;
+    const borda = (i >= 0 && i <= 6 && (j === 0 || j === 6)) || (j >= 0 && j <= 6 && (i === 0 || i === 6));
+    const miolo = i >= 2 && i <= 4 && j >= 2 && j <= 4;
+    M.m[y][x] = (borda || miolo) ? 1 : 0;
+  }
+}
+
+function padroesFixos(M, v){
+  poeFinder(M, 0, 0); poeFinder(M, 0, M.n - 7); poeFinder(M, M.n - 7, 0);
+  for (let i = 8; i < M.n - 8; i++) {          // timing
+    const b = (i % 2 === 0) ? 1 : 0;
+    M.m[6][i] = b; M.m[i][6] = b;
+  }
+  const centros = ALIGN[v];
+  for (const r of centros) for (const c of centros) {
+    if ((r <= 8 && c <= 8) || (r <= 8 && c >= M.n - 9) || (r >= M.n - 9 && c <= 8)) continue;
+    for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++)
+      M.m[r + i][c + j] = (Math.max(Math.abs(i), Math.abs(j)) !== 1) ? 1 : 0;
+  }
+  M.m[M.n - 8][8] = 1;                          // modulo escuro
+  /* reserva area de formato */
+  for (let i = 0; i < 9; i++) { if (M.m[8][i] === -1) M.m[8][i] = 0; if (M.m[i][8] === -1) M.m[i][8] = 0; }
+  for (let i = 0; i < 8; i++) { if (M.m[8][M.n-1-i] === -1) M.m[8][M.n-1-i] = 0; if (M.m[M.n-1-i][8] === -1) M.m[M.n-1-i][8] = 0; }
+  if (v >= 7) {
+    for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) {
+      M.m[M.n - 11 + j][i] = 0; M.m[i][M.n - 11 + j] = 0;
+    }
+  }
+}
+
+function reservado(M, v, y, x){
+  const n = M.n;
+  if (y <= 8 && x <= 8) return true;
+  if (y <= 8 && x >= n - 8) return true;
+  if (y >= n - 8 && x <= 8) return true;
+  if (y === 6 || x === 6) return true;
+  for (const r of ALIGN[v]) for (const c of ALIGN[v]) {
+    if ((r <= 8 && c <= 8) || (r <= 8 && c >= n - 9) || (r >= n - 9 && c <= 8)) continue;
+    if (Math.abs(y - r) <= 2 && Math.abs(x - c) <= 2) return true;
+  }
+  if (v >= 7 && ((y < 6 && x >= n - 11 && x < n - 8) || (x < 6 && y >= n - 11 && y < n - 8))) return true;
+  return false;
+}
+
+function colocaDados(M, v, codewords){
+  const bits = [];
+  codewords.forEach((b) => { for (let i = 7; i >= 0; i--) bits.push((b >> i) & 1); });
+  let idx = 0, subindo = true;
+  for (let col = M.n - 1; col > 0; col -= 2) {
+    if (col === 6) col--;
+    for (let k = 0; k < M.n; k++) {
+      const y = subindo ? (M.n - 1 - k) : k;
+      for (const x of [col, col - 1]) {
+        if (reservado(M, v, y, x)) continue;
+        M.m[y][x] = idx < bits.length ? bits[idx] : 0;
+        idx++;
+      }
+    }
+    subindo = !subindo;
+  }
+}
+
+const MASCARAS = [
+  (y,x)=>((y+x)%2===0), (y,x)=>(y%2===0), (y,x)=>(x%3===0), (y,x)=>((y+x)%3===0),
+  (y,x)=>((Math.floor(y/2)+Math.floor(x/3))%2===0), (y,x)=>(((y*x)%2)+((y*x)%3)===0),
+  (y,x)=>((((y*x)%2)+((y*x)%3))%2===0), (y,x)=>((((y+x)%2)+((y*x)%3))%2===0),
+];
+
+function aplica(M, v, mascara){
+  const N = { n: M.n, m: M.m.map(r => Int8Array.from(r)) };
+  for (let y = 0; y < M.n; y++) for (let x = 0; x < M.n; x++) {
+    if (reservado(M, v, y, x)) continue;
+    if (MASCARAS[mascara](y, x)) N.m[y][x] ^= 1;
+  }
+  /* Os 15 bits de formato sao gravados do MAIS significativo para o
+     menos, nesta ordem exata de posicoes. Escrevi ao contrario na
+     primeira versao e o QR nao decodificava de jeito nenhum: sem o
+     formato correto o leitor nem descobre qual mascara desfazer, e
+     desiste antes de olhar os dados. Ordem conferida contra uma
+     implementacao de referencia independente. */
+  const f = bitsDeFormato(mascara);
+  const bitMsb = (i) => (f >> (14 - i)) & 1;   // i = 0 e o bit 14
+  const N1 = N.n;
+  const copia1 = [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];
+  const copia2 = [[N1-1,8],[N1-2,8],[N1-3,8],[N1-4,8],[N1-5,8],[N1-6,8],[N1-7,8],
+                  [8,N1-8],[8,N1-7],[8,N1-6],[8,N1-5],[8,N1-4],[8,N1-3],[8,N1-2],[8,N1-1]];
+  copia1.forEach(([y,x], i) => { N.m[y][x] = bitMsb(i); });
+  copia2.forEach(([y,x], i) => { N.m[y][x] = bitMsb(i); });
+  N.m[N.n - 8][8] = 1;
+  if (v >= 7) {
+    const vb = bitsDeVersao(v);
+    for (let i = 0; i < 18; i++) {
+      const b = (vb >> i) & 1;
+      N.m[Math.floor(i / 3)][N.n - 11 + (i % 3)] = b;
+      N.m[N.n - 11 + (i % 3)][Math.floor(i / 3)] = b;
+    }
+  }
+  return N;
+}
+
+function penalidade(M){
+  const n = M.n, g = M.m; let p = 0;
+  const linha = (get) => {
+    for (let a = 0; a < n; a++) {
+      let run = 1;
+      for (let b = 1; b < n; b++) {
+        if (get(a,b) === get(a,b-1)) { run++; }
+        else { if (run >= 5) p += 3 + (run - 5); run = 1; }
+      }
+      if (run >= 5) p += 3 + (run - 5);
+    }
+  };
+  linha((a,b)=>g[a][b]); linha((a,b)=>g[b][a]);
+  for (let y = 0; y < n-1; y++) for (let x = 0; x < n-1; x++)
+    if (g[y][x]===g[y][x+1] && g[y][x]===g[y+1][x] && g[y][x]===g[y+1][x+1]) p += 3;
+  const alvo1 = [1,0,1,1,1,0,1,0,0,0,0], alvo2 = [0,0,0,0,1,0,1,1,1,0,1];
+  const casa = (arr) => arr.join('');
+  for (let y = 0; y < n; y++) for (let x = 0; x + 11 <= n; x++) {
+    const h = []; for (let k = 0; k < 11; k++) h.push(g[y][x+k]);
+    if (casa(h)===casa(alvo1) || casa(h)===casa(alvo2)) p += 40;
+    const w = []; for (let k = 0; k < 11; k++) w.push(g[x+k][y]);
+    if (casa(w)===casa(alvo1) || casa(w)===casa(alvo2)) p += 40;
+  }
+  let escuros = 0;
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) escuros += g[y][x];
+  const pct = (escuros * 100) / (n * n);
+  p += Math.floor(Math.abs(pct - 50) / 5) * 10;
+  return p;
+}
+
+function qrMatriz(texto, mascaraFixa){
+  const { v, codewords } = montaCodewords(texto);
+  const n = 17 + 4 * v;
+  const base = novaMatriz(n);
+  padroesFixos(base, v);
+  colocaDados(base, v, codewords);
+  let melhor = null, melhorP = Infinity;
+  if (mascaraFixa !== undefined) return { versao: v, n, modulos: aplica(base, v, mascaraFixa).m };
+  for (let k = 0; k < 8; k++) {
+    const cand = aplica(base, v, k);
+    const p = penalidade(cand);
+    if (p < melhorP) { melhorP = p; melhor = cand; }
+  }
+  return { versao: v, n, modulos: melhor.m };
+}
+/* Desenha a matriz como SVG: nítido em qualquer tamanho, imprimível,
+   e sem canvas — que em alguns navegadores sai borrado no zoom. */
+function qrSvg(texto, lado){
+  const q = qrMatriz(texto);
+  const quiet = 4;
+  const total = q.n + quiet * 2;
+  let d = '';
+  for (let y = 0; y < q.n; y++) {
+    for (let x = 0; x < q.n; x++) {
+      if (q.modulos[y][x]) d += 'M' + (x + quiet) + ' ' + (y + quiet) + 'h1v1h-1z';
+    }
+  }
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + total + ' ' + total +
+         '" width="' + lado + '" height="' + lado + '" shape-rendering="crispEdges" role="img" aria-label="QR Code PIX">' +
+         '<rect width="' + total + '" height="' + total + '" fill="#fff"/>' +
+         '<path d="' + d + '" fill="#000"/></svg>';
+}
+
+let apoioValor = null;   /* null = sem valor definido; o doador escolhe no app */
+
+function apoioPayload(){
+  return brCode({ chave: PIX.chave, nome: PIX.nome, cidade: PIX.cidade, valor: apoioValor });
+}
+
+function renderApoio(){
+  const caixa = $('supportQr');
+  if (!caixa) return;
+  const payload = apoioPayload();
+  caixa.innerHTML = qrSvg(payload, 180);
+  const campo = $('supportCode');
+  if (campo) campo.value = payload;
+  document.querySelectorAll('#supportValues button').forEach((b) => {
+    const v = b.getAttribute('data-v');
+    b.classList.toggle('is-on', (v === '' && apoioValor === null) || (v !== '' && Number(v) === apoioValor));
+  });
+}
+
+function ligaApoio(){
+  if (!$('supportQr')) return;
+  document.querySelectorAll('#supportValues button').forEach((b) => {
+    b.addEventListener('click', () => {
+      const v = b.getAttribute('data-v');
+      apoioValor = v === '' ? null : Number(v);
+      renderApoio();
+    });
+  });
+  const copiar = $('supportCopy');
+  if (copiar) copiar.addEventListener('click', async () => {
+    const txt = apoioPayload();
+    let ok = false;
+    try { await navigator.clipboard.writeText(txt); ok = true; }
+    catch (e) {
+      /* navigator.clipboard falha sem HTTPS ou sem permissão; o campo
+         de texto visível é a saída de emergência para copiar na mão. */
+      const campo = $('supportCode');
+      if (campo) { campo.select(); try { ok = document.execCommand('copy'); } catch (e2) {} }
+    }
+    copiar.textContent = ok ? t('supportCopied') : t('supportCopyFail');
+    setTimeout(() => { copiar.textContent = t('supportCopy'); }, 2200);
+  });
+  const naoQuero = $('supportDismiss');
+  if (naoQuero) naoQuero.addEventListener('click', () => { esconderConviteApoio(true); });
+
+  if (PAYPAL_ME) {
+    const intl = $('supportIntl');
+    if (intl) {
+      intl.style.display = 'block';
+      const a = $('supportPaypal');
+      if (a) a.href = 'https://www.paypal.com/paypalme/' + PAYPAL_ME;
+    }
+  }
+  renderApoio();
+}
+
+/* --- convite depois do download, nunca antes ---------------------------
+   Regra do produto: o download JAMAIS é bloqueado nem adiado para pedir
+   contribuição. O convite só aparece depois que a pessoa já baixou o
+   GIF, e some de vez se ela dispensar. */
+const APOIO_DISPENSADO = 'gifLocalApoioDispensado';
+
+function apoioFoiDispensado(){
+  try { return localStorage.getItem(APOIO_DISPENSADO) === '1'; } catch (e) { return false; }
+}
+
+function esconderConviteApoio(persistir){
+  document.querySelectorAll('.support-nudge').forEach((el) => { el.style.display = 'none'; });
+  if (persistir) { try { localStorage.setItem(APOIO_DISPENSADO, '1'); } catch (e) {} }
+}
+
+function mostrarConviteApoio(prefixo){
+  if (apoioFoiDispensado()) return;
+  const el = $(prefixo + 'Nudge');
+  if (el) el.style.display = 'flex';
+}
+
+function ligaConvitesDeDownload(){
+  ['fotos', 'video', 'tela', 'zero'].forEach((p) => {
+    const btn = $(p + 'Download');
+    if (btn) btn.addEventListener('click', () => { setTimeout(() => mostrarConviteApoio(p), 900); });
+    const ir = $(p + 'NudgeBtn');
+    if (ir) ir.addEventListener('click', () => {
+      const alvo = document.getElementById('apoiar');
+      if (alvo) alvo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    const nao = $(p + 'NudgeNo');
+    if (nao) nao.addEventListener('click', () => esconderConviteApoio(true));
+  });
+}
+
 const USAGE_STORAGE_KEY = 'gifLocalUsage';
 let usageTrackingAvailable = true;
 
@@ -3912,6 +4527,8 @@ currentLang = detectLang();
 $('langSwitch').value = currentLang;
 applyTranslations();
 initLicense();
+ligaApoio();
+ligaConvitesDeDownload();
 
 /* Detecção proativa da gravação de tela: em vez de deixar o usuário
    clicar em "Iniciar gravação da tela" e só então ver o erro, já
