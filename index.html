@@ -111,9 +111,12 @@
   .usage-badge.usage-badge--full{color:var(--amber);}
   .usage-badge.usage-badge--full .usage-fill{background:var(--amber);}
 
-  /* O cabeçalho é fixo: sem scroll-margin, rolar até uma seção deixava
-     o título escondido atrás dele. Vale para qualquer âncora do site. */
-  section[id], [id="apoiar"]{scroll-margin-top:96px;}
+  /* O cabeçalho é fixo E muda de altura quando quebra em linhas (telas
+     estreitas, idiomas com textos longos). Um valor fixo aqui escondia
+     o título atrás dele; a altura real é medida em JS e escrita nesta
+     variável. O 96px é só o palpite inicial, até o JS rodar. */
+  :root{--altura-cabecalho:96px;}
+  section[id], [id="apoiar"]{scroll-margin-top:calc(var(--altura-cabecalho) + 16px);}
 
   /* --- apoio voluntário --- */
   .support-values{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:18px;}
@@ -4529,6 +4532,16 @@ applyTranslations();
 initLicense();
 ligaApoio();
 ligaConvitesDeDownload();
+
+/* Mantém --altura-cabecalho igual à altura real do cabeçalho fixo, para
+   que rolar até uma âncora nunca esconda o título atrás dele. */
+function ajustaAlturaCabecalho(){
+  const h = document.querySelector("header.top");
+  if (h) document.documentElement.style.setProperty("--altura-cabecalho", Math.round(h.getBoundingClientRect().height) + "px");
+}
+ajustaAlturaCabecalho();
+addEventListener("resize", ajustaAlturaCabecalho);
+if (window.ResizeObserver) { const ro = new ResizeObserver(ajustaAlturaCabecalho); const hh = document.querySelector("header.top"); if (hh) ro.observe(hh); }
 
 /* Detecção proativa da gravação de tela: em vez de deixar o usuário
    clicar em "Iniciar gravação da tela" e só então ver o erro, já
