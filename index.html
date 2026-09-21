@@ -864,6 +864,7 @@
           <a class="btn" id="supportStripe" href="#" rel="noopener" target="_blank" hidden data-i18n="supportStripe">Apoiar com cartão</a>
           <a class="btn sec-pay" id="supportPaypal" href="#" rel="noopener" target="_blank" hidden data-i18n="supportPaypal">Apoiar via PayPal</a>
         </div>
+        <p class="support-hint" id="supportCardHint" hidden data-i18n="supportCardHint">O valor é escolhido na tela seguinte, na sua própria moeda.</p>
         <div id="supportIntl" hidden>
           <p class="support-hint" id="supportIntlSoon" data-i18n="supportIntlSoon">O apoio de fora do Brasil está sendo configurado. Por enquanto, o PIX só funciona com conta em banco brasileiro.</p>
         </div>
@@ -1387,6 +1388,7 @@ const I18N = {
     supportClose: "Fechar",
     supportStripe: "Apoiar com cartão",
     supportIntlSoon: "O apoio de fora do Brasil está sendo configurado. Por enquanto, o PIX só funciona com conta em banco brasileiro.",
+    supportCardHint: "O valor é escolhido na tela seguinte, na sua própria moeda.",
     founderBadge: "★ Fundador",
     founderBadgeTitle: "Você apoiou o GIF Local quando ele ainda era pago. Obrigado! Todas as ferramentas agora são gratuitas para todos.",
     planFreeF4: "GIF até 480px · gravação 720p, 60s", planSupF3: "GIF até 1280px · gravação 1080p, 10 min",
@@ -1569,6 +1571,7 @@ const I18N = {
     supportClose: "Close",
     supportStripe: "Support by card",
     supportIntlSoon: "Support from outside Brazil is being set up. For now, PIX only works with a Brazilian bank account.",
+    supportCardHint: "You choose the amount on the next screen, in your own currency.",
     founderBadge: "★ Founder",
     founderBadgeTitle: "You backed GIF Local when it was still paid. Thank you! Every tool is now free for everyone.",
     planFreeF4: "GIF up to 480px · 720p recording, 60s", planSupF3: "GIF up to 1280px · 1080p recording, 10 min",
@@ -1751,6 +1754,7 @@ const I18N = {
     supportClose: "Cerrar",
     supportStripe: "Apoyar con tarjeta",
     supportIntlSoon: "El apoyo desde fuera de Brasil se está configurando. Por ahora, PIX solo funciona con una cuenta bancaria brasileña.",
+    supportCardHint: "Eliges el importe en la pantalla siguiente, en tu propia moneda.",
     founderBadge: "★ Mecenas",
     founderBadgeTitle: "Apoyaste GIF Local cuando aún era de pago. ¡Gracias! Todas las herramientas ahora son gratuitas para todos.",
     planFreeF4: "GIF hasta 480px · grabación 720p, 60s", planSupF3: "GIF hasta 1280px · grabación 1080p, 10 min",
@@ -1933,6 +1937,7 @@ const I18N = {
     supportClose: "Fermer",
     supportStripe: "Soutenir par carte",
     supportIntlSoon: "Le soutien depuis l'étranger est en cours de mise en place. Pour l'instant, PIX ne fonctionne qu'avec un compte bancaire brésilien.",
+    supportCardHint: "Vous choisissez le montant sur l\u2019écran suivant, dans votre propre monnaie.",
     founderBadge: "★ Fondateur",
     founderBadgeTitle: "Vous avez soutenu GIF Local quand il était encore payant. Merci ! Tous les outils sont désormais gratuits pour tous.",
     planFreeF4: "GIF jusqu'à 480px · enregistrement 720p, 60s", planSupF3: "GIF jusqu'à 1280px · enregistrement 1080p, 10 min",
@@ -2115,6 +2120,7 @@ const I18N = {
     supportClose: "Schließen",
     supportStripe: "Mit Karte unterstützen",
     supportIntlSoon: "Die Unterstützung aus dem Ausland wird gerade eingerichtet. Vorerst funktioniert PIX nur mit einem brasilianischen Bankkonto.",
+    supportCardHint: "Den Betrag wählen Sie auf dem nächsten Bildschirm, in Ihrer eigenen Währung.",
     founderBadge: "★ Förderer",
     founderBadgeTitle: "Sie haben GIF Local unterstützt, als es noch kostenpflichtig war. Danke! Alle Werkzeuge sind jetzt für alle kostenlos.",
     planFreeF4: "GIF bis 480px · Aufnahme 720p, 60s", planSupF3: "GIF bis 1280px · Aufnahme 1080p, 10 Min.",
@@ -2297,6 +2303,7 @@ const I18N = {
     supportClose: "Chiudi",
     supportStripe: "Sostieni con carta",
     supportIntlSoon: "Il sostegno dall'estero è in fase di configurazione. Per ora PIX funziona solo con un conto bancario brasiliano.",
+    supportCardHint: "Scegli l\u2019importo nella schermata successiva, nella tua valuta.",
     founderBadge: "★ Fondatore",
     founderBadgeTitle: "Hai sostenuto GIF Local quando era ancora a pagamento. Grazie! Tutti gli strumenti ora sono gratuiti per tutti.",
     planFreeF4: "GIF fino a 480px · registrazione 720p, 60s", planSupF3: "GIF fino a 1280px · registrazione 1080p, 10 min",
@@ -2459,7 +2466,19 @@ const PIX = {
                 enganoso agora que nada é pago.
    Nenhum dos dois cobra mensalidade; só tarifa por transação. */
 const PAYPAL_ME = '';
-const STRIPE_LINK = { BRL: '', USD: '', EUR: '' };
+/* UM link só atende o mundo inteiro. O Adaptive Pricing está ligado na
+   conta, então o Stripe converte o valor para a moeda de quem paga, com
+   câmbio de verdade — bem melhor que eu chutar uma cotação no código.
+   Por isso as três moedas apontam para o mesmo lugar.
+
+   O link cobra R$ 1,00 por unidade com quantidade ajustável de 1 a 500:
+   é assim que o doador escolhe quanto dar. Os Payment Links do Stripe
+   NÃO aceitam o modelo "cliente escolhe o preço" (testado no painel: a
+   opção existe, mas fica desabilitada para links), e também não aceitam
+   quantidade pré-preenchida pela URL. Daí o aviso na interface de que o
+   valor é escolhido na tela seguinte. */
+const STRIPE_DOACAO = 'https://donate.stripe.com/aFaeVdgxw9mybwk2cB8bS09';
+const STRIPE_LINK = { BRL: STRIPE_DOACAO, USD: STRIPE_DOACAO, EUR: STRIPE_DOACAO };
 
 /* MOEDA SEGUE O IDIOMA, E O MEIO DE PAGAMENTO SEGUE A MOEDA.
 
@@ -2908,6 +2927,8 @@ function renderApoio(){
     stripe.hidden = !urlStripe;
     if (urlStripe) stripe.href = urlStripe;
   }
+  const aviso = $('supportCardHint');
+  if (aviso) aviso.hidden = !(urlStripe || PAYPAL_ME);
   const paypal = $('supportPaypal');
   if (paypal) {
     paypal.hidden = !PAYPAL_ME;

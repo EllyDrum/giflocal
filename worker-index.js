@@ -427,11 +427,22 @@ const PAYMENT_LINK_PLAN = {
    de mapeá-lo acima, ainda dá para deduzir o plano pelo valor pago, em
    centavos. Melhor emitir a licença certa do que deixar um cliente que
    pagou sem receber nada. */
-const AMOUNT_PLAN = {
-  BRL: { 990: 'apoiador', 2990: 'profissional' },
-  USD: { 229: 'apoiador', 699: 'profissional' },
-  EUR: { 209: 'apoiador', 629: 'profissional' },
-};
+/* Links que NÃO são venda. O link de doação usa quantidade ajustável
+   sobre R$ 1,00 e o Adaptive Pricing converte para a moeda de quem paga,
+   então o valor final pode cair, por coincidência, em cima de um preço
+   antigo (R$ 1,00 x 12 ≈ US$ 2,29, que era o preço do Apoiador). Sem
+   esta lista, uma doação viraria licença e o doador receberia uma chave
+   que ele não pediu. */
+const PAYMENT_LINK_DOACAO = new Set([
+  'plink_1UIFpyFV7byOqCPV8WFWVlcA', // Apoio ao GIF Local (doação)
+]);
+
+/* A dedução por valor foi REMOVIDA. Ela existia para pegar um link de
+   venda novo que alguém esquecesse de mapear — mas desde setembro/2026
+   não se vende mais nada, e o único link novo que existe é de doação.
+   Manter a dedução só criaria licenças por acidente. Agora, um checkout
+   que não esteja explicitamente em PAYMENT_LINK_PLAN não emite licença
+   nenhuma: apenas registra no log. */
 
 /* ====================== entrega da chave por e-mail ======================
 
@@ -518,17 +529,20 @@ async function sendLicenseEmail(env, { to, licenseKey, plan }) {
 }
 
 function resolvePlanFromSession(session) {
-  const meta = session.metadata && session.metadata.plan;
-  if (meta && PLAN_DEVICES[meta]) return meta;
-
   const link = typeof session.payment_link === 'string'
     ? session.payment_link
     : session.payment_link && session.payment_link.id;
+
+  /* Doação nunca vira licença, aconteça o que acontecer. Verificado
+     antes de tudo, inclusive antes do metadata. */
+  if (link && PAYMENT_LINK_DOACAO.has(link)) return null;
+
+  const meta = session.metadata && session.metadata.plan;
+  if (meta && PLAN_DEVICES[meta]) return meta;
+
   if (link && PAYMENT_LINK_PLAN[link]) return PAYMENT_LINK_PLAN[link];
 
-  const cur = String(session.currency || '').toUpperCase();
-  const byAmount = AMOUNT_PLAN[cur] && AMOUNT_PLAN[cur][session.amount_total];
-  return byAmount || null;
+  return null;
 }
 
 async function handleStripeWebhook(request, env) {
