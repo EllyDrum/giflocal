@@ -4,3 +4,38 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(self), microphone=(self), geolocation=(), browsing-topics=()
   Content-Security-Policy: default-src 'self'; img-src 'self' blob: data:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://giflocal-license-api.guardiaia.workers.dev; frame-ancestors 'none'; base-uri 'self'; form-action 'none'
+
+# CACHE - o painel mostrava 2,69% porque nao havia nenhum Cache-Control.
+# Os nomes nao tem hash, entao nada de "immutable": quem pegasse uma
+# versao com defeito ficaria preso nela. Dai os prazos curtos abaixo.
+
+# HTML muda a cada publicacao e o service worker ja usa rede-primeiro.
+/
+  Cache-Control: public, max-age=0, must-revalidate
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+/obrigado.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# sw.js NUNCA em cache: um service worker preso prende o app numa versao
+# antiga e nenhuma publicacao parece surtir efeito.
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/manifest.webmanifest
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+
+# Icones, CSS e JS: 1 dia de cache + 7 dias servindo a copia guardada
+# enquanto busca a nova em segundo plano.
+/*.png
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/*.ico
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/*.svg
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/*.webp
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/*.css
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/*.js
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
