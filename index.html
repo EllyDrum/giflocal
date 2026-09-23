@@ -3807,7 +3807,13 @@ async function loadDeviceList(){
   const record = readStoredLicense();
   if (!record || !record.licenseKey) { list.textContent = ''; return; }
   try {
-    const res = await fetch(LICENSE_API_BASE + '/license/devices?licenseKey=' + encodeURIComponent(record.licenseKey));
+    /* POST: a chave de licença funciona como senha e não vai na URL
+       (URL fica em histórico, em logs e no cabeçalho Referer). */
+    const res = await fetch(LICENSE_API_BASE + '/license/devices', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ licenseKey: record.licenseKey }),
+    });
     const data = await res.json();
     if (!res.ok) { list.textContent = data.message || t('licenseErrGeneric'); return; }
     renderDeviceList(data.devices, record);
@@ -4470,9 +4476,11 @@ async function refreshAiQuota(){
   if (!el || !LICENSE_BACKEND_CONFIGURED) return;
   el.textContent = t('aiQuotaLoading');
   try {
-    const url = LICENSE_API_BASE + '/ai/quota?deviceId=' + encodeURIComponent(getOrCreateDeviceId()) +
-      '&licenseKey=' + encodeURIComponent(aiLicenseKey());
-    const res = await fetch(url);
+    const res = await fetch(LICENSE_API_BASE + '/ai/quota', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ deviceId: getOrCreateDeviceId(), licenseKey: aiLicenseKey() }),
+    });
     const d = await res.json();
     if (d.serviceBusy) {
       el.textContent = t('aiServiceBusy');
