@@ -372,18 +372,11 @@ async function handleValidate(request, env) {
 }
 
 async function handleListDevices(request, env) {
-  /* POST com a chave no corpo é o caminho certo: na URL (GET), a chave de
-     licença, que funciona como senha, ficava gravada em histórico do
-     navegador e em logs de rede. O GET continua aceito por um tempo, só
-     para versões antigas do app que ainda estejam em cache. */
-  let bruto = null;
-  if (request.method === 'POST') {
-    const body = await readJson(request);
-    bruto = body && body.licenseKey;
-  } else {
-    bruto = new URL(request.url).searchParams.get('licenseKey');
-  }
-  const licenseKey = texto(bruto, 64);
+  /* Só POST, com a chave no corpo: na URL (GET), a chave de licença, que
+     funciona como senha, ficava gravada em histórico do navegador e em
+     logs de rede. */
+  const body = await readJson(request);
+  const licenseKey = texto(body && body.licenseKey, 64);
   if (!licenseKey) return err('BAD_REQUEST', 'licenseKey é obrigatório');
 
   const license = await env.DB.prepare('SELECT * FROM licenses WHERE license_key = ?').bind(licenseKey.toUpperCase()).first();
@@ -920,13 +913,8 @@ async function devolveCota(env, day, subject) {
 }
 
 async function handleAiQuota(request, env) {
-  /* Aceita POST (chave no corpo) e, por compatibilidade, GET. */
-  let body;
-  if (request.method === 'POST') body = (await readJson(request)) || {};
-  else {
-    const url = new URL(request.url);
-    body = { deviceId: url.searchParams.get('deviceId'), licenseKey: url.searchParams.get('licenseKey') };
-  }
+  /* Só POST: a chave de licença não vai na URL. */
+  const body = (await readJson(request)) || {};
   const { tier, subject } = await resolveAiSubject(env, body);
   const { used, globalUsed } = await readAiUsage(env, subject);
   const allowed = AI_DAILY_LIMIT[tier];
@@ -1083,13 +1071,13 @@ async function route(request, env, url) {
 
   if (url.pathname === '/activate' && request.method === 'POST') return await handleActivate(request, env);
   if (url.pathname === '/validate' && request.method === 'POST') return await handleValidate(request, env);
-  if (url.pathname === '/license/devices' && (request.method === 'POST' || request.method === 'GET')) return await handleListDevices(request, env);
+  if (url.pathname === '/license/devices' && request.method === 'POST') return await handleListDevices(request, env);
   if (url.pathname === '/device/deactivate' && request.method === 'POST') return await handleDeactivateDevice(request, env);
   if (url.pathname === '/license-by-session' && request.method === 'GET') return await handleLicenseBySession(request, env);
   if (url.pathname === '/license/resend' && request.method === 'POST') return await handleResendLicense(request, env);
   if (url.pathname === '/webhooks/stripe' && request.method === 'POST') return await handleStripeWebhook(request, env);
   if (url.pathname === '/ai/generate' && request.method === 'POST') return await handleAiGenerate(request, env);
-  if (url.pathname === '/ai/quota' && (request.method === 'POST' || request.method === 'GET')) return await handleAiQuota(request, env);
+  if (url.pathname === '/ai/quota' && request.method === 'POST') return await handleAiQuota(request, env);
 
   const adminMatch = url.pathname.match(/^\/admin\/license\/([^/]+)(\/status)?$/);
   if (adminMatch && request.method === 'GET' && !adminMatch[2]) return await handleAdminGetLicense(request, env, adminMatch[1]);
