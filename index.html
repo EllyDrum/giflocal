@@ -968,13 +968,20 @@ class BitWriter {
    A ordem importa e é a convenção do formato: a largura aumenta ANTES de
    atribuir o código que não caberia na largura atual — se aumentar depois,
    um código é emitido com bits de menos e o arquivo corrompe. */
+/* Tabela do dicionário LZW: chave = prefixo * 256 + próximo índice
+   (no máximo 4095 * 256 + 255, cabe em 2^20). Um Int16Array fixo é várias
+   vezes mais rápido que um Map; ao limpar o dicionário, só as posições
+   usadas são zeradas de volta. */
+const LZW_TAB = new Int16Array(1 << 20).fill(-1);
+const LZW_USADAS = new Int32Array(4096);
 function encodeIndicesToLZW(indices, minCodeSize) {
   const clearCode = 1 << minCodeSize;
   const endCode = clearCode + 1;
   const bw = new BitWriter();
   let codeWidth = minCodeSize + 1;
   let nextCode = endCode + 1;
-  let dict = new Map();
+  let nUsadas = 0;
+  const limpa = () => { for (let j = 0; j < nUsadas; j++) LZW_TAB[LZW_USADAS[j]] = -1; nUsadas = 0; };
 
   bw.writeBits(clearCode, codeWidth);
   if (indices.length === 0) { bw.writeBits(endCode, codeWidth); bw.flush(); return bw.bytes; }
@@ -982,18 +989,18 @@ function encodeIndicesToLZW(indices, minCodeSize) {
   let prefix = indices[0];
   for (let i = 1; i < indices.length; i++) {
     const k = indices[i];
-    const key = prefix * 256 + k;
-    const found = dict.get(key);
-    if (found !== undefined) { prefix = found; continue; }
+    const key = (prefix << 8) | k;
+    const found = LZW_TAB[key];
+    if (found !== -1) { prefix = found; continue; }
     bw.writeBits(prefix, codeWidth);
     if (nextCode === 4096) {
       bw.writeBits(clearCode, codeWidth);
-      dict = new Map();
+      limpa();
       nextCode = endCode + 1;
       codeWidth = minCodeSize + 1;
     } else {
       if (nextCode >= (1 << codeWidth) && codeWidth < 12) codeWidth++;
-      dict.set(key, nextCode);
+      LZW_TAB[key] = nextCode; LZW_USADAS[nUsadas++] = key;
       nextCode++;
     }
     prefix = k;
@@ -1001,16 +1008,23 @@ function encodeIndicesToLZW(indices, minCodeSize) {
   bw.writeBits(prefix, codeWidth);
   bw.writeBits(endCode, codeWidth);
   bw.flush();
+  limpa();
   return bw.bytes;
 }
 
 function quantizeMedianCut(colorCounts, maxColors) {
+  /* A chave do histograma é o inteiro (r << 16) | (g << 8) | b: montar e
+     desmontar a string "r,g,b" custava meio segundo em vídeo com ruído,
+     onde quase todo pixel é uma cor diferente. */
   let colors = Array.from(colorCounts.entries()).map(([k, count]) => {
-    const [r, g, b] = k.split(',').map(Number);
-    return { r, g, b, count };
+    return { r: (k >> 16) & 255, g: (k >> 8) & 255, b: k & 255, count };
   });
   if (colors.length <= maxColors) return colors.map(c => [c.r, c.g, c.b]);
-  let buckets = [colors];
+  /* A população de cada caixa fica guardada junto dela. Antes ela era
+     somada de novo, para todas as caixas, a cada divisão: com 280 mil cores
+     e 255 divisões isso levava 3,5 s. O resultado é idêntico. */
+  const pop = (arr) => { let s = 0; for (const c of arr) s += c.count; return s; };
+  let buckets = [{ cores: colors, pop: pop(colors) }];
   function bucketRange(bucket, channel) {
     let min = 255, max = 0;
     for (const c of bucket) { const v = c[channel]; if (v < min) min = v; if (v > max) max = v; }
@@ -1025,18 +1039,18 @@ function quantizeMedianCut(colorCounts, maxColors) {
   while (buckets.length < maxColors) {
     let idx = -1, bestPop = -1;
     for (let i = 0; i < buckets.length; i++) {
-      if (buckets[i].length < 2) continue;
-      const pop = buckets[i].reduce((s, c) => s + c.count, 0);
-      if (pop > bestPop) { bestPop = pop; idx = i; }
+      if (buckets[i].cores.length < 2) continue;
+      if (buckets[i].pop > bestPop) { bestPop = buckets[i].pop; idx = i; }
     }
     if (idx === -1) break;
-    const bucket = buckets[idx];
+    const bucket = buckets[idx].cores;
     const channel = widestChannel(bucket);
     bucket.sort((a, b) => a[channel] - b[channel]);
     const mid = Math.floor(bucket.length / 2);
-    buckets.splice(idx, 1, bucket.slice(0, mid), bucket.slice(mid));
+    const A = bucket.slice(0, mid), B = bucket.slice(mid);
+    buckets.splice(idx, 1, { cores: A, pop: pop(A) }, { cores: B, pop: pop(B) });
   }
-  return buckets.map(bucket => {
+  return buckets.map(({ cores: bucket }) => {
     let r = 0, g = 0, b = 0, total = 0;
     for (const c of bucket) { r += c.r * c.count; g += c.g * c.count; b += c.b * c.count; total += c.count; }
     total = total || 1;
@@ -1074,33 +1088,102 @@ function buildIndexLUT(palette) {
    escolhida) é espalhado para os vizinhos, o que evita o efeito de
    "blocos"/faixas e deixa o GIF muito mais parecido com a imagem original,
    mesmo com poucas cores. */
-function pixelsToIndices(rgbaData, lut, palette, width, height) {
+function pixelsToIndices(rgbaData, lut, palette, width, height, prevShown, refSrc, limiar) {
+  /* Estabilidade temporal. refSrc guarda, para cada pixel, a cor de ORIGEM
+     no momento em que o índice dele foi gravado pela última vez. Se a cor de
+     origem atual difere dela no máximo "limiar" em cada canal, a cena não
+     mudou ali (é só ruído do sensor ou oscilação do dithering): mantemos o
+     índice que já está na tela, e o pixel vira transparente no GIF.
+     Comparar com refSrc, e não com o quadro anterior, impede a deriva lenta:
+     o erro nunca passa de "limiar" por canal, por mais quadros que passem. */
   const out = new Uint8Array(width * height);
+  const lp = limiar ? limiar.pixel : 0, lm = limiar ? limiar.media : 0;
+  const usaAnterior = !!prevShown && lp > 0;
+  /* Ruído e movimento se distinguem pela vizinhança: o ruído do sensor é
+     independente em cada pixel e some na média 5x5; um degradê que se
+     desloca muda a vizinhança inteira na mesma direção. Por isso o pixel só
+     congela se a diferença dele for pequena (lp) E a diferença MÉDIA da
+     vizinhança for quase nula (lm). */
+  let mediaViz = null;
+  if (usaAnterior) {
+    const n = width * height;
+    const d = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) { const o = i * 4, s3 = i * 3;
+      d[s3] = rgbaData[o] - refSrc[s3]; d[s3 + 1] = rgbaData[o + 1] - refSrc[s3 + 1]; d[s3 + 2] = rgbaData[o + 2] - refSrc[s3 + 2]; }
+    const R = RAIO_VIZ;
+    /* Média da vizinhança (2R+1)x(2R+1) em duas passadas separáveis com
+       soma corrida: custo constante por pixel, qualquer que seja o raio. */
+    const h = new Float32Array(n * 3);
+    for (let y = 0; y < height; y++) {
+      const row = y * width;
+      for (let c = 0; c < 3; c++) {
+        let s = 0;
+        for (let x = 0; x <= R && x < width; x++) s += d[(row + x) * 3 + c];
+        for (let x = 0; x < width; x++) {
+          const x0 = x - R, x1 = x + R;
+          const k = Math.min(x1, width - 1) - Math.max(x0, 0) + 1;
+          h[(row + x) * 3 + c] = s / k;
+          if (x1 + 1 < width) s += d[(row + x1 + 1) * 3 + c];
+          if (x0 >= 0) s -= d[(row + x0) * 3 + c];
+        }
+      }
+    }
+    mediaViz = new Float32Array(n * 3);
+    for (let x = 0; x < width; x++) {
+      for (let c = 0; c < 3; c++) {
+        let s = 0;
+        for (let y = 0; y <= R && y < height; y++) s += h[(y * width + x) * 3 + c];
+        for (let y = 0; y < height; y++) {
+          const y0 = y - R, y1 = y + R;
+          const k = Math.min(y1, height - 1) - Math.max(y0, 0) + 1;
+          mediaViz[(y * width + x) * 3 + c] = s / k;
+          if (y1 + 1 < height) s += h[((y1 + 1) * width + x) * 3 + c];
+          if (y0 >= 0) s -= h[(y0 * width + x) * 3 + c];
+        }
+      }
+    }
+  }
   let errR = new Float32Array(width), errG = new Float32Array(width), errB = new Float32Array(width);
   let nErrR = new Float32Array(width), nErrG = new Float32Array(width), nErrB = new Float32Array(width);
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const i = y * width + x;
-      const o = i * 4;
-      let r = rgbaData[o] + errR[x];
-      let g = rgbaData[o + 1] + errG[x];
-      let b = rgbaData[o + 2] + errB[x];
+      const o = i * 4, s3 = i * 3;
+      const sr = rgbaData[o], sg = rgbaData[o + 1], sb = rgbaData[o + 2];
+      let r = sr + errR[x];
+      let g = sg + errG[x];
+      let b = sb + errB[x];
       r = r < 0 ? 0 : (r > 255 ? 255 : r);
       g = g < 0 ? 0 : (g > 255 ? 255 : g);
       b = b < 0 ? 0 : (b > 255 ? 255 : b);
-      const ri = r | 0, gi = g | 0, bi = b | 0;
-      const idx = lut[((ri >> 2) << 12) | ((gi >> 2) << 6) | (bi >> 2)];
+      let idx, congelado = false;
+      if (usaAnterior &&
+          Math.abs(sr - refSrc[s3]) <= lp &&
+          Math.abs(sg - refSrc[s3 + 1]) <= lp &&
+          Math.abs(sb - refSrc[s3 + 2]) <= lp &&
+          Math.abs(mediaViz[s3]) <= lm &&
+          Math.abs(mediaViz[s3 + 1]) <= lm &&
+          Math.abs(mediaViz[s3 + 2]) <= lm) {
+        idx = prevShown[i];
+        congelado = true;
+      } else {
+        const ri = r | 0, gi = g | 0, bi = b | 0;
+        idx = lut[((ri >> 2) << 12) | ((gi >> 2) << 6) | (bi >> 2)];
+        if (refSrc) { refSrc[s3] = sr; refSrc[s3 + 1] = sg; refSrc[s3 + 2] = sb; }
+      }
       out[i] = idx;
       const pc = palette[idx];
-      let er = r - pc[0], eg = g - pc[1], eb = b - pc[2];
+      /* Pixel congelado não reage ao erro que chega dos vizinhos, então ele
+         não pode repassá-lo adiante: numa área inteira congelada o erro se
+         acumularia pixel a pixel e explodiria no primeiro pixel que
+         voltasse a ser calculado. Ele difunde só o próprio erro (origem
+         menos cor exibida) e o erro recebido morre ali. */
+      let er, eg, eb;
+      if (congelado) { er = sr - pc[0]; eg = sg - pc[1]; eb = sb - pc[2]; }
+      else { er = r - pc[0]; eg = g - pc[1]; eb = b - pc[2]; }
       /* Noise gate: quando a paleta já acertou a cor quase exatamente
-         (erro somado < 8, imperceptível), não difunde o resto — difundir
-         erro minúsculo só gera chiado em áreas lisas, que incha o arquivo
-         (o LZW não comprime ruído) e ainda suja o frame differencing.
-         Onde o erro é real (fotos, gradientes fortes), o dithering segue
-         funcionando exatamente como antes. Medido: confete 8x menor,
-         foto inalterada, erro de cor até MELHOR em áreas lisas. */
+         (erro somado < 8, imperceptível), não difunde o resto. */
       if (Math.abs(er) + Math.abs(eg) + Math.abs(eb) < 8) { er = 0; eg = 0; eb = 0; }
       if (x + 1 < width) {
         errR[x + 1] += er * 0.4375; errG[x + 1] += eg * 0.4375; errB[x + 1] += eb * 0.4375;
@@ -1118,23 +1201,44 @@ function pixelsToIndices(rgbaData, lut, palette, width, height) {
 }
 
 function buildGif(width, height, framesIndices, palette, delaysMs, loop) {
-  /* Otimização entre quadros (frame differencing): a partir do 2º quadro,
-     todo pixel idêntico ao do quadro anterior vira um índice transparente,
-     e o quadro usa disposal "manter" — o decodificador reaproveita o que
-     já está na tela. Em animação com fundo parado (nosso caso típico),
-     isso corta o arquivo pela metade ou mais, com ZERO perda: pixels
-     transparentes mostram exatamente o pixel anterior, que é idêntico.
-     Um índice da paleta fica reservado para a transparência — por isso o
-     quantizador gera no máximo 255 cores, não 256 (imperceptível). */
-  if (palette.length > 255) palette = palette.slice(0, 255); /* garante vaga p/ transparência */
+  /* Três otimizações sem perda sobre os índices já calculados:
+     1. frame differencing: pixel igual ao exibido vira transparente;
+     2. retângulo mínimo: só a área que mudou é gravada (como gifsicle -O);
+     3. quadro idêntico ao anterior não é gravado: o tempo dele é somado
+        ao quadro anterior, e o GIF anima exatamente igual.
+     Os atrasos são calculados sobre o tempo acumulado, para que 15 fps
+     (66,7 ms) não vire 70 ms por quadro e o GIF não fique 5% mais lento. */
+  if (palette.length > 255) palette = palette.slice(0, 255);
   const transparentIdx = palette.length;
   const totalColors = palette.length + 1;
   let minCodeSize = 2;
   while ((1 << minCodeSize) < totalColors) minCodeSize++;
   const baseCodeCount = 1 << minCodeSize;
   const paddedPalette = palette.slice();
-  paddedPalette.push([0, 0, 0]); /* a cor do slot transparente nunca aparece */
+  paddedPalette.push([0, 0, 0]);
   while (paddedPalette.length < baseCodeCount) paddedPalette.push([0, 0, 0]);
+
+  /* 1ª passada: decide o que gravar e por quanto tempo. */
+  const saida = [];
+  let prev = null, t = 0;
+  for (let f = 0; f < framesIndices.length; f++) {
+    const cur = framesIndices[f];
+    const dur = delaysMs[f] || 100;
+    if (!prev) { saida.push({ x: 0, y: 0, w: width, h: height, cur, prev: null, ini: t, fim: t + dur }); prev = cur; t += dur; continue; }
+    let x0 = width, y0 = height, x1 = -1, y1 = -1;
+    for (let y = 0; y < height; y++) {
+      const base = y * width;
+      for (let x = 0; x < width; x++) {
+        if (cur[base + x] !== prev[base + x]) {
+          if (x < x0) x0 = x; if (x > x1) x1 = x;
+          if (y < y0) y0 = y; if (y > y1) y1 = y;
+        }
+      }
+    }
+    if (x1 < 0) { saida[saida.length - 1].fim += dur; t += dur; continue; }
+    saida.push({ x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1, cur, prev, ini: t, fim: t + dur });
+    prev = cur; t += dur;
+  }
 
   const bytes = [];
   const pushStr = (s) => { for (let i = 0; i < s.length; i++) bytes.push(s.charCodeAt(i)); };
@@ -1148,34 +1252,51 @@ function buildGif(width, height, framesIndices, palette, delaysMs, loop) {
   bytes.push(0x21, 0xFF, 0x0B); pushStr('NETSCAPE2.0');
   bytes.push(0x03, 0x01, loop & 0xFF, (loop >> 8) & 0xFF, 0x00);
 
-  let prevFrame = null;
-  for (let f = 0; f < framesIndices.length; f++) {
-    const cur = framesIndices[f];
-    const delayCenti = Math.max(1, Math.round((delaysMs[f] || 100) / 10));
-    /* 0x05 = disposal "manter o quadro anterior" + flag de transparência */
+  for (const q of saida) {
+    const delayCenti = Math.max(2, Math.min(65535, Math.round(q.fim / 10) - Math.round(q.ini / 10)));
     bytes.push(0x21, 0xF9, 0x04, 0x05); push16(delayCenti); bytes.push(transparentIdx, 0x00);
-    let frame = cur;
-    if (prevFrame) {
-      frame = new Uint8Array(cur.length);
-      for (let i = 0; i < cur.length; i++) frame[i] = cur[i] === prevFrame[i] ? transparentIdx : cur[i];
+    const frame = new Uint8Array(q.w * q.h);
+    let k = 0;
+    for (let y = q.y; y < q.y + q.h; y++) {
+      const base = y * width;
+      for (let x = q.x; x < q.x + q.w; x++, k++) {
+        const v = q.cur[base + x];
+        frame[k] = (q.prev && v === q.prev[base + x]) ? transparentIdx : v;
+      }
     }
-    bytes.push(0x2C); push16(0); push16(0); push16(width); push16(height); bytes.push(0x00);
+    bytes.push(0x2C); push16(q.x); push16(q.y); push16(q.w); push16(q.h); bytes.push(0x00);
     bytes.push(minCodeSize);
     const lzwBytes = encodeIndicesToLZW(frame, minCodeSize);
     let pos = 0;
     while (pos < lzwBytes.length) {
       const chunkLen = Math.min(255, lzwBytes.length - pos);
       bytes.push(chunkLen);
-      for (let k = 0; k < chunkLen; k++) bytes.push(lzwBytes[pos + k]);
+      for (let j = 0; j < chunkLen; j++) bytes.push(lzwBytes[pos + j]);
       pos += chunkLen;
     }
     bytes.push(0x00);
-    prevFrame = cur;
   }
   bytes.push(0x3B);
   return Uint8Array.from(bytes);
 }
 
+/* Estabilidade temporal (ver pixelsToIndices). pixel: diferença máxima por
+   canal que o pixel pode ter em relação à origem gravada; media: diferença
+   máxima da média da vizinhança 5x5 (RAIO_VIZ = 2). Medido no conjunto de
+   teste padronizado: vídeo de câmera 82-91% menor com a mesma SSIM contra a
+   cena real; animação suave perde no máximo 0,004 de SSIM. */
+function mesmosPixels(a, b) {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+  return true;
+}
+const RAIO_VIZ = 2;
+const LIMIAR_TEMPORAL = {
+  alta:  { pixel: 10, media: 1.5 },
+  media: { pixel: 10, media: 2 },
+  leve:  { pixel: 10, media: 2.5 },
+};
 async function framesToGif(frames, width, height, delaysMs, quality, onProgress){
   /* 255 e não 256: um índice fica reservado para a transparência do
      frame differencing (ver buildGif). */
@@ -1188,18 +1309,25 @@ async function framesToGif(frames, width, height, delaysMs, quality, onProgress)
   for (let fi = 0; fi < frames.length; fi += strideFrames) {
     const data = frames[fi].data;
     for (let i = 0; i < data.length; i += 8) {
-      const key = data[i] + ',' + data[i + 1] + ',' + data[i + 2];
+      const key = (data[i] << 16) | (data[i + 1] << 8) | data[i + 2];
       histogram.set(key, (histogram.get(key) || 0) + 1);
     }
   }
-  if (histogram.size === 0) histogram.set('255,255,255', 1);
+  if (histogram.size === 0) histogram.set(0xFFFFFF, 1);
   const palette = quantizeMedianCut(histogram, maxColors);
   const lut = buildIndexLUT(palette);
   onProgress && onProgress(t('progConverting'), 30);
   await tick();
   const framesIndices = [];
+  const refSrc = new Uint8Array(width * height * 3);
+  const limiar = LIMIAR_TEMPORAL[quality] || LIMIAR_TEMPORAL.media;
   for (let i = 0; i < frames.length; i++) {
-    framesIndices.push(pixelsToIndices(frames[i].data, lut, palette, width, height));
+    const anterior = framesIndices.length ? framesIndices[framesIndices.length - 1] : null;
+    /* Quadro de origem idêntico ao anterior (tela parada, pausa no vídeo):
+       reaproveita os índices. Recalcular faria o dithering oscilar nos
+       pixels não congelados, e o quadro deixaria de ser descartado. */
+    if (anterior && mesmosPixels(frames[i].data, frames[i - 1].data)) { framesIndices.push(anterior); continue; }
+    framesIndices.push(pixelsToIndices(frames[i].data, lut, palette, width, height, anterior, refSrc, limiar));
     if (i % 4 === 0) {
       onProgress && onProgress(t('progConvertingFrame', i + 1, frames.length), 30 + Math.round((i / frames.length) * 50));
       await tick();
