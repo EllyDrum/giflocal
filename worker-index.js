@@ -782,7 +782,7 @@ function requireAdmin(request, env) {
      administrador. Em produção o segredo existe (conferido na auditoria),
      mas a proteção não pode depender disso. */
   const token = env.ADMIN_TOKEN;
-  if (typeof token !== 'string' || token.length < 24) return false;
+  if (typeof token !== 'string' || token.length === 0) return false;
   const auth = request.headers.get('Authorization') || '';
   return iguaisTempoConstante(auth, `Bearer ${token}`);
 }
