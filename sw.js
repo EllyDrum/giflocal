@@ -48,14 +48,23 @@ self.addEventListener('fetch', (event) => {
      atualização do site apareça na próxima visita — só usa o cache se
      estiver offline. Isso evita ficar "preso" numa versão antiga. */
   if (event.request.mode === 'navigate') {
+    /* A chave do cache é o endereço SEM a query string: antes cada URL
+       diferente (?v=..., ?session_id=cs_live_...) virava uma entrada nova,
+       o cache crescia sem limite e guardava o identificador da compra.
+       E só guarda resposta 200: uma página de erro não pode virar a
+       versão offline do app. */
+    const u = new URL(event.request.url);
+    const chave = u.origin + u.pathname;
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          if (response && response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(chave, clone));
+          }
           return response;
         })
-        .catch(() => caches.match(event.request).then((cached) => cached || caches.match('./index.html')))
+        .catch(() => caches.match(chave).then((cached) => cached || caches.match('./index.html')))
     );
     return;
   }
