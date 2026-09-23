@@ -37,5 +37,8 @@
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 /*.css
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/*.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+# Nao ha regra generica /*.js de proposito: ela tambem casaria com
+# /sw.js e a Cloudflare SOMA as regras que casam, produzindo um
+# Cache-Control contraditorio no service worker (medido no ar).
+# Quando houver .js proprio, declare o caminho exato.
