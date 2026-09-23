@@ -47,6 +47,58 @@ function withCors(response, request) {
   });
 }
 
+/* ============================ segurança ============================
+   Utilitários usados pelas rotas. Motivo de cada um está no relatório de
+   auditoria (set/2026); o resumo vai junto de cada função. */
+
+/* Aceita só texto, aparado, dentro do limite. Qualquer outro tipo (número,
+   objeto, lista) vira null: antes, { "licenseKey": 123 } derrubava a rota
+   com um 500 que devolvia a mensagem interna do JavaScript. */
+function texto(v, max) {
+  if (typeof v !== 'string') return null;
+  const t = v.trim();
+  if (!t || t.length > max) return null;
+  return t;
+}
+
+/* Comparação em tempo constante: não revela, pelo tempo de resposta,
+   quantos caracteres iniciais de um segredo o atacante já acertou. */
+function iguaisTempoConstante(a, b) {
+  const ea = new TextEncoder().encode(String(a));
+  const eb = new TextEncoder().encode(String(b));
+  if (ea.length !== eb.length) return false;
+  let dif = 0;
+  for (let i = 0; i < ea.length; i++) dif |= ea[i] ^ eb[i];
+  return dif === 0;
+}
+
+/* Em IPv6, um único assinante recebe um bloco /64 inteiro (18 quintilhões
+   de endereços): limitar por endereço exato não limitaria nada. Agrupamos
+   pelos 4 primeiros grupos, que identificam a conexão. */
+function prefixoIp(ip) {
+  if (!ip || ip.indexOf(':') < 0) return ip;
+  let [cabeca, cauda] = ip.split('::');
+  const a = cabeca ? cabeca.split(':') : [];
+  const b = cauda !== undefined && cauda ? cauda.split(':') : [];
+  const faltam = cauda !== undefined ? 8 - a.length - b.length : 0;
+  const grupos = [...a, ...Array(Math.max(0, faltam)).fill('0'), ...b];
+  return grupos.slice(0, 4).map((g) => (parseInt(g, 16) || 0).toString(16)).join(':') + '::/64';
+}
+
+/* Hash do IP com chave. SHA-256 puro de um IPv4 se desfaz por força bruta
+   (são só 4 bilhões de possibilidades); com HMAC e uma chave que só o
+   servidor conhece, o hash continua útil para limitar abuso e deixa de ser
+   um dado pessoal recuperável. A chave deriva de um segredo que já existe,
+   sem criar configuração nova. */
+async function hashIp(env, ipBruto) {
+  const ip = prefixoIp(ipBruto);
+  if (!ip) return null;
+  const base = new TextEncoder().encode('ip-hash:' + (env.LICENSE_PRIVATE_KEY_JWK || ''));
+  const chave = await crypto.subtle.importKey('raw', await crypto.subtle.digest('SHA-256', base), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', chave, new TextEncoder().encode(ip));
+  return [...new Uint8Array(sig)].slice(0, 16).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 // Nomes batem com os planos já existentes nos Payment Links do Stripe
 // (ver worker/README.md, passo 6, sobre como marcar metadata.plan em cada link).
 const PLAN_DEVICES = {
@@ -60,9 +112,15 @@ const OFFLINE_TOLERANCE_DAYS = { default: 30, lifetime: 90 };
 function corsHeaders(extra = {}) {
   return {
     'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-    'Access-Control-Allow-Methods': 'GET,POST,DELETE,OPTIONS',
+    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+    'Access-Control-Max-Age': '600',
     'Content-Type': 'application/json; charset=utf-8',
+    /* Respostas carregam chave de licença: nenhum cache intermediário pode
+       guardar, e o navegador não deve reinterpretar o tipo. */
+    'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'no-referrer',
     ...extra,
   };
 }
@@ -163,7 +221,7 @@ async function countActiveDevices(env, licenseId) {
 
 async function logEvent(env, { licenseId, deviceId, event, detail, request, appVersion }) {
   const ip = request ? request.headers.get('CF-Connecting-IP') || '' : '';
-  const ipHash = ip ? await sha256Hex(ip) : null;
+  const ipHash = await hashIp(env, ip);
   await env.DB.prepare(
     `INSERT INTO activation_log (license_id, device_id, event, detail, ip_hash, app_version, created_at)
      VALUES (?, ?, ?, ?, ?, ?, ?)`
@@ -172,9 +230,35 @@ async function logEvent(env, { licenseId, deviceId, event, detail, request, appV
     .run();
 }
 
-async function readJson(request) {
+/* Lê o corpo com teto de tamanho contando os bytes que chegam, e não só
+   o cabeçalho Content-Length (um corpo "chunked" não tem esse cabeçalho).
+   Devolve null se passar do teto. */
+async function leCorpo(request, limite) {
+  if (!request.body) return '';
+  const leitor = request.body.getReader();
+  const partes = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await leitor.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > limite) { try { await leitor.cancel(); } catch {} return null; }
+    partes.push(value);
+  }
+  const buf = new Uint8Array(total);
+  let p = 0;
+  for (const c of partes) { buf.set(c, p); p += c.byteLength; }
+  return new TextDecoder().decode(buf);
+}
+
+class CorpoGrande extends Error {}
+
+async function readJson(request, limite = 16 * 1024) {
+  const bruto = await leCorpo(request, limite);
+  if (bruto === null) throw new CorpoGrande();
   try {
-    return await request.json();
+    const v = JSON.parse(bruto);
+    return v && typeof v === 'object' && !Array.isArray(v) ? v : null;
   } catch {
     return null;
   }
@@ -184,10 +268,14 @@ async function readJson(request) {
 
 async function handleActivate(request, env) {
   const body = await readJson(request);
-  if (!body || !body.licenseKey || !body.deviceId) return err('BAD_REQUEST', 'licenseKey e deviceId são obrigatórios');
+  const licenseKey = texto(body && body.licenseKey, 64);
+  const deviceId = texto(body && body.deviceId, 120);
+  if (!licenseKey || !deviceId) return err('BAD_REQUEST', 'licenseKey e deviceId são obrigatórios');
+  const deviceLabel = typeof body.deviceLabel === 'string' ? body.deviceLabel.trim().slice(0, 120) || null : null;
+  const appVersion = typeof body.appVersion === 'string' ? body.appVersion.slice(0, 32) : null;
 
   const license = await env.DB.prepare('SELECT * FROM licenses WHERE license_key = ?')
-    .bind(body.licenseKey.trim().toUpperCase())
+    .bind(licenseKey.toUpperCase())
     .first();
   if (!license) return err('LICENSE_NOT_FOUND', 'Licença não encontrada', 404);
 
@@ -196,58 +284,62 @@ async function handleActivate(request, env) {
     return err('LICENSE_NOT_ACTIVATABLE', `Licença está ${status}`, 403);
   }
 
-  let device = await env.DB.prepare('SELECT * FROM devices WHERE device_id = ? AND license_id = ?')
-    .bind(body.deviceId, license.license_id)
-    .first();
+  /* Um único comando, atômico no D1, faz as três coisas que antes eram
+     separadas (ler a contagem, comparar, inserir):
+     - só grava se a licença ainda tiver vaga (sem contar o próprio aparelho);
+     - reativa um aparelho desativado (antes: erro 500 de chave primária,
+       porque device_id é PRIMARY KEY e o código tentava INSERT de novo);
+     - move o aparelho de outra licença para esta (mesmo navegador trocando
+       de chave; antes também dava 500).
+     Com a leitura separada da escrita, seis ativações simultâneas de uma
+     licença de 1 aparelho passavam todas. */
+  const agora = nowIso();
+  const res = await env.DB.prepare(
+    `INSERT INTO devices (device_id, license_id, device_label, first_seen_at, last_validated_at, deactivated_at)
+     SELECT ?1, ?2, ?3, ?4, ?4, NULL
+      WHERE (SELECT COUNT(*) FROM devices
+              WHERE license_id = ?2 AND deactivated_at IS NULL AND device_id <> ?1) < ?5
+     ON CONFLICT(device_id) DO UPDATE SET
+       license_id = excluded.license_id,
+       device_label = COALESCE(excluded.device_label, devices.device_label),
+       last_validated_at = excluded.last_validated_at,
+       deactivated_at = NULL`
+  )
+    .bind(deviceId, license.license_id, deviceLabel, agora, license.max_devices)
+    .run();
 
-  if (device && device.deactivated_at) {
-    // dispositivo foi desativado antes; reativar consome uma vaga de novo
-    device = null;
-  }
-
-  if (!device) {
-    const activeCount = await countActiveDevices(env, license.license_id);
-    if (activeCount >= license.max_devices) {
-      return err(
-        'LICENSE_DEVICE_LIMIT_REACHED',
-        'Esta licença já está ativada no número máximo de dispositivos permitido.',
-        409
-      );
-    }
-    await env.DB.prepare(
-      `INSERT INTO devices (device_id, license_id, device_label, first_seen_at, last_validated_at, deactivated_at)
-       VALUES (?, ?, ?, ?, ?, NULL)`
-    )
-      .bind(body.deviceId, license.license_id, body.deviceLabel || null, nowIso(), nowIso())
-      .run();
-  } else {
-    await env.DB.prepare('UPDATE devices SET last_validated_at = ? WHERE device_id = ?')
-      .bind(nowIso(), body.deviceId)
-      .run();
+  if (!res.meta || !res.meta.changes) {
+    return err(
+      'LICENSE_DEVICE_LIMIT_REACHED',
+      'Esta licença já está ativada no número máximo de dispositivos permitido.',
+      409
+    );
   }
 
   if (license.status === 'PENDING') {
-    await env.DB.prepare('UPDATE licenses SET status = ?, activated_at = ? WHERE license_id = ?')
-      .bind('ACTIVE', nowIso(), license.license_id)
+    await env.DB.prepare("UPDATE licenses SET status = 'ACTIVE', activated_at = ? WHERE license_id = ? AND status = 'PENDING'")
+      .bind(agora, license.license_id)
       .run();
     license.status = 'ACTIVE';
-    license.activated_at = nowIso();
+    license.activated_at = agora;
   }
 
-  const signed = await buildSignedLicense(env, license, { device_id: body.deviceId });
-  await logEvent(env, { licenseId: license.license_id, deviceId: body.deviceId, event: 'ACTIVATE', request, appVersion: body.appVersion });
+  const signed = await buildSignedLicense(env, license, { device_id: deviceId });
+  await logEvent(env, { licenseId: license.license_id, deviceId, event: 'ACTIVATE', request, appVersion });
   return json(signed);
 }
 
 async function handleValidate(request, env) {
   const body = await readJson(request);
-  if (!body || !body.licenseId || !body.deviceId) return err('BAD_REQUEST', 'licenseId e deviceId são obrigatórios');
+  const licenseId = texto(body && body.licenseId, 64);
+  const deviceId = texto(body && body.deviceId, 120);
+  if (!licenseId || !deviceId) return err('BAD_REQUEST', 'licenseId e deviceId são obrigatórios');
 
-  const license = await env.DB.prepare('SELECT * FROM licenses WHERE license_id = ?').bind(body.licenseId).first();
+  const license = await env.DB.prepare('SELECT * FROM licenses WHERE license_id = ?').bind(licenseId).first();
   if (!license) return err('LICENSE_NOT_FOUND', 'Licença não encontrada', 404);
 
   const device = await env.DB.prepare('SELECT * FROM devices WHERE device_id = ? AND license_id = ?')
-    .bind(body.deviceId, body.licenseId)
+    .bind(deviceId, licenseId)
     .first();
   if (!device) return err('DEVICE_NOT_FOUND', 'Dispositivo não registrado nesta licença', 404);
 
@@ -257,7 +349,7 @@ async function handleValidate(request, env) {
     // uma mensagem clara e derrubar o estado PRO local de forma confiável.
     const payloadObj = {
       licenseId: license.license_id,
-      deviceId: body.deviceId,
+      deviceId,
       plan: license.plan,
       status: 'DEVICE_DEACTIVATED',
       maxDevices: license.max_devices,
@@ -267,22 +359,34 @@ async function handleValidate(request, env) {
       issuedAt: nowIso(),
     };
     const signed = await signLicensePayload(env, payloadObj);
-    await logEvent(env, { licenseId: license.license_id, deviceId: body.deviceId, event: 'VALIDATE', detail: 'device_deactivated', request });
+    await logEvent(env, { licenseId: license.license_id, deviceId, event: 'VALIDATE', detail: 'device_deactivated', request });
     return json(signed);
   }
 
-  await env.DB.prepare('UPDATE devices SET last_validated_at = ? WHERE device_id = ?').bind(nowIso(), body.deviceId).run();
+  await env.DB.prepare('UPDATE devices SET last_validated_at = ? WHERE device_id = ? AND license_id = ?')
+    .bind(nowIso(), deviceId, licenseId)
+    .run();
   const signed = await buildSignedLicense(env, license, device);
-  await logEvent(env, { licenseId: license.license_id, deviceId: body.deviceId, event: 'VALIDATE', detail: effectiveStatus(license), request });
+  await logEvent(env, { licenseId: license.license_id, deviceId, event: 'VALIDATE', detail: effectiveStatus(license), request });
   return json(signed);
 }
 
 async function handleListDevices(request, env) {
-  const url = new URL(request.url);
-  const licenseKey = (url.searchParams.get('licenseKey') || '').trim().toUpperCase();
+  /* POST com a chave no corpo é o caminho certo: na URL (GET), a chave de
+     licença, que funciona como senha, ficava gravada em histórico do
+     navegador e em logs de rede. O GET continua aceito por um tempo, só
+     para versões antigas do app que ainda estejam em cache. */
+  let bruto = null;
+  if (request.method === 'POST') {
+    const body = await readJson(request);
+    bruto = body && body.licenseKey;
+  } else {
+    bruto = new URL(request.url).searchParams.get('licenseKey');
+  }
+  const licenseKey = texto(bruto, 64);
   if (!licenseKey) return err('BAD_REQUEST', 'licenseKey é obrigatório');
 
-  const license = await env.DB.prepare('SELECT * FROM licenses WHERE license_key = ?').bind(licenseKey).first();
+  const license = await env.DB.prepare('SELECT * FROM licenses WHERE license_key = ?').bind(licenseKey.toUpperCase()).first();
   if (!license) return err('LICENSE_NOT_FOUND', 'Licença não encontrada', 404);
 
   const { results } = await env.DB.prepare(
@@ -297,27 +401,32 @@ async function handleListDevices(request, env) {
 
 async function handleDeactivateDevice(request, env) {
   const body = await readJson(request);
-  if (!body || !body.licenseKey || !body.deviceId) return err('BAD_REQUEST', 'licenseKey e deviceId são obrigatórios');
+  const licenseKey = texto(body && body.licenseKey, 64);
+  const deviceId = texto(body && body.deviceId, 120);
+  if (!licenseKey || !deviceId) return err('BAD_REQUEST', 'licenseKey e deviceId são obrigatórios');
 
   const license = await env.DB.prepare('SELECT * FROM licenses WHERE license_key = ?')
-    .bind(body.licenseKey.trim().toUpperCase())
+    .bind(licenseKey.toUpperCase())
     .first();
   if (!license) return err('LICENSE_NOT_FOUND', 'Licença não encontrada', 404);
 
-  const device = await env.DB.prepare('SELECT * FROM devices WHERE device_id = ? AND license_id = ?')
-    .bind(body.deviceId, license.license_id)
-    .first();
-  if (!device) return err('DEVICE_NOT_FOUND', 'Dispositivo não encontrado nesta licença', 404);
+  /* O filtro por license_id vai no próprio UPDATE: a autorização não
+     depende de uma leitura anterior que poderia ficar desatualizada. */
+  const res = await env.DB.prepare('UPDATE devices SET deactivated_at = ? WHERE device_id = ? AND license_id = ?')
+    .bind(nowIso(), deviceId, license.license_id)
+    .run();
+  if (!res.meta || !res.meta.changes) return err('DEVICE_NOT_FOUND', 'Dispositivo não encontrado nesta licença', 404);
 
-  await env.DB.prepare('UPDATE devices SET deactivated_at = ? WHERE device_id = ?').bind(nowIso(), body.deviceId).run();
-  await logEvent(env, { licenseId: license.license_id, deviceId: body.deviceId, event: 'DEACTIVATE', request });
+  await logEvent(env, { licenseId: license.license_id, deviceId, event: 'DEACTIVATE', request });
   return json({ ok: true });
 }
 
 async function handleLicenseBySession(request, env) {
   const url = new URL(request.url);
-  const sessionId = url.searchParams.get('session_id');
-  if (!sessionId) return err('BAD_REQUEST', 'session_id é obrigatório');
+  const sessionId = texto(url.searchParams.get('session_id'), 255);
+  /* Só aceita o formato de sessão do Stripe: corta de saída qualquer
+     tentativa de usar o parâmetro para outra coisa. */
+  if (!sessionId || !/^cs_(live|test)_[A-Za-z0-9]{10,250}$/.test(sessionId)) return err('BAD_REQUEST', 'session_id inválido');
 
   const license = await env.DB.prepare('SELECT license_key, plan, status FROM licenses WHERE stripe_checkout_session_id = ?')
     .bind(sessionId)
@@ -345,7 +454,7 @@ async function handleResendLicense(request, env) {
     message: 'Se houver uma compra com esse e-mail, a chave foi reenviada para ele.',
   });
 
-  if (!email || !email.includes('@') || email.length > 254) return generic;
+  if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || email.length > 254) return generic;
 
   const rows = await env.DB.prepare(
     `SELECT l.license_id, l.license_key, l.plan
@@ -359,49 +468,70 @@ async function handleResendLicense(request, env) {
     .bind(email)
     .all();
 
+  /* Intervalo mínimo de 15 minutos por licença. Sem ele, qualquer pessoa
+     que soubesse o e-mail de um cliente podia disparar dezenas de e-mails
+     para ele e esgotar a cota grátis do serviço de e-mail. */
+  const limite = new Date(Date.now() - 15 * 60 * 1000).toISOString();
   const list = (rows && rows.results) || [];
   for (const lic of list) {
+    const hist = await env.DB.prepare(
+      `SELECT SUM(CASE WHEN created_at > ?2 THEN 1 ELSE 0 END) AS recentes, COUNT(*) AS dia
+         FROM activation_log WHERE license_id = ?1 AND event = 'RESEND' AND created_at > ?3`
+    )
+      .bind(lic.license_id, limite, new Date(Date.now() - 24 * 3600 * 1000).toISOString())
+      .first();
+    /* No máximo 1 a cada 15 minutos e 4 por dia, por licença. */
+    if (hist && ((hist.recentes || 0) > 0 || (hist.dia || 0) >= 4)) continue;
     const mail = await sendLicenseEmail(env, { to: email, licenseKey: lic.license_key, plan: lic.plan });
     await logEvent(env, {
       licenseId: lic.license_id,
-      event: 'WEBHOOK',
+      event: 'RESEND',
       detail: `reenvio pedido pelo cliente: ${mail.ok ? 'OK' : 'FALHOU'} — ${mail.detail}`,
       request,
     });
   }
 
-  if (!list.length) {
-    /* Registramos a tentativa sem licença para dar visibilidade a quem
-       pagou e não recebeu (ou digitou o e-mail errado). */
-    await logEvent(env, { event: 'WEBHOOK', detail: 'reenvio pedido para e-mail sem licença ativa', request });
-  }
-
+  /* E-mail sem licença: não grava nada. Antes gravava uma linha por pedido,
+     o que deixava qualquer um encher o activation_log e consumir a cota
+     diária de escritas do D1 gratuito com e-mails inventados. */
   return generic;
 }
 
 /* ---- Stripe webhook ---- */
 
-async function verifyStripeSignature(request, env, rawBody) {
-  const sigHeader = request.headers.get('Stripe-Signature') || '';
-  const parts = Object.fromEntries(
-    sigHeader.split(',').map((kv) => {
-      const [k, v] = kv.split('=');
-      return [k, v];
-    })
-  );
-  if (!parts.t || !parts.v1) return false;
+/* Janela de tolerância da assinatura, a mesma das bibliotecas oficiais do
+   Stripe. Sem ela, um evento assinado capturado uma vez podia ser
+   reapresentado para sempre. */
+const STRIPE_TOLERANCIA_S = 300;
 
-  const signedPayload = `${parts.t}.${rawBody}`;
+async function verifyStripeSignature(request, env, rawBody) {
+  /* Falha FECHADO: sem segredo configurado, nada é aceito. */
+  const segredo = env.STRIPE_WEBHOOK_SECRET;
+  if (typeof segredo !== 'string' || segredo.length < 16) return false;
+
+  const sigHeader = request.headers.get('Stripe-Signature') || '';
+  let t = null;
+  const v1s = [];
+  for (const parte of sigHeader.split(',')) {
+    const i = parte.indexOf('=');
+    if (i < 0) continue;
+    const k = parte.slice(0, i).trim(), v = parte.slice(i + 1).trim();
+    if (k === 't') t = v;
+    else if (k === 'v1') v1s.push(v); // pode haver mais de uma durante a troca de segredo
+  }
+  if (!t || !/^\d{1,12}$/.test(t) || !v1s.length) return false;
+  if (Math.abs(Math.floor(Date.now() / 1000) - Number(t)) > STRIPE_TOLERANCIA_S) return false;
+
   const key = await crypto.subtle.importKey(
     'raw',
-    new TextEncoder().encode(env.STRIPE_WEBHOOK_SECRET),
+    new TextEncoder().encode(segredo),
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign']
   );
-  const sigBuf = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(signedPayload));
+  const sigBuf = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`${t}.${rawBody}`));
   const expectedHex = [...new Uint8Array(sigBuf)].map((b) => b.toString(16).padStart(2, '0')).join('');
-  return expectedHex === parts.v1;
+  return v1s.some((v) => iguaisTempoConstante(v, expectedHex));
 }
 
 /* De qual plano é cada Payment Link.
@@ -423,10 +553,6 @@ const PAYMENT_LINK_PLAN = {
   plink_1Twrf7FV7byOqCPVq0ZTZRp8: 'apoiador', // BRL 9,90
 };
 
-/* Rede de segurança: se um dia criarem um Payment Link novo e esquecerem
-   de mapeá-lo acima, ainda dá para deduzir o plano pelo valor pago, em
-   centavos. Melhor emitir a licença certa do que deixar um cliente que
-   pagou sem receber nada. */
 /* Links que NÃO são venda. O link de doação usa quantidade ajustável
    sobre R$ 1,00 e o Adaptive Pricing converte para a moeda de quem paga,
    então o valor final pode cair, por coincidência, em cima de um preço
@@ -546,14 +672,29 @@ function resolvePlanFromSession(session) {
 }
 
 async function handleStripeWebhook(request, env) {
-  const rawBody = await request.text();
+  const rawBody = await leCorpo(request, 256 * 1024);
+  if (rawBody === null) return err('PAYLOAD_TOO_LARGE', 'Corpo da requisição grande demais.', 413);
   const validSig = await verifyStripeSignature(request, env, rawBody);
   if (!validSig) return err('INVALID_SIGNATURE', 'Assinatura do webhook inválida', 400);
 
-  const event = JSON.parse(rawBody);
+  let event;
+  try { event = JSON.parse(rawBody); } catch { return err('BAD_REQUEST', 'Corpo inválido', 400); }
+  if (!event || !event.data || !event.data.object) return json({ ok: true });
 
-  if (event.type === 'checkout.session.completed') {
+  if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
     const session = event.data.object;
+
+    /* Só emite com o dinheiro confirmado. Com boleto (e outros meios
+       assíncronos), o Stripe manda checkout.session.completed com
+       payment_status = "unpaid" assim que o boleto é GERADO; o pagamento
+       chega depois, em async_payment_succeeded. Antes, a licença saía na
+       geração do boleto, e bastava não pagar. */
+    const pago = session.payment_status === 'paid' || session.payment_status === 'no_payment_required';
+    if (!pago) {
+      await logEvent(env, { event: 'WEBHOOK', detail: `${event.type} aguardando pagamento — session=${session.id}`, request });
+      return json({ ok: true, pending: true });
+    }
+
     const email = session.customer_details?.email || session.customer_email;
     const plan = resolvePlanFromSession(session);
     if (!email || !plan || !PLAN_DEVICES[plan]) {
@@ -562,11 +703,20 @@ async function handleStripeWebhook(request, env) {
          porquê. */
       await logEvent(env, {
         event: 'WEBHOOK',
-        detail: `checkout.session.completed sem plano identificado — session=${session.id} link=${session.payment_link || '-'} valor=${session.amount_total} ${session.currency} email=${email || '-'}`,
+        detail: `${event.type} sem plano identificado — session=${session.id} link=${session.payment_link || '-'} valor=${session.amount_total} ${session.currency}`,
         request,
       });
       return json({ ok: true, warning: 'plano não identificado — ver activation_log e emitir manualmente' });
     }
+
+    /* Idempotência: uma sessão de checkout gera no máximo UMA licença.
+       O Stripe reenvia o webhook quando não recebe resposta a tempo, e o
+       mesmo evento assinado podia ser reapresentado; cada reenvio criava
+       uma licença nova e mandava mais um e-mail. */
+    const jaExiste = await env.DB.prepare('SELECT license_id FROM licenses WHERE stripe_checkout_session_id = ?')
+      .bind(session.id)
+      .first();
+    if (jaExiste) return json({ ok: true, duplicate: true });
 
     let customer = await env.DB.prepare('SELECT * FROM customers WHERE email = ?').bind(email).first();
     if (!customer) {
@@ -579,16 +729,20 @@ async function handleStripeWebhook(request, env) {
 
     const licenseId = uuid();
     const licenseKey = generateLicenseKey();
-    await env.DB.prepare(
+    /* O NOT EXISTS no próprio INSERT fecha a janela entre a checagem acima
+       e a gravação, caso duas entregas do mesmo evento cheguem juntas. */
+    const ins = await env.DB.prepare(
       `INSERT INTO licenses
         (license_id, license_key, customer_id, product, plan, status, max_devices,
          stripe_checkout_session_id, stripe_payment_id, purchased_at)
-       VALUES (?, ?, ?, 'giflocal', ?, 'PENDING', ?, ?, ?, ?)`
+       SELECT ?1, ?2, ?3, 'giflocal', ?4, 'PENDING', ?5, ?6, ?7, ?8
+        WHERE NOT EXISTS (SELECT 1 FROM licenses WHERE stripe_checkout_session_id = ?6)`
     )
       .bind(licenseId, licenseKey, customer.customer_id, plan, PLAN_DEVICES[plan], session.id, session.payment_intent || null, nowIso())
       .run();
+    if (!ins.meta || !ins.meta.changes) return json({ ok: true, duplicate: true });
 
-    await logEvent(env, { licenseId, event: 'WEBHOOK', detail: 'checkout.session.completed -> licença criada', request });
+    await logEvent(env, { licenseId, event: 'WEBHOOK', detail: `${event.type} -> licença criada`, request });
 
     /* Segundo canal de entrega. Falha aqui não pode derrubar o webhook:
        a licença já existe e a página de obrigado já consegue buscá-la. */
@@ -599,6 +753,8 @@ async function handleStripeWebhook(request, env) {
       detail: `entrega por e-mail: ${mail.ok ? 'OK' : 'FALHOU'} — ${mail.detail}`,
       request,
     });
+  } else if (event.type === 'checkout.session.async_payment_failed') {
+    await logEvent(env, { event: 'WEBHOOK', detail: `pagamento assíncrono falhou — session=${event.data.object.id}`, request });
   } else if (event.type === 'charge.refunded' || event.type === 'charge.dispute.created') {
     const obj = event.data.object;
     const paymentIntent = obj.payment_intent;
@@ -621,8 +777,14 @@ async function handleStripeWebhook(request, env) {
 /* ---- admin leve (protegido por ADMIN_TOKEN), sem interface — só endpoints ---- */
 
 function requireAdmin(request, env) {
+  /* Falha FECHADO. Antes: sem ADMIN_TOKEN configurado, a comparação era
+     com a string "Bearer undefined", e quem mandasse exatamente isso virava
+     administrador. Em produção o segredo existe (conferido na auditoria),
+     mas a proteção não pode depender disso. */
+  const token = env.ADMIN_TOKEN;
+  if (typeof token !== 'string' || token.length < 24) return false;
   const auth = request.headers.get('Authorization') || '';
-  return auth === `Bearer ${env.ADMIN_TOKEN}`;
+  return iguaisTempoConstante(auth, `Bearer ${token}`);
 }
 
 async function handleAdminGetLicense(request, env, licenseId) {
@@ -638,10 +800,12 @@ async function handleAdminSetStatus(request, env, licenseId) {
   const body = await readJson(request);
   const allowed = ['ACTIVE', 'REVOKED', 'SUSPENDED', 'EXPIRED'];
   if (!body || !allowed.includes(body.status)) return err('BAD_REQUEST', `status deve ser um de: ${allowed.join(', ')}`);
-  await env.DB.prepare('UPDATE licenses SET status = ?, revoked_at = ?, revoked_reason = ? WHERE license_id = ?')
-    .bind(body.status, body.status === 'ACTIVE' ? null : nowIso(), body.reason || null, licenseId)
+  const reason = typeof body.reason === 'string' ? body.reason.slice(0, 200) : null;
+  const res = await env.DB.prepare('UPDATE licenses SET status = ?, revoked_at = ?, revoked_reason = ? WHERE license_id = ?')
+    .bind(body.status, body.status === 'ACTIVE' ? null : nowIso(), reason, licenseId)
     .run();
-  await logEvent(env, { licenseId, event: 'REVOKE', detail: `admin -> ${body.status} (${body.reason || ''})`, request });
+  if (!res.meta || !res.meta.changes) return err('LICENSE_NOT_FOUND', 'Licença não encontrada', 404);
+  await logEvent(env, { licenseId, event: 'REVOKE', detail: `admin -> ${body.status} (${reason || ''})`, request });
   return json({ ok: true });
 }
 
@@ -675,6 +839,16 @@ const AI_DAILY_LIMIT = { free: 1, pro: 25, full: 80 };
    deixar margem — passar disso não quebra nada, mas sai do gratuito. */
 const AI_GLOBAL_DAILY_CAP = 55;
 
+/* Teto grátis por IP. O limite grátis é por deviceId, e o deviceId é
+   gerado pelo próprio navegador: trocando-o a cada pedido, uma só pessoa
+   consumia sozinha o teto global do dia e derrubava a IA para todos.
+   3 por IP deixa folga para uma casa ou escritório com IP compartilhado. */
+const AI_FREE_PER_IP = 3;
+
+/* Linhas especiais na mesma tabela ai_usage (sem mudar o esquema):
+   '*global*' guarda o total do dia; 'ip:<hash>' o total grátis por IP. */
+const AI_GLOBAL_SUBJECT = '*global*';
+
 const BACKEND_PLAN_TO_TIER = { apoiador: 'pro', profissional: 'full', empresa: 'full' };
 
 function todayKey() {
@@ -685,13 +859,13 @@ function todayKey() {
    licença é conferida no banco (nunca confiamos num "plano" enviado pelo
    navegador, que qualquer um poderia forjar). */
 async function resolveAiSubject(env, body) {
-  const deviceId = String((body && body.deviceId) || '').slice(0, 120);
+  const deviceId = texto(body && body.deviceId, 120) || '';
   let tier = 'free';
   let subject = 'dev:' + (deviceId || 'anon');
-  const key = body && body.licenseKey ? String(body.licenseKey).trim().toUpperCase() : '';
+  const key = texto(body && body.licenseKey, 64);
   if (key) {
     const lic = await env.DB.prepare('SELECT license_id, plan, status FROM licenses WHERE license_key = ?')
-      .bind(key)
+      .bind(key.toUpperCase())
       .first();
     if (lic && lic.status === 'ACTIVE') {
       tier = BACKEND_PLAN_TO_TIER[lic.plan] || 'pro';
@@ -706,15 +880,53 @@ async function readAiUsage(env, subject) {
   const mine = await env.DB.prepare('SELECT count FROM ai_usage WHERE day = ? AND subject = ?')
     .bind(day, subject)
     .first();
-  const total = await env.DB.prepare('SELECT COALESCE(SUM(count), 0) AS n FROM ai_usage WHERE day = ?')
-    .bind(day)
+  const global = await env.DB.prepare('SELECT count FROM ai_usage WHERE day = ? AND subject = ?')
+    .bind(day, AI_GLOBAL_SUBJECT)
     .first();
-  return { day, used: (mine && mine.count) || 0, globalUsed: (total && total.n) || 0 };
+  return { day, used: (mine && mine.count) || 0, globalUsed: (global && global.count) || 0 };
+}
+
+/* Reserva uma unidade de cota de forma ATÔMICA: o incremento só acontece
+   se o contador ainda estiver abaixo do limite, num único comando. Antes
+   o código lia o uso, comparava e só depois incrementava; dez pedidos
+   simultâneos liam todos "0 usados" e passavam todos. */
+async function reservaCota(env, day, subject, limite) {
+  const r = await env.DB.prepare(
+    `INSERT INTO ai_usage (day, subject, count) VALUES (?1, ?2, 1)
+     ON CONFLICT(day, subject) DO UPDATE SET count = count + 1 WHERE ai_usage.count < ?3`
+  )
+    .bind(day, subject, limite)
+    .run();
+  return !!(r.meta && r.meta.changes);
+}
+
+/* Na primeira geração do dia, o contador global nasce com a soma do que
+   já foi usado hoje (dia da implantação: havia uso registrado só por
+   pessoa). INSERT OR IGNORE: depois da primeira vez não grava nada. */
+async function semeiaGlobal(env, day) {
+  await env.DB.prepare(
+    `INSERT OR IGNORE INTO ai_usage (day, subject, count)
+     SELECT ?1, '*global*', COALESCE(SUM(count), 0) FROM ai_usage
+      WHERE day = ?1 AND (subject LIKE 'dev:%' OR subject LIKE 'lic:%')`
+  )
+    .bind(day)
+    .run();
+}
+
+async function devolveCota(env, day, subject) {
+  await env.DB.prepare('UPDATE ai_usage SET count = count - 1 WHERE day = ? AND subject = ? AND count > 0')
+    .bind(day, subject)
+    .run();
 }
 
 async function handleAiQuota(request, env) {
-  const url = new URL(request.url);
-  const body = { deviceId: url.searchParams.get('deviceId'), licenseKey: url.searchParams.get('licenseKey') };
+  /* Aceita POST (chave no corpo) e, por compatibilidade, GET. */
+  let body;
+  if (request.method === 'POST') body = (await readJson(request)) || {};
+  else {
+    const url = new URL(request.url);
+    body = { deviceId: url.searchParams.get('deviceId'), licenseKey: url.searchParams.get('licenseKey') };
+  }
   const { tier, subject } = await resolveAiSubject(env, body);
   const { used, globalUsed } = await readAiUsage(env, subject);
   const allowed = AI_DAILY_LIMIT[tier];
@@ -736,34 +948,64 @@ async function handleAiGenerate(request, env) {
   if (prompt.length > 800) return err('PROMPT_TOO_LONG', 'Descrição muito longa (máximo 800 caracteres).');
 
   const { tier, subject } = await resolveAiSubject(env, body);
-  const { day, used, globalUsed } = await readAiUsage(env, subject);
+  const day = todayKey();
   const allowed = AI_DAILY_LIMIT[tier];
 
-  if (globalUsed >= AI_GLOBAL_DAILY_CAP) {
+  /* Leitura prévia, só para recusar barato quando o dia já acabou: sem
+     ela, cada pedido recusado ainda gastaria escritas no D1. A garantia de
+     verdade vem das reservas atômicas logo abaixo. */
+  await semeiaGlobal(env, day);
+  const previa = await readAiUsage(env, subject);
+  if (previa.globalUsed >= AI_GLOBAL_DAILY_CAP) {
     return json(
       { error: 'AI_SERVICE_BUSY', message: 'O limite diário de gerações com IA do serviço foi atingido. Tente de novo amanhã.' },
       429
     );
   }
-  if (used >= allowed) {
+  if (previa.used >= allowed) {
+    return json({ error: 'AI_LIMIT_REACHED', message: 'Você usou suas gerações com IA de hoje.', tier, used: previa.used, allowed }, 429);
+  }
+
+  /* Ordem das reservas: por IP (só no grátis), por pessoa e, por último, o
+     teto global. Os limites mais estreitos vêm primeiro: quem já estourou o
+     próprio limite é recusado sem gravar nada, e ninguém consegue gerar
+     escritas em série (reserva + devolução) para esgotar a cota diária de
+     escritas do D1 gratuito. */
+  const devolver = [];
+  const desfaz = async () => { for (const sub of devolver) await devolveCota(env, day, sub); };
+  if (tier === 'free') {
+    const h = await hashIp(env, request.headers.get('CF-Connecting-IP') || '');
+    if (h) {
+      const ipSubject = 'ip:' + h;
+      if (!(await reservaCota(env, day, ipSubject, AI_FREE_PER_IP))) {
+        return json({ error: 'AI_LIMIT_REACHED', message: 'Você usou suas gerações com IA de hoje.', tier, used: allowed, allowed }, 429);
+      }
+      devolver.push(ipSubject);
+    }
+  }
+  if (!(await reservaCota(env, day, subject, allowed))) {
+    await desfaz();
+    return json({ error: 'AI_LIMIT_REACHED', message: 'Você usou suas gerações com IA de hoje.', tier, used: allowed, allowed }, 429);
+  }
+  devolver.push(subject);
+  if (!(await reservaCota(env, day, AI_GLOBAL_SUBJECT, AI_GLOBAL_DAILY_CAP))) {
+    await desfaz();
     return json(
-      { error: 'AI_LIMIT_REACHED', message: 'Você usou suas gerações com IA de hoje.', tier, used, allowed },
+      { error: 'AI_SERVICE_BUSY', message: 'O limite diário de gerações com IA do serviço foi atingido. Tente de novo amanhã.' },
       429
     );
   }
+  const { used } = await readAiUsage(env, subject);
 
-  /* Conta ANTES de gerar: se contássemos depois, chamadas simultâneas
-     furariam o teto e poderiam estourar a franquia da conta. O custo de
-     uma geração que falhar é um crédito perdido — preferível a um limite
-     que não segura. */
-  await env.DB.prepare(
-    `INSERT INTO ai_usage (day, subject, count) VALUES (?, ?, 1)
-     ON CONFLICT(day, subject) DO UPDATE SET count = count + 1`
-  )
-    .bind(day, subject)
-    .run();
-
-  const result = await env.AI.run(AI_MODEL, { prompt, steps: AI_STEPS });
+  /* A cota é gasta ANTES de gerar: uma geração que falhar custa um crédito,
+     o que é preferível a um limite que não segura. */
+  let result;
+  try {
+    result = await env.AI.run(AI_MODEL, { prompt, steps: AI_STEPS });
+  } catch (e) {
+    console.error('AI.run falhou:', e && e.message ? e.message : e);
+    return err('AI_FAILED', 'Não foi possível gerar a imagem agora. Tente de novo em instantes.', 502);
+  }
 
   /* O formato de retorno varia entre modelos: alguns devolvem { image: base64 },
      outros um ReadableStream binário. Normalizamos para base64 aqui, para o
@@ -779,7 +1021,8 @@ async function handleAiGenerate(request, env) {
   }
 
   if (!imageB64) {
-    return err('AI_UNEXPECTED_OUTPUT', 'O modelo respondeu num formato inesperado: ' + typeof result, 502);
+    console.error('AI.run: formato inesperado', typeof result);
+    return err('AI_UNEXPECTED_OUTPUT', 'O modelo respondeu num formato inesperado.', 502);
   }
 
   return json({
@@ -787,9 +1030,9 @@ async function handleAiGenerate(request, env) {
     image: imageB64,
     model: AI_MODEL,
     tier,
-    used: used + 1,
+    used,
     allowed,
-    remaining: Math.max(0, allowed - used - 1),
+    remaining: Math.max(0, allowed - used),
   });
 }
 
@@ -816,21 +1059,37 @@ export default {
     try {
       return withCors(await route(request, env, url), request);
     } catch (e) {
-      return withCors(err('INTERNAL_ERROR', String(e && e.message ? e.message : e), 500), request);
+      if (e instanceof CorpoGrande) return withCors(err('PAYLOAD_TOO_LARGE', 'Corpo da requisição grande demais.', 413), request);
+      /* O detalhe vai para o log do Worker (visível só no painel); quem
+         chamou recebe uma mensagem genérica. Antes a mensagem interna do
+         JavaScript ou do D1 voltava inteira na resposta. */
+      console.error('erro interno', url.pathname, e && e.stack ? e.stack : e);
+      return withCors(err('INTERNAL_ERROR', 'Erro interno. Tente novamente em instantes.', 500), request);
     }
   },
 };
 
+/* Corpo máximo por rota. No plano gratuito o Worker tem 10 ms de CPU por
+   pedido; um JSON de dezenas de MB derrubaria a requisição no parse. Um
+   evento do Stripe tem poucos KB. */
+const LIMITE_CORPO = { '/webhooks/stripe': 256 * 1024 };
+const LIMITE_CORPO_PADRAO = 16 * 1024;
+
 async function route(request, env, url) {
+  if (request.method === 'POST') {
+    const tam = Number(request.headers.get('Content-Length') || '0');
+    if (tam > (LIMITE_CORPO[url.pathname] || LIMITE_CORPO_PADRAO)) return err('PAYLOAD_TOO_LARGE', 'Corpo da requisição grande demais.', 413);
+  }
+
   if (url.pathname === '/activate' && request.method === 'POST') return await handleActivate(request, env);
   if (url.pathname === '/validate' && request.method === 'POST') return await handleValidate(request, env);
-  if (url.pathname === '/license/devices' && request.method === 'GET') return await handleListDevices(request, env);
+  if (url.pathname === '/license/devices' && (request.method === 'POST' || request.method === 'GET')) return await handleListDevices(request, env);
   if (url.pathname === '/device/deactivate' && request.method === 'POST') return await handleDeactivateDevice(request, env);
   if (url.pathname === '/license-by-session' && request.method === 'GET') return await handleLicenseBySession(request, env);
   if (url.pathname === '/license/resend' && request.method === 'POST') return await handleResendLicense(request, env);
   if (url.pathname === '/webhooks/stripe' && request.method === 'POST') return await handleStripeWebhook(request, env);
   if (url.pathname === '/ai/generate' && request.method === 'POST') return await handleAiGenerate(request, env);
-  if (url.pathname === '/ai/quota' && request.method === 'GET') return await handleAiQuota(request, env);
+  if (url.pathname === '/ai/quota' && (request.method === 'POST' || request.method === 'GET')) return await handleAiQuota(request, env);
 
   const adminMatch = url.pathname.match(/^\/admin\/license\/([^/]+)(\/status)?$/);
   if (adminMatch && request.method === 'GET' && !adminMatch[2]) return await handleAdminGetLicense(request, env, adminMatch[1]);
