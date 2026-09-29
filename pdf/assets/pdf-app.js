@@ -7,8 +7,8 @@
    arquivos estáticos em cache, e URL nova garante código novo após cada
    publicação. Ao alterar qualquer arquivo em /pdf/assets, suba a versão
    aqui e em gerar_paginas.py. */
-import { TEXTOS } from './pdf-i18n.js?v=1';
-const VERSAO = '1';
+import { TEXTOS } from './pdf-i18n.js?v=2';
+const VERSAO = '2';
 
 const PDFJS_BASE = '/pdf/vendor/pdfjs-4.10.38/';
 const IDIOMAS = ['pt', 'en', 'es', 'fr', 'de', 'it'];
@@ -160,7 +160,12 @@ async function renderizaPagina(doc, numero, escala, larguraMax) {
   const ctx = tela.getContext('2d', { alpha: false });
   ctx.fillStyle = '#fff';
   ctx.fillRect(0, 0, tela.width, tela.height);
-  await pg.render({ canvasContext: ctx, viewport: vp }).promise;
+  /* intent 'print': com o padrão ('display') o PDF.js agenda cada etapa com
+     requestAnimationFrame, que o navegador congela em aba oculta. Medido no
+     ar: a conversão parava ao trocar de aba e só seguia ao voltar. Com
+     'print' o desenho continua em segundo plano; campos de formulário
+     preenchidos saem iguais nos dois modos (verificado). */
+  await pg.render({ canvasContext: ctx, viewport: vp, intent: 'print' }).promise;
   const tamanhoPt = pg.getViewport({ scale: 1 });
   pg.cleanup();
   return { tela, larguraPt: tamanhoPt.width, alturaPt: tamanhoPt.height };
