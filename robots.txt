@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /obrigado
+
+Sitemap: https://giflocal.com/sitemap.xml

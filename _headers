@@ -44,3 +44,17 @@
 # /sw.js e a Cloudflare SOMA as regras que casam, produzindo um
 # Cache-Control contraditorio no service worker (medido no ar).
 # Quando houver .js proprio, declare o caminho exato.
+
+# FERRAMENTAS DE PDF - politica mais estrita, somada a de /* (o navegador
+# aplica as duas). Sem 'unsafe-inline' e com rede apenas para o proprio
+# site: e isso que torna verificavel que os documentos nao saem daqui.
+/pdf
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; img-src 'self' blob: data:; style-src 'self'; font-src 'self'; worker-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'
+  Cache-Control: public, max-age=0, must-revalidate
+/pdf/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; img-src 'self' blob: data:; style-src 'self'; font-src 'self'; worker-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'
+# Bibliotecas: a versao esta no caminho, entao o arquivo nunca muda.
+/pdf/vendor/*
+  Cache-Control: public, max-age=31536000, immutable
+# /pdf/assets/* fica sem regra propria: o pdf.css ja recebe a de /*.css e
+# a Cloudflare somaria as duas. Os arquivos levam ?v= no endereco.

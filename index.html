@@ -74,6 +74,12 @@
   .top-nav a{color:var(--ink-soft); text-decoration:none; font-size:13.5px; font-weight:600; transition:.15s;}
   .top-nav a:hover{color:var(--primary);}
   @media(max-width:700px){ .top-nav{display:none;} }
+  /* Atalho para as ferramentas de PDF: o menu textual some no celular,
+     então este botão curto garante o acesso em qualquer largura. */
+  .nav-atalho{display:none; align-items:center; height:36px; padding:0 12px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--ink-soft); font-size:12.5px; font-weight:700; text-decoration:none; transition:.15s;}
+  .nav-atalho:hover{border-color:var(--primary); color:var(--primary);}
+  @media(max-width:700px){ .nav-atalho{display:inline-flex;} }
+  @media (pointer:coarse){ .nav-atalho{min-height:44px;} }
   .top-right{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
   /* min-width fixo cobrindo a tradução mais longa (francês/alemão) evita que o
      badge mude de largura ao trocar de idioma — sem isso, o header "pulava"
@@ -393,12 +399,14 @@
       <a href="#tabs" data-i18n="navFeatures">Recursos</a>
       <a href="#como-funciona" data-i18n="navHowItWorks">Como funciona</a>
       <a href="#privacidade" data-i18n="navPrivacy">Privacidade</a>
+      <a href="/pdf" data-i18n="navPdf">Ferramentas de PDF</a>
     </nav>
     <div class="top-right">
       <div class="privacy-badge">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2l7 3v6c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V5l7-3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
         <span data-i18n="badge">100% no seu navegador · seus arquivos nunca saem daqui</span>
       </div>
+      <a class="nav-atalho" href="/pdf" data-i18n="navPdfShort">PDF</a>
       <button class="pro-badge-btn" id="proStatusBtn" type="button" data-i18n-title="licenseFreeTitle" title="GIF Local PRO">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="14" height="14"><path d="M12 2l7 3v6c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V5l7-3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
         <span id="proStatusLabel" data-i18n="proStatusFree">Free</span>
@@ -1455,7 +1463,7 @@ const I18N = {
     pageTitle: "GIF Local: crie GIFs sem enviar seus arquivos para a internet",
     metaDesc: "Crie GIFs a partir de fotos, vídeos ou gravações de tela, tudo processado localmente no navegador, sem upload.",
     trustNoUpload: "Sem upload", trustNoSignup: "Sem cadastro", trustFree: "Grátis para começar", trustInstallable: "Instala como app",
-    navFeatures: "Recursos", navHowItWorks: "Como funciona", navPrivacy: "Privacidade",
+    navFeatures: "Recursos", navHowItWorks: "Como funciona", navPrivacy: "Privacidade", navPdf: "Ferramentas de PDF", navPdfShort: "PDF",
     howStep1: "Escolha a fonte", howStep1Desc: "Fotos, vídeo, tela ou do zero",
     howStep2: "Ajuste e gere", howStep2Desc: "Tamanho, qualidade e pronto",
     howStep3: "Baixe na hora", howStep3Desc: "Direto no seu dispositivo, sem espera",
@@ -1638,7 +1646,7 @@ const I18N = {
     pageTitle: "GIF Local: create GIFs without sending your files to the internet",
     metaDesc: "Create GIFs from photos, videos or screen recordings, all processed locally in your browser, no upload.",
     trustNoUpload: "No upload", trustNoSignup: "No sign-up", trustFree: "Free to start", trustInstallable: "Installs as an app",
-    navFeatures: "Features", navHowItWorks: "How it works", navPrivacy: "Privacy",
+    navFeatures: "Features", navHowItWorks: "How it works", navPrivacy: "Privacy", navPdf: "PDF tools", navPdfShort: "PDF",
     howStep1: "Pick a source", howStep1Desc: "Photos, video, screen or from scratch",
     howStep2: "Adjust and generate", howStep2Desc: "Size, quality, done",
     howStep3: "Download instantly", howStep3Desc: "Right on your device, no waiting",
@@ -1821,7 +1829,7 @@ const I18N = {
     pageTitle: "GIF Local: crea GIFs sin enviar tus archivos a internet",
     metaDesc: "Crea GIFs a partir de fotos, vídeos o grabaciones de pantalla, todo procesado localmente en el navegador, sin subir nada.",
     trustNoUpload: "Sin subir nada", trustNoSignup: "Sin registro", trustFree: "Gratis para empezar", trustInstallable: "Se instala como app",
-    navFeatures: "Características", navHowItWorks: "Cómo funciona", navPrivacy: "Privacidad",
+    navFeatures: "Características", navHowItWorks: "Cómo funciona", navPrivacy: "Privacidad", navPdf: "Herramientas PDF", navPdfShort: "PDF",
     howStep1: "Elige una fuente", howStep1Desc: "Fotos, vídeo, pantalla o desde cero",
     howStep2: "Ajusta y genera", howStep2Desc: "Tamaño, calidad y listo",
     howStep3: "Descarga al instante", howStep3Desc: "Directo en tu dispositivo, sin esperas",
@@ -2004,7 +2012,7 @@ const I18N = {
     pageTitle: "GIF Local: créez des GIF sans envoyer vos fichiers sur internet",
     metaDesc: "Créez des GIF à partir de photos, vidéos ou enregistrements d'écran, tout est traité localement dans le navigateur, sans upload.",
     trustNoUpload: "Sans envoi", trustNoSignup: "Sans inscription", trustFree: "Gratuit pour commencer", trustInstallable: "S'installe comme une app",
-    navFeatures: "Fonctionnalités", navHowItWorks: "Comment ça marche", navPrivacy: "Confidentialité",
+    navFeatures: "Fonctionnalités", navHowItWorks: "Comment ça marche", navPrivacy: "Confidentialité", navPdf: "Outils PDF", navPdfShort: "PDF",
     howStep1: "Choisissez une source", howStep1Desc: "Photos, vidéo, écran ou à partir de zéro",
     howStep2: "Ajustez et générez", howStep2Desc: "Taille, qualité, terminé",
     howStep3: "Téléchargez aussitôt", howStep3Desc: "Directement sur votre appareil, sans attente",
@@ -2187,7 +2195,7 @@ const I18N = {
     pageTitle: "GIF Local: GIFs erstellen, ohne Ihre Dateien ins Internet zu senden",
     metaDesc: "Erstellen Sie GIFs aus Fotos, Videos oder Bildschirmaufnahmen, alles wird lokal im Browser verarbeitet, ohne Upload.",
     trustNoUpload: "Kein Upload", trustNoSignup: "Keine Anmeldung", trustFree: "Kostenlos starten", trustInstallable: "Als App installierbar",
-    navFeatures: "Funktionen", navHowItWorks: "So funktioniert's", navPrivacy: "Datenschutz",
+    navFeatures: "Funktionen", navHowItWorks: "So funktioniert's", navPrivacy: "Datenschutz", navPdf: "PDF-Werkzeuge", navPdfShort: "PDF",
     howStep1: "Quelle wählen", howStep1Desc: "Fotos, Video, Bildschirm oder von Grund auf",
     howStep2: "Anpassen und erstellen", howStep2Desc: "Größe, Qualität, fertig",
     howStep3: "Sofort herunterladen", howStep3Desc: "Direkt auf Ihrem Gerät, ohne Wartezeit",
@@ -2370,7 +2378,7 @@ const I18N = {
     pageTitle: "GIF Local: crea GIF senza inviare i tuoi file a internet",
     metaDesc: "Crea GIF da foto, video o registrazioni dello schermo, tutto elaborato localmente nel browser, senza upload.",
     trustNoUpload: "Senza upload", trustNoSignup: "Senza registrazione", trustFree: "Gratis per iniziare", trustInstallable: "Si installa come app",
-    navFeatures: "Funzionalità", navHowItWorks: "Come funziona", navPrivacy: "Privacy",
+    navFeatures: "Funzionalità", navHowItWorks: "Come funziona", navPrivacy: "Privacy", navPdf: "Strumenti PDF", navPdfShort: "PDF",
     howStep1: "Scegli una fonte", howStep1Desc: "Foto, video, schermo o da zero",
     howStep2: "Regola e genera", howStep2Desc: "Dimensione, qualità, fatto",
     howStep3: "Scarica all'istante", howStep3Desc: "Direttamente sul tuo dispositivo, senza attese",
