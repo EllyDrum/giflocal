@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#6C4CF5">
+<title>Comprimir PDF online grátis, sem upload | GIF Local</title>
+<meta name="description" content="Reduza o tamanho de arquivos PDF recomprimindo imagens diretamente no navegador. Veja o tamanho antes e depois.">
+<link rel="canonical" href="https://giflocal.com/pdf/comprimir">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Comprimir PDF online grátis, sem upload | GIF Local">
+<meta property="og:description" content="Reduza o tamanho de arquivos PDF recomprimindo imagens diretamente no navegador. Veja o tamanho antes e depois.">
+<meta property="og:url" content="https://giflocal.com/pdf/comprimir">
+<meta name="twitter:card" content="summary">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/pdf/assets/pdf.css?v=1">
+<link rel="modulepreload" href="/pdf/assets/pdf-app.js?v=1">
+</head>
+<body data-ferramenta="comprimir" data-titulo="t_comp_h1">
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="/" aria-label="GIF Local, página inicial">
+      <span class="brand-mark" aria-hidden="true"><img src="/brand-mark.png" alt="" width="28" height="28"></span>
+      GIF<span>Local</span>
+    </a>
+    <nav class="top-nav" aria-label="Principal">
+      <a href="/" data-i18n="nav_gif">Criar GIF</a>
+      <a href="/pdf" aria-current="page" data-i18n="nav_pdf">Ferramentas de PDF</a>
+    </nav>
+    <div class="top-right">
+      <div class="privacy-badge"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l7 3v6c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V5l7-3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span data-i18n="badge">100% no seu navegador · seus arquivos nunca saem daqui</span></div>
+      <a class="nav-atalho" href="/" data-i18n="nav_gif">Criar GIF</a>
+      <button class="icon-btn" id="themeToggle" type="button" data-i18n-aria="theme_title" data-i18n-title="theme_title" aria-label="Alternar tema" title="Alternar tema">
+        <svg id="themeIconSun" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v2.4M12 19.1v2.4M21.5 12h-2.4M4.9 12H2.5M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7M18.5 18.5l-1.7-1.7M7.2 7.2 5.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <svg id="themeIconMoon" viewBox="0 0 24 24" fill="none" aria-hidden="true" hidden><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      </button>
+      <select class="lang-select" id="langSwitch" aria-label="Idioma / Language">
+        <option value="pt">Português</option><option value="en">English</option><option value="es">Español</option>
+        <option value="fr">Français</option><option value="de">Deutsch</option><option value="it">Italiano</option>
+      </select>
+    </div>
+  </div>
+</header>
+<main class="wrap">
+  <nav class="migalhas" aria-label="Você está em"><a href="/pdf" data-i18n="nav_pdf">Ferramentas de PDF</a> › <span data-i18n="t_comp_name">Comprimir PDF</span></nav>
+  <div class="hero">
+    <h1 data-i18n="t_comp_h1">Comprimir PDF</h1>
+    <p data-i18n="t_comp_p">Reduza o tamanho do PDF recomprimindo as imagens, sem enviar o arquivo para lugar nenhum.</p>
+  </div>
+  <div class="trust-row">
+    <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l7 3v6c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V5l7-3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span data-i18n="trust_local">Processado no seu dispositivo</span></span>
+    <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.2" stroke="currentColor" stroke-width="2"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span data-i18n="trust_nocad">Sem cadastro</span></span>
+    <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 12l-8 8-9-9V3h8l9 9z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="7.5" cy="7.5" r="1.5" fill="currentColor"/></svg><span data-i18n="trust_free">Grátis</span></span>
+  </div>
+  <section class="card" aria-labelledby="rotuloZona">
+    <div class="dropzone" id="zona">
+      <input type="file" id="entrada" accept="application/pdf,.pdf" aria-labelledby="rotuloZona" aria-describedby="dicaZona">
+      <div class="dropzone-inner">
+        <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 16V4m0 0l-4.5 4.5M12 4l4.5 4.5M5 20h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span id="rotuloZona" data-i18n="drop_pdf_one">Arraste um PDF aqui ou toque para escolher</span>
+        <small id="dicaZona"><span data-i18n="drop_hint_pdf">Somente arquivos PDF. Nada é enviado para a internet.</span> <span data-i18n-limite></span></small>
+      </div>
+    </div>
+    <ul class="lista-arquivos" id="lista" aria-live="polite"></ul>
+
+      <div class="opcoes" id="opcoes" hidden>
+        <fieldset class="field grupo-radios">
+          <legend class="rotulo-legenda" data-i18n="comp_level">Nível de compressão</legend>
+          <div class="radios">
+            <label class="radio"><input type="radio" name="nivel" value="baixa"> <span data-i18n="comp_baixa">Leve: sem perda de qualidade</span></label>
+            <label class="radio"><input type="radio" name="nivel" value="media" checked> <span data-i18n="comp_media">Recomendada: imagens otimizadas</span></label>
+            <label class="radio"><input type="radio" name="nivel" value="alta"> <span data-i18n="comp_alta">Forte: imagens menores</span></label>
+            <label class="radio"><input type="radio" name="nivel" value="maxima"> <span data-i18n="comp_maxima">Máxima: páginas viram imagens (o texto deixa de ser selecionável)</span></label>
+          </div>
+        </fieldset>
+        <p class="note info" data-i18n="comp_note">A redução depende do conteúdo. PDFs com muitas fotos costumam diminuir bastante; PDFs só com texto quase não mudam.</p>
+      </div>
+    <div class="btn-row acoes-principais">
+      <button type="button" class="btn" id="acao" disabled data-i18n="comp_btn">Comprimir PDF</button>
+      <button type="button" class="btn secondary" id="limpar" hidden data-i18n="start_over">Começar de novo</button>
+    </div>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+    <div class="progress-track" id="barra" role="progressbar" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="barraFill"></div></div>
+    <div class="result" id="resultado" aria-live="polite"></div>
+  </section>
+  <section class="outras">
+    <h2 data-i18n="others">Outras ferramentas de PDF</h2>
+    <div class="ferramentas-grade">
+      <a class="ferramenta-card" href="/pdf/unir">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="8" height="11" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="13" y="3" width="8" height="11" rx="1.5" stroke="currentColor" stroke-width="1.8"/><path d="M7 17v2h10v-2M12 19v2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+        <b data-i18n="t_merge_name">Unir PDFs</b>
+        <span class="d" data-i18n="t_merge_desc">Combine vários PDFs em um só, na ordem que quiser.</span>
+        <span class="abrir" data-i18n="open">Abrir</span>
+      </a>
+      <a class="ferramenta-card" href="/pdf/dividir">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6" y="3" width="12" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="6" y="14" width="12" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/><path d="M3 12h3m3 0h2m2 0h2m3 0h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+        <b data-i18n="t_split_name">Dividir PDF</b>
+        <span class="d" data-i18n="t_split_desc">Separe páginas ou intervalos em arquivos menores.</span>
+        <span class="abrir" data-i18n="open">Abrir</span>
+      </a>
+      <a class="ferramenta-card" href="/pdf/imagem-para-pdf">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="13" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M3 12.5l3.5-3 3 2.5 2.5-2 4 3.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 13h5a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-2" stroke="currentColor" stroke-width="1.8"/></svg></span>
+        <b data-i18n="t_img_name">Imagens para PDF</b>
+        <span class="d" data-i18n="t_img_desc">Junte fotos JPG, PNG ou WebP em um único PDF.</span>
+        <span class="abrir" data-i18n="open">Abrir</span>
+      </a>
+      <a class="ferramenta-card" href="/pdf/pdf-para-imagem">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3h7l4 4v6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M6 3v11" stroke="currentColor" stroke-width="1.8"/><rect x="9" y="12" width="12" height="9" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M9 19l3-2.5 2.5 2 2-1.5 4.5 3" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
+        <b data-i18n="t_toimg_name">PDF para imagens</b>
+        <span class="d" data-i18n="t_toimg_desc">Transforme páginas do PDF em PNG ou JPG.</span>
+        <span class="abrir" data-i18n="open">Abrir</span>
+      </a>
+      <a class="ferramenta-card" href="/pdf/desbloquear">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10.5V7a4 4 0 0 1 7.6-1.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="15.5" r="1.4" fill="currentColor"/></svg></span>
+        <b data-i18n="t_unlock_name">Desbloquear PDF</b>
+        <span class="d" data-i18n="t_unlock_desc">Remova a senha de um PDF que você tem autorização para abrir.</span>
+        <span class="abrir" data-i18n="open">Abrir</span>
+      </a>
+    </div>
+  </section>
+  <section class="sobre">
+    <h3>Quanto o arquivo diminui?</h3>
+    <p>Depende do conteúdo. A compressão recodifica as fotos do documento; arquivos com muitas imagens costumam reduzir bastante, e PDFs só com texto quase não mudam. A ferramenta sempre mostra o tamanho antes e depois.</p>
+    <h3>O nível Máxima</h3>
+    <p>Transforma cada página em imagem. O arquivo fica bem menor, mas o texto deixa de ser selecionável e pesquisável.</p>
+  </section>
+  <footer class="end" data-i18n="footer">Nenhum arquivo sai do seu dispositivo. As ferramentas de PDF rodam no seu navegador com bibliotecas de código aberto (pdf-lib e PDF.js).</footer>
+  <div class="credit-line">© GIF Local EC</div>
+</main>
+<script type="module" src="/pdf/assets/pdf-app.js?v=1"></script>
+</body>
+</html>
