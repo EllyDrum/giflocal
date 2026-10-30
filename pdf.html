@@ -5,20 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#6C4CF5">
 <title>Ferramentas de PDF online e gratuitas | GIF Local</title>
-<meta name="description" content="Converta imagens em PDF, una, divida, comprima e desbloqueie arquivos PDF diretamente no navegador, com foco em privacidade e sem necessidade de cadastro.">
+<meta name="description" content="Converta PDF em Word, Excel e PowerPoint, transforme documentos do Office em PDF, una, divida, comprima e desbloqueie PDFs no navegador, sem cadastro.">
 <link rel="canonical" href="https://giflocal.com/pdf">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Ferramentas de PDF online e gratuitas | GIF Local">
-<meta property="og:description" content="Converta imagens em PDF, una, divida, comprima e desbloqueie arquivos PDF diretamente no navegador, com foco em privacidade e sem necessidade de cadastro.">
+<meta property="og:description" content="Converta PDF em Word, Excel e PowerPoint, transforme documentos do Office em PDF, una, divida, comprima e desbloqueie PDFs no navegador, sem cadastro.">
 <meta property="og:url" content="https://giflocal.com/pdf">
 <meta name="twitter:card" content="summary">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="/pdf/assets/pdf.css?v=2">
-<link rel="modulepreload" href="/pdf/assets/pdf-app.js?v=2">
+<link rel="stylesheet" href="/pdf/assets/pdf.css?v=3">
+<link rel="modulepreload" href="/pdf/assets/pdf-app.js?v=3">
 </head>
-<body data-ferramenta="hub" data-titulo="hub_h1">
+<body class="secao-pdf" data-ferramenta="hub" data-titulo="hub_h1">
+<svg width="0" height="0" class="defs-svg" aria-hidden="true" focusable="false"><defs><linearGradient id="brilho" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".24"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".14"/></linearGradient></defs></svg>
 <header class="top">
   <div class="top-inner">
     <a class="brand" href="/" aria-label="GIF Local, página inicial">
@@ -43,67 +44,102 @@
     </div>
   </div>
 </header>
-<main class="wrap">
-  <div class="hero">
-    <h1 data-i18n="hub_h1">Ferramentas de PDF</h1>
-    <p data-i18n="hub_p">Converta, organize e desbloqueie seus arquivos PDF diretamente no navegador.</p>
+<main class="wrap larga">
+  <div class="hero hero-central">
+    <h1 data-i18n="hub_h1">Todas as ferramentas de PDF que você precisa, num só lugar</h1>
+    <p data-i18n="hub_p">Converta, organize, comprima e desbloqueie seus PDFs direto no navegador. Grátis, sem cadastro e sem enviar arquivos.</p>
   </div>
-  <p class="hero-valor" data-i18n="hub_value">Suas ferramentas de PDF, gratuitas, rápidas e privadas. Seus arquivos permanecem no seu dispositivo.</p>
   <div class="trust-row">
     <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l7 3v6c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V5l7-3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span data-i18n="trust_local">Processado no seu dispositivo</span></span>
     <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.2" stroke="currentColor" stroke-width="2"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span data-i18n="trust_nocad">Sem cadastro</span></span>
     <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 12l-8 8-9-9V3h8l9 9z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="7.5" cy="7.5" r="1.5" fill="currentColor"/></svg><span data-i18n="trust_free">Grátis</span></span>
   </div>
-  <section class="ferramentas-grade" aria-label="Ferramentas">
-      <a class="ferramenta-card" href="/pdf/unir">
-        <span class="ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="8" height="11" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="13" y="3" width="8" height="11" rx="1.5" stroke="currentColor" stroke-width="1.8"/><path d="M7 17v2h10v-2M12 19v2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+  <div class="chips" role="group" aria-label="Filtrar ferramentas" data-i18n-aria="filter_label">
+    <button type="button" class="chip" data-filtro="todas" aria-pressed="true" data-i18n="cat_all">Todas</button>
+    <button type="button" class="chip" data-filtro="organizar" aria-pressed="false" data-i18n="cat_org">Organizar PDF</button>
+    <button type="button" class="chip" data-filtro="otimizar" aria-pressed="false" data-i18n="cat_opt">Otimizar PDF</button>
+    <button type="button" class="chip" data-filtro="para-pdf" aria-pressed="false" data-i18n="cat_to">Converter para PDF</button>
+    <button type="button" class="chip" data-filtro="de-pdf" aria-pressed="false" data-i18n="cat_from">Converter de PDF</button>
+    <button type="button" class="chip" data-filtro="seguranca" aria-pressed="false" data-i18n="cat_sec">Segurança</button>
+  </div>
+  <section class="ferramentas-grade" id="gradeFerramentas" aria-label="Ferramentas">
+      <a class="ferramenta-card" href="/pdf/unir" data-categoria="organizar">
+        <span class="ic"><svg class="ic-svg" viewBox="0 0 48 48" aria-hidden="true"><rect x="1" y="1" width="46" height="46" rx="13" fill="#6d4cf0"/><rect x="1" y="1" width="46" height="46" rx="13" fill="url(#brilho)"/><g fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="10" y="12" width="12" height="16" rx="2"/><rect x="26" y="12" width="12" height="16" rx="2"/><path d="M16 32v3h16v-3M24 35v4"/></g></svg></span>
         <b data-i18n="t_merge_name">Unir PDFs</b>
         <span class="d" data-i18n="t_merge_desc">Combine vários PDFs em um só, na ordem que quiser.</span>
-        <span class="abrir" data-i18n="open">Abrir</span>
       </a>
-      <a class="ferramenta-card" href="/pdf/dividir">
-        <span class="ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6" y="3" width="12" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="6" y="14" width="12" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/><path d="M3 12h3m3 0h2m2 0h2m3 0h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+      <a class="ferramenta-card" href="/pdf/dividir" data-categoria="organizar">
+        <span class="ic"><svg class="ic-svg" viewBox="0 0 48 48" aria-hidden="true"><rect x="1" y="1" width="46" height="46" rx="13" fill="#9b4be0"/><rect x="1" y="1" width="46" height="46" rx="13" fill="url(#brilho)"/><g fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="15" y="9" width="18" height="11" rx="2"/><rect x="15" y="28" width="18" height="11" rx="2"/><path d="M9 24h4m4 0h3m4 0h3m4 0h4"/></g></svg></span>
         <b data-i18n="t_split_name">Dividir PDF</b>
         <span class="d" data-i18n="t_split_desc">Separe páginas ou intervalos em arquivos menores.</span>
-        <span class="abrir" data-i18n="open">Abrir</span>
       </a>
-      <a class="ferramenta-card" href="/pdf/comprimir">
-        <span class="ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3h8l4 4v14H6z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 8v4m0 0l-2-2m2 2l2-2M12 17v-3m0 0l-2 2m2-2l2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <a class="ferramenta-card" href="/pdf/comprimir" data-categoria="otimizar">
+        <span class="ic"><svg class="ic-svg" viewBox="0 0 48 48" aria-hidden="true"><rect x="1" y="1" width="46" height="46" rx="13" fill="#0f9f8f"/><rect x="1" y="1" width="46" height="46" rx="13" fill="url(#brilho)"/><g fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10h12l7 7v21H15z"/><path d="M24.5 15v6m0 0l-3-3m3 3l3-3M24.5 33v-6m0 0l-3 3m3-3l3 3"/></g></svg></span>
         <b data-i18n="t_comp_name">Comprimir PDF</b>
         <span class="d" data-i18n="t_comp_desc">Reduza o tamanho do arquivo quando for possível.</span>
-        <span class="abrir" data-i18n="open">Abrir</span>
       </a>
-      <a class="ferramenta-card" href="/pdf/imagem-para-pdf">
-        <span class="ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="13" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M3 12.5l3.5-3 3 2.5 2.5-2 4 3.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 13h5a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-2" stroke="currentColor" stroke-width="1.8"/></svg></span>
-        <b data-i18n="t_img_name">Imagens para PDF</b>
-        <span class="d" data-i18n="t_img_desc">Junte fotos JPG, PNG ou WebP em um único PDF.</span>
-        <span class="abrir" data-i18n="open">Abrir</span>
+      <a class="ferramenta-card" href="/pdf/pdf-para-word" data-categoria="de-pdf">
+        <span class="selo-novo" data-i18n="badge_new">Novo</span><span class="ic"><svg class="ic-svg" viewBox="0 0 48 48" aria-hidden="true"><rect x="1" y="1" width="46" height="46" rx="13" fill="#2f6fe4"/><rect x="1" y="1" width="46" height="46" rx="13" fill="url(#brilho)"/><g fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 11h11l7 7v17a2 2 0 0 1-2 2H15a2 2 0 0 1-2-2V13a2 2 0 0 1 2-2z"/><path d="M26 11v7h7"/><text x="22.6" y="32.2" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="11" fill="#fff" stroke="none">W</text><circle cx="35.5" cy="35.5" r="7" fill="#fff" stroke="none"/><path d="M32.3 35.5h6.2m-2.6-2.7l2.7 2.7-2.7 2.7" stroke="#2f6fe4" stroke-width="2"/></g></svg></span>
+        <b data-i18n="t_toword_name">PDF para Word</b>
+        <span class="d" data-i18n="t_toword_desc">Transforme PDF em documento DOCX editável.</span>
       </a>
-      <a class="ferramenta-card" href="/pdf/pdf-para-imagem">
-        <span class="ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3h7l4 4v6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M6 3v11" stroke="currentColor" stroke-width="1.8"/><rect x="9" y="12" width="12" height="9" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M9 19l3-2.5 2.5 2 2-1.5 4.5 3" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
+      <a class="ferramenta-card" href="/pdf/pdf-para-excel" data-categoria="de-pdf">
+        <span class="selo-novo" data-i18n="badge_new">Novo</span><span class="ic"><svg class="ic-svg" viewBox="0 0 48 48" aria-hidden="true"><rect x="1" y="1" width="46" height="46" rx="13" fill="#1c8f4d"/><rect x="1" y="1" width="46" height="46" rx="13" fill="url(#brilho)"/><g fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 11h11l7 7v17a2 2 0 0 1-2 2H15a2 2 0 0 1-2-2V13a2 2 0 0 1 2-2z"/><path d="M26 11v7h7"/><text x="22.6" y="32.2" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="11" fill="#fff" stroke="none">X</text><circle cx="35.5" cy="35.5" r="7" fill="#fff" stroke="none"/><path d="M32.3 35.5h6.2m-2.6-2.7l2.7 2.7-2.7 2.7" stroke="#1c8f4d" stroke-width="2"/></g></svg></span>
+        <b data-i18n="t_toexcel_name">PDF para Excel</b>
+        <span class="d" data-i18n="t_toexcel_desc">Extraia tabelas do PDF para planilhas XLSX.</span>
+      </a>
+      <a class="ferramenta-card" href="/pdf/pdf-para-powerpoint" data-categoria="de-pdf">
+        <span class="selo-novo" data-i18n="badge_new">Novo</span><span class="ic"><svg class="ic-svg" viewBox="0 0 48 48" aria-hidden="true"><rect x="1" y="1" width="46" height="46" rx="13" fill="#e8601c"/><rect x="1" y="1" width="46" height="46" rx="13" fill="url(#brilho)"/><g fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 11h11l7 7v17a2 2 0 0 1-2 2H15a2 2 0 0 1-2-2V13a2 2 0 0 1 2-2z"/><path d="M26 11v7h7"/><text x="22.6" y="32.2" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="11" fill="#fff" stroke="none">P</text><circle cx="35.5" cy="35.5" r="7" fill="#fff" stroke="none"/><path d="M32.3 35.5h6.2m-2.6-2.7l2.7 2.7-2.7 2.7" stroke="#e8601c" stroke-width="2"/></g></svg></span>
+        <b data-i18n="t_toppt_name">PDF para PowerPoint</b>
+        <span class="d" data-i18n="t_toppt_desc">Cada página vira um slide em PPTX.</span>
+      </a>
+      <a class="ferramenta-card" href="/pdf/pdf-para-imagem" data-categoria="de-pdf">
+        <span class="ic"><svg class="ic-svg" viewBox="0 0 48 48" aria-hidden="true"><rect x="1" y="1" width="46" height="46" rx="13" fill="#d29b06"/><rect x="1" y="1" width="46" height="46" rx="13" fill="url(#brilho)"/><g fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 11h11l7 7v17a2 2 0 0 1-2 2H15a2 2 0 0 1-2-2V13a2 2 0 0 1 2-2z"/><path d="M26 11v7h7"/><path d="M17 31l3-3 3 2.5 3-2 4 3.5"/></g></svg></span>
         <b data-i18n="t_toimg_name">PDF para imagens</b>
         <span class="d" data-i18n="t_toimg_desc">Transforme páginas do PDF em PNG ou JPG.</span>
-        <span class="abrir" data-i18n="open">Abrir</span>
       </a>
-      <a class="ferramenta-card" href="/pdf/desbloquear">
-        <span class="ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10.5V7a4 4 0 0 1 7.6-1.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="15.5" r="1.4" fill="currentColor"/></svg></span>
+      <a class="ferramenta-card" href="/pdf/pdf-para-texto" data-categoria="de-pdf">
+        <span class="selo-novo" data-i18n="badge_new">Novo</span><span class="ic"><svg class="ic-svg" viewBox="0 0 48 48" aria-hidden="true"><rect x="1" y="1" width="46" height="46" rx="13" fill="#56657a"/><rect x="1" y="1" width="46" height="46" rx="13" fill="url(#brilho)"/><g fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 11h11l7 7v17a2 2 0 0 1-2 2H15a2 2 0 0 1-2-2V13a2 2 0 0 1 2-2z"/><path d="M26 11v7h7"/><path d="M17.5 23h10M17.5 27.5h10M17.5 32h6"/></g></svg></span>
+        <b data-i18n="t_totxt_name">PDF para texto</b>
+        <span class="d" data-i18n="t_totxt_desc">Extraia todo o texto do PDF em TXT.</span>
+      </a>
+      <a class="ferramenta-card" href="/pdf/word-para-pdf" data-categoria="para-pdf">
+        <span class="selo-novo" data-i18n="badge_new">Novo</span><span class="ic"><svg class="ic-svg" viewBox="0 0 48 48" aria-hidden="true"><rect x="1" y="1" width="46" height="46" rx="13" fill="#2f6fe4"/><rect x="1" y="1" width="46" height="46" rx="13" fill="url(#brilho)"/><g fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 11h11l7 7v17a2 2 0 0 1-2 2H15a2 2 0 0 1-2-2V13a2 2 0 0 1 2-2z"/><path d="M26 11v7h7"/><text x="22.6" y="32.2" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="11" fill="#fff" stroke="none">W</text><circle cx="35.5" cy="35.5" r="7" fill="#fff" stroke="none"/><path d="M38.7 35.5h-6.2m2.6-2.7l-2.7 2.7 2.7 2.7" stroke="#2f6fe4" stroke-width="2"/></g></svg></span>
+        <b data-i18n="t_fromword_name">Word para PDF</b>
+        <span class="d" data-i18n="t_fromword_desc">Converta documentos DOCX em PDF.</span>
+      </a>
+      <a class="ferramenta-card" href="/pdf/excel-para-pdf" data-categoria="para-pdf">
+        <span class="selo-novo" data-i18n="badge_new">Novo</span><span class="ic"><svg class="ic-svg" viewBox="0 0 48 48" aria-hidden="true"><rect x="1" y="1" width="46" height="46" rx="13" fill="#1c8f4d"/><rect x="1" y="1" width="46" height="46" rx="13" fill="url(#brilho)"/><g fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 11h11l7 7v17a2 2 0 0 1-2 2H15a2 2 0 0 1-2-2V13a2 2 0 0 1 2-2z"/><path d="M26 11v7h7"/><text x="22.6" y="32.2" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="11" fill="#fff" stroke="none">X</text><circle cx="35.5" cy="35.5" r="7" fill="#fff" stroke="none"/><path d="M38.7 35.5h-6.2m2.6-2.7l-2.7 2.7 2.7 2.7" stroke="#1c8f4d" stroke-width="2"/></g></svg></span>
+        <b data-i18n="t_fromexcel_name">Excel para PDF</b>
+        <span class="d" data-i18n="t_fromexcel_desc">Converta planilhas XLSX ou CSV em PDF.</span>
+      </a>
+      <a class="ferramenta-card" href="/pdf/powerpoint-para-pdf" data-categoria="para-pdf">
+        <span class="selo-novo" data-i18n="badge_new">Novo</span><span class="ic"><svg class="ic-svg" viewBox="0 0 48 48" aria-hidden="true"><rect x="1" y="1" width="46" height="46" rx="13" fill="#e8601c"/><rect x="1" y="1" width="46" height="46" rx="13" fill="url(#brilho)"/><g fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 11h11l7 7v17a2 2 0 0 1-2 2H15a2 2 0 0 1-2-2V13a2 2 0 0 1 2-2z"/><path d="M26 11v7h7"/><text x="22.6" y="32.2" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="11" fill="#fff" stroke="none">P</text><circle cx="35.5" cy="35.5" r="7" fill="#fff" stroke="none"/><path d="M38.7 35.5h-6.2m2.6-2.7l-2.7 2.7 2.7 2.7" stroke="#e8601c" stroke-width="2"/></g></svg></span>
+        <b data-i18n="t_fromppt_name">PowerPoint para PDF</b>
+        <span class="d" data-i18n="t_fromppt_desc">Converta apresentações PPTX em PDF.</span>
+      </a>
+      <a class="ferramenta-card" href="/pdf/imagem-para-pdf" data-categoria="para-pdf">
+        <span class="ic"><svg class="ic-svg" viewBox="0 0 48 48" aria-hidden="true"><rect x="1" y="1" width="46" height="46" rx="13" fill="#e08a0b"/><rect x="1" y="1" width="46" height="46" rx="13" fill="url(#brilho)"/><g fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="12" width="20" height="16" rx="2.5"/><path d="M9 24l5-4 4 3 4-3 7 6"/><circle cx="23" cy="17" r="1.6" fill="#fff" stroke="none"/><path d="M27 33h9m-3-3l3 3-3 3"/></g></svg></span>
+        <b data-i18n="t_img_name">Imagens para PDF</b>
+        <span class="d" data-i18n="t_img_desc">Junte fotos JPG, PNG ou WebP em um único PDF.</span>
+      </a>
+      <a class="ferramenta-card" href="/pdf/desbloquear" data-categoria="seguranca">
+        <span class="ic"><svg class="ic-svg" viewBox="0 0 48 48" aria-hidden="true"><rect x="1" y="1" width="46" height="46" rx="13" fill="#0a8fd0"/><rect x="1" y="1" width="46" height="46" rx="13" fill="url(#brilho)"/><g fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="13" y="22" width="22" height="16" rx="3"/><path d="M18 22v-5a6 6 0 0 1 11.3-2.8"/><circle cx="24" cy="30" r="1.8" fill="#fff" stroke="none"/></g></svg></span>
         <b data-i18n="t_unlock_name">Desbloquear PDF</b>
         <span class="d" data-i18n="t_unlock_desc">Remova a senha de um PDF que você tem autorização para abrir.</span>
-        <span class="abrir" data-i18n="open">Abrir</span>
       </a>
   </section>
-  <section class="sobre">
-    <h2>Por que usar as ferramentas de PDF do GIF Local</h2>
-    <h3>Privacidade verificável</h3>
-    <p>Os documentos são processados no seu navegador. As páginas destas ferramentas só têm permissão técnica para conversar com o próprio site: não há envio de arquivos para servidores, serviços de terceiros ou inteligência artificial.</p>
-    <h3>Sem cadastro e sem marca d'água</h3>
-    <p>Todas as ferramentas básicas são gratuitas, sem login, sem assinatura e sem marca d'água nos arquivos gerados.</p>
-    <h3>Funciona no computador e no celular</h3>
-    <p>Arraste os arquivos ou toque para escolher. Em arquivos muito grandes, o limite depende da memória do seu aparelho, e a ferramenta avisa antes de travar.</p>
+  <section class="vantagens">
+    <h2 data-i18n="why_h2">Por que usar as ferramentas de PDF do GIF Local</h2>
+    <div class="vantagens-grade">
+      <div class="vantagem"><span class="v-ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l7 3v6c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V5l7-3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><h3 data-i18n="why1_t">Privacidade verificável</h3><p data-i18n="why1_p">Os documentos são processados no seu navegador. Estas páginas só têm permissão técnica para conversar com o próprio site: nada de envio para servidores, serviços de terceiros ou inteligência artificial.</p></div>
+      <div class="vantagem"><span class="v-ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 12l-8 8-9-9V3h8l9 9z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="7.5" cy="7.5" r="1.5" fill="currentColor"/></svg></span><h3 data-i18n="why2_t">Grátis, sem cadastro e sem marca d'água</h3><p data-i18n="why2_p">Todas as ferramentas são gratuitas, sem login, sem assinatura e sem marca d'água nos arquivos gerados.</p></div>
+      <div class="vantagem"><span class="v-ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="13" height="10" rx="2" stroke="currentColor" stroke-width="2"/><rect x="15" y="9" width="6" height="11" rx="1.5" stroke="currentColor" stroke-width="2"/><path d="M7 18h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><h3 data-i18n="why3_t">Computador e celular</h3><p data-i18n="why3_p">Arraste os arquivos ou toque para escolher. Em arquivos muito grandes, o limite depende da memória do aparelho, e a ferramenta avisa antes de travar.</p></div>
+    </div>
   </section>
   <footer class="end" data-i18n="footer">Nenhum arquivo sai do seu dispositivo. As ferramentas de PDF rodam no seu navegador com bibliotecas de código aberto (pdf-lib e PDF.js).</footer>
   <div class="credit-line">© GIF Local EC</div>
 </main>
-<script type="module" src="/pdf/assets/pdf-app.js?v=2"></script>
+<script type="module" src="/pdf/assets/pdf-app.js?v=3"></script>
 </body>
 </html>
