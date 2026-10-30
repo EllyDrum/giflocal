@@ -7,8 +7,8 @@
    arquivos estáticos em cache, e URL nova garante código novo após cada
    publicação. Ao alterar qualquer arquivo em /pdf/assets, suba a versão
    aqui e em gerar_paginas.py. */
-import { TEXTOS } from './pdf-i18n.js?v=2';
-const VERSAO = '2';
+import { TEXTOS } from './pdf-i18n.js?v=3';
+const VERSAO = '3';
 
 const PDFJS_BASE = '/pdf/vendor/pdfjs-4.10.38/';
 const IDIOMAS = ['pt', 'en', 'es', 'fr', 'de', 'it'];
@@ -265,9 +265,18 @@ function baixa(blob, nome) {
 function blobPdf(bytes) { return new Blob([bytes], { type: 'application/pdf' }); }
 
 /* ---------------- estado da interface ---------------- */
+/* Layout da página da ferramenta: antes do arquivo, só a área de escolha
+   (grande, centralizada); depois, área de trabalho com painel lateral. */
+function atualizaLayout() {
+  const lista = $('lista');
+  const st = $('status');
+  const ativo = (lista && lista.children.length > 0) || ($('senhaVer') && !$('senhaVer').hidden) || ($('resultado') && $('resultado').classList.contains('show')) || (st && /erro/.test(st.className));
+  document.body.classList.toggle('com-arquivo', !!ativo);
+}
 function estado(texto, tipo) {
   const el = $('status');
   if (!el) return;
+  queueMicrotask(atualizaLayout);
   el.textContent = texto || '';
   el.className = 'status' + (tipo ? ' status-' + tipo : '');
   el.setAttribute('role', tipo === 'erro' ? 'alert' : 'status');
@@ -299,13 +308,21 @@ function mensagemDeErro(e) {
     case 'PAGINAS_SINTAXE': return t('err_pages_syntax');
     case 'PAGINAS_FAIXA': return t('err_pages_syntax') + ' ' + t('err_pages_range', d);
     case 'WORKER': return t('err_worker');
+    case 'NAO_DOCX': return t('err_not_docx');
+    case 'NAO_XLSX': return t('err_not_xlsx');
+    case 'NAO_PPTX': return t('err_not_pptx');
+    case 'FORMATO_ANTIGO': return t('err_old_format');
+    case 'ARQUIVO_INVALIDO': return t('err_bad_office');
+    case 'PLANILHA_GRANDE': return t('err_sheet_big');
+    case 'PLANILHA_VAZIA': return t('err_sheet_empty');
+    case 'SEM_TEXTO': return t('err_no_text');
     default:
       if (e instanceof RangeError || /memory|allocation/i.test(String(e && e.message))) return t('err_memory');
       return t('err_unexpected');
   }
 }
 function erro(e) {
-  if (!(e instanceof ErroFerramenta)) console.error(e);
+  if (!e || !e.codigo) console.error(e);
   progresso(null);
   estado(mensagemDeErro(e), 'erro');
 }
@@ -429,6 +446,7 @@ function mostraResultado(titulo, estatisticas, acoes, extra) {
   if (extra) r.appendChild(extra);
   if (acoes && acoes.length) r.appendChild(el('div', { class: 'btn-row result-actions' }, acoes));
   r.classList.add('show');
+  atualizaLayout();
   const primeiro = r.querySelector('button');
   if (primeiro) primeiro.focus({ preventScroll: false });
 }
@@ -830,6 +848,7 @@ function ferramentaDividir() {
   function atualizaModo() {
     $('campoIntervalos').hidden = modo.value !== 'intervalos';
     $('campoSelecao').hidden = modo.value !== 'selecionar';
+    grade.hidden = modo.value !== 'selecionar';
     if (modo.value === 'selecionar') montaGrade();
     atualizaBotao();
   }
@@ -1010,6 +1029,250 @@ function ferramentaComprimir() {
   return { recebe, processa, limpa, aoMudarIdioma: desenhaArquivo };
 }
 
+
+/* ================================================================
+   CONVERSÕES DE DOCUMENTOS (Word, Excel, PowerPoint, texto)
+   ================================================================ */
+let convDePdf = null, convParaPdf = null;
+const carregaDePdf = () => (convDePdf = convDePdf || import('./conv-de-pdf.js?v=' + VERSAO));
+const carregaParaPdf = () => (convParaPdf = convParaPdf || import('./conv-para-pdf.js?v=' + VERSAO));
+
+/* worker próprio das conversões para PDF (diagramação com pdf-lib) */
+let workerConv = null;
+function chamaConv(op, dados, aoProgredir) {
+  if (!workerConv) {
+    try { workerConv = new Worker('/pdf/assets/conv-worker.js?v=' + VERSAO); } catch (e) { return Promise.reject(new ErroFerramenta('WORKER')); }
+  }
+  const w = workerConv;
+  return new Promise((resolve, reject) => {
+    w.onmessage = (ev) => {
+      const m = ev.data || {};
+      if (m.tipo === 'progresso') { aoProgredir && aoProgredir(m.feito, m.total); return; }
+      if (m.tipo === 'ok') resolve(m.resultado); else reject(new ErroFerramenta(m.codigo, m.detalhe));
+    };
+    w.onerror = (e) => { e.preventDefault && e.preventDefault(); try { w.terminate(); } catch (x) { /* já morto */ } workerConv = null; reject(new ErroFerramenta('MEMORIA')); };
+    const transf = [];
+    const imgs = dados.modelo && dados.modelo.imagens;
+    if (imgs) for (const k of Object.keys(imgs)) if (imgs[k] && imgs[k].bytes && imgs[k].bytes.buffer) transf.push(imgs[k].bytes.buffer);
+    w.postMessage({ id: 1, op, dados }, transf.filter((b, i, a) => a.indexOf(b) === i));
+  });
+}
+
+function itemArquivo(arq, detalhe, miniatura) {
+  const info = el('div', { class: 'item-info com-mini' });
+  if (miniatura) info.appendChild(miniatura);
+  info.appendChild(el('div', null, [el('b', { text: arq.name }), el('small', { text: [tamanhoLegivel(arq.size), detalhe].filter(Boolean).join(' · ') })]));
+  return el('li', { class: 'item-arquivo' }, info);
+}
+async function miniaturaPdf(doc) {
+  try {
+    const { tela } = await renderizaPagina(doc, 1, null, 120);
+    const blob = await canvasParaBlob(tela, 'image/jpeg', 0.8);
+    liberaCanvas(tela);
+    return el('img', { class: 'mini mini-pagina', src: urlTemporaria(blob), alt: '' });
+  } catch (e) { return el('span', { class: 'mini mini-vazia', text: 'PDF' }); }
+}
+
+/* PDF -> Word / Excel / PowerPoint / texto */
+function ferramentaDePdf(cfg) {
+  let arq = null, doc = null;
+  async function abre(senha) {
+    doc = await abrePdfjs(await leBytes(arq), senha);
+    $('senhaVer').hidden = true;
+    const lista = $('lista');
+    lista.textContent = '';
+    lista.appendChild(itemArquivo(arq, paginasTxt(doc.numPages), await miniaturaPdf(doc)));
+    $('opcoes').hidden = false;
+    acao(true); mostraLimpar(true);
+    estado(t('st_selected'));
+  }
+  async function recebe(files) {
+    limpaResultado(); await fecha();
+    const f = files[0];
+    try {
+      checaTamanho(f);
+      estado(t('st_validating'));
+      if (!(await ehPdf(f))) throw new ErroFerramenta('NAO_PDF', { nome: f.name });
+      arq = f;
+      try { await abre(undefined); }
+      catch (e) {
+        if (e.codigo === 'PRECISA_SENHA' || e.codigo === 'SENHA_ERRADA') {
+          $('lista').textContent = '';
+          $('lista').appendChild(itemArquivo(arq, '', el('span', { class: 'mini mini-vazia', text: 'PDF' })));
+          $('senhaVer').hidden = false; $('senhaVerCampo').focus(); estado(t('pw_view_label')); mostraLimpar(true); return;
+        }
+        throw e;
+      }
+    } catch (e) { arq = null; $('lista').textContent = ''; erro(e); }
+  }
+  $('senhaVerBtn').addEventListener('click', async () => { try { await abre($('senhaVerCampo').value); } catch (e) { erro(e); } });
+  $('senhaVerCampo').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('senhaVerBtn').click(); } });
+  async function processa() {
+    if (!doc) return;
+    ocupado(true); limpaResultado(); liberaUrls();
+    estado(t('st_processing'));
+    progresso(0, 1);
+    try {
+      const C = await carregaDePdf();
+      const pdfjs = await carregaPdfjs();
+      const r = await cfg.executa(C, pdfjs, doc, (a, b) => progresso(a, b));
+      progresso(null);
+      if (cfg.exigeTexto && !r.letras) throw new ErroFerramenta('SEM_TEXTO');
+      const nome = nomeBase(arq.name) + cfg.ext;
+      estado(t('st_done'), 'ok');
+      const extra = el('div', { class: 'resultado-extra' });
+      if (r.escaneadas) extra.appendChild(el('p', { class: 'note warn', text: t(r.escaneadas === r.paginas ? 'warn_scanned_all' : 'warn_scanned_some', { n: r.escaneadas }) }));
+      if (cfg.extra) cfg.extra(r, extra);
+      mostraResultado(cfg.titulo(r), [[t('lbl_pages'), String(r.paginas)], [t('lbl_size'), tamanhoLegivel(r.blob.size)]].concat(cfg.estatisticas ? cfg.estatisticas(r) : []),
+        [botaoBaixar(t('download_named', { f: cfg.formato }), () => baixa(r.blob, nome))], extra.children.length ? extra : null);
+    } catch (e) { erro(e); } finally { ocupado(false); acao(!!doc); }
+  }
+  async function fecha() { if (doc) { try { await doc.destroy(); } catch (e) { /* já fechado */ } } doc = null; }
+  async function limpa() { await fecha(); arq = null; $('senhaVer').hidden = true; $('opcoes').hidden = true; $('lista').textContent = ''; limpaResultado(); liberaUrls(); acao(false); mostraLimpar(false); progresso(null); estado(t('st_wait')); }
+  return { recebe, processa, limpa };
+}
+const radio = (nome) => { const r = document.querySelector('input[name="' + nome + '"]:checked'); return r ? r.value : null; };
+
+function ferramentaPdfParaWord() {
+  return ferramentaDePdf({
+    ext: '.docx', formato: 'DOCX',
+    executa: (C, pdfjs, doc, pr) => C.pdfParaWord(pdfjs, doc, { modo: radio('modoWord') || 'editavel' }, pr),
+    titulo: () => t('toword_done'),
+  });
+}
+function ferramentaPdfParaExcel() {
+  return ferramentaDePdf({
+    ext: '.xlsx', formato: 'XLSX',
+    executa: (C, pdfjs, doc, pr) => C.pdfParaExcel(pdfjs, doc, { modo: $('modoExcel').value, nomePagina: t('sheet_page'), nomePlanilha: 'PDF' }, pr),
+    titulo: (r) => t('toexcel_done', { n: r.planilhas }),
+    estatisticas: (r) => [[t('lbl_cells'), String(r.celulas)]],
+  });
+}
+function ferramentaPdfParaPpt() {
+  return ferramentaDePdf({
+    ext: '.pptx', formato: 'PPTX',
+    executa: (C, pdfjs, doc, pr) => C.pdfParaPowerPoint(pdfjs, doc, { qualidade: $('qualidadePpt').value }, pr),
+    titulo: (r) => t('toppt_done', { n: r.paginas }),
+  });
+}
+function ferramentaPdfParaTexto() {
+  return ferramentaDePdf({
+    ext: '.txt', formato: 'TXT', exigeTexto: true,
+    executa: (C, pdfjs, doc, pr) => C.pdfParaTexto(pdfjs, doc, { separar: $('separarPaginas').checked, quebraWindows: $('quebraWindows').checked, rotuloPagina: '--- ' + t('lbl_page') }, pr),
+    titulo: () => t('totxt_done'),
+    estatisticas: (r) => [[t('lbl_chars'), r.letras.toLocaleString()]],
+    extra: (r, box) => {
+      const area = el('textarea', { class: 'previa-texto', readonly: true, 'aria-label': t('txt_preview'), rows: '10' });
+      area.value = r.texto.length > 20000 ? r.texto.slice(0, 20000) + '\n…' : r.texto;
+      const copiar = el('button', { type: 'button', class: 'btn secondary small', text: t('txt_copy'), onclick: async () => {
+        try { await navigator.clipboard.writeText(r.texto); estado(t('txt_copied'), 'ok'); } catch (e) { area.select(); estado(t('txt_copy_manual')); }
+      } });
+      box.appendChild(el('label', { class: 'rotulo-previa', text: t('txt_preview') }));
+      box.appendChild(area);
+      box.appendChild(el('div', { class: 'btn-row' }, copiar));
+    },
+  });
+}
+
+/* Word / Excel / PowerPoint -> PDF */
+async function assinaturaOffice(file) {
+  const b = await cabecalho(file, 8);
+  if (b[0] === 0xD0 && b[1] === 0xCF && b[2] === 0x11 && b[3] === 0xE0) return 'antigo';
+  if (b[0] === 0x50 && b[1] === 0x4B) return 'zip';
+  return null;
+}
+function ferramentaParaPdf(cfg) {
+  let arq = null, modelo = null;
+  async function recebe(files) {
+    limpaResultado(); modelo = null;
+    const f = files[0];
+    try {
+      checaTamanho(f);
+      estado(t('st_reading'));
+      $('lista').textContent = '';
+      $('lista').appendChild(itemArquivo(f, '…', el('span', { class: 'mini mini-vazia', text: cfg.sigla })));
+      const ehCsv = cfg.csv && /\.csv$/i.test(f.name);
+      if (!ehCsv) {
+        const ass = await assinaturaOffice(f);
+        if (ass === 'antigo') throw new ErroFerramenta('FORMATO_ANTIGO');
+        if (ass !== 'zip') throw new ErroFerramenta(cfg.erroTipo);
+      }
+      const C = await carregaParaPdf();
+      const bytes = await leBytes(f);
+      modelo = ehCsv ? C.leCsv(bytes) : await cfg.le(C, bytes);
+      arq = f;
+      $('lista').textContent = '';
+      $('lista').appendChild(itemArquivo(f, cfg.descreve(modelo), el('span', { class: 'mini mini-vazia mini-' + cfg.sigla.toLowerCase(), text: cfg.sigla })));
+      if (cfg.preparaOpcoes) cfg.preparaOpcoes(modelo);
+      $('opcoes').hidden = false;
+      acao(true); mostraLimpar(true);
+      estado(t('st_selected'));
+    } catch (e) {
+      arq = null; modelo = null; $('lista').textContent = '';
+      erro(e && e.codigo ? e : new ErroFerramenta(cfg.erroTipo));
+    }
+  }
+  async function processa() {
+    if (!modelo) return;
+    ocupado(true); limpaResultado(); liberaUrls();
+    estado(t('st_processing'));
+    progresso(0, 1);
+    try {
+      /* o worker recebe uma cópia das imagens (para poder converter de novo com outras opções) */
+      const copia = Object.assign({}, modelo);
+      if (modelo.imagens) { copia.imagens = {}; for (const [k, v] of Object.entries(modelo.imagens)) copia.imagens[k] = { tipo: v.tipo, bytes: v.bytes.slice() }; }
+      const r = await chamaConv(cfg.op, { modelo: copia, opcoes: cfg.opcoes ? cfg.opcoes() : null, titulo: nomeBase(arq.name) }, (a, b) => progresso(a, b));
+      progresso(null);
+      const blob = blobPdf(r.bytes);
+      const nome = nomeBase(arq.name) + '.pdf';
+      estado(t('st_done'), 'ok');
+      const extra = el('div', { class: 'resultado-extra' });
+      const av = modelo.avisos || {};
+      if (r.trocados) extra.appendChild(el('p', { class: 'note warn', text: t('warn_chars', { n: r.trocados }) }));
+      if (av.imagens) extra.appendChild(el('p', { class: 'note warn', text: t('warn_images', { n: av.imagens }) }));
+      if (av.objetos) extra.appendChild(el('p', { class: 'note warn', text: t('warn_objects', { n: av.objetos }) }));
+      mostraResultado(t('topdf_done', { n: r.paginas }), [[t('lbl_pages'), String(r.paginas)], [t('lbl_size'), tamanhoLegivel(blob.size)]],
+        [botaoBaixar(t('download_named', { f: 'PDF' }), () => baixa(blob, nome))], extra.children.length ? extra : null);
+    } catch (e) { erro(e); } finally { ocupado(false); acao(!!modelo); }
+  }
+  function limpa() { arq = null; modelo = null; $('opcoes').hidden = true; $('lista').textContent = ''; limpaResultado(); liberaUrls(); acao(false); mostraLimpar(false); progresso(null); estado(t('st_wait')); }
+  return { recebe, processa, limpa };
+}
+function ferramentaWordParaPdf() {
+  return ferramentaParaPdf({ sigla: 'DOCX', erroTipo: 'NAO_DOCX', op: 'documento', le: (C, b) => C.leDocx(b), descreve: (m) => t('n_sections', { n: m.secoes.length }) });
+}
+function ferramentaPptParaPdf() {
+  return ferramentaParaPdf({ sigla: 'PPTX', erroTipo: 'NAO_PPTX', op: 'slides', le: (C, b) => C.lePptx(b), descreve: (m) => t('n_slides', { n: m.slides.length }) });
+}
+function ferramentaExcelParaPdf() {
+  return ferramentaParaPdf({
+    sigla: 'XLSX', erroTipo: 'NAO_XLSX', op: 'planilhas', csv: true,
+    le: (C, b) => C.leXlsx(b, idioma),
+    descreve: (m) => t('n_sheets', { n: m.folhas.filter((f) => !f.oculta).length }),
+    preparaOpcoes: (m) => {
+      const sel = $('folhas');
+      sel.textContent = '';
+      sel.appendChild(el('option', { value: 'todas', text: t('xl_all') }));
+      m.folhas.forEach((f, i) => { if (!f.oculta) sel.appendChild(el('option', { value: String(i), text: f.nome })); });
+    },
+    opcoes: () => {
+      const v = $('folhas').value;
+      return { folhas: v === 'todas' ? 'todas' : 'uma', indice: v === 'todas' ? -1 : parseInt(v, 10), ajuste: $('ajusteXl').value, orientacao: $('orientacaoXl').value, papel: $('papelXl').value, grade: $('gradeXl').checked, repetir: $('repetirXl').checked };
+    },
+  });
+}
+
+/* Página inicial: filtro por categoria */
+function iniciaHub() {
+  const chips = document.querySelectorAll('.chip[data-filtro]');
+  if (!chips.length) return;
+  chips.forEach((c) => c.addEventListener('click', () => {
+    const f = c.dataset.filtro;
+    chips.forEach((x) => x.setAttribute('aria-pressed', x === c ? 'true' : 'false'));
+    document.querySelectorAll('#gradeFerramentas .ferramenta-card').forEach((card) => { card.hidden = f !== 'todas' && card.dataset.categoria !== f; });
+  }));
+}
+
 /* ================================================================ */
 const FABRICAS = {
   desbloquear: ferramentaDesbloquear,
@@ -1018,6 +1281,13 @@ const FABRICAS = {
   unir: ferramentaUnir,
   dividir: ferramentaDividir,
   comprimir: ferramentaComprimir,
+  'pdf-para-word': ferramentaPdfParaWord,
+  'pdf-para-excel': ferramentaPdfParaExcel,
+  'pdf-para-powerpoint': ferramentaPdfParaPpt,
+  'pdf-para-texto': ferramentaPdfParaTexto,
+  'word-para-pdf': ferramentaWordParaPdf,
+  'excel-para-pdf': ferramentaExcelParaPdf,
+  'powerpoint-para-pdf': ferramentaPptParaPdf,
 };
 let ferramentaAtual = null;
 
@@ -1042,6 +1312,9 @@ function inicia() {
     $('limpar').addEventListener('click', () => { ferramentaAtual.limpa(); const e = $('entrada'); if (e) e.focus(); });
     estado(t('st_wait'));
   }
+  iniciaHub();
+  const lista = $('lista');
+  if (lista && window.MutationObserver) new MutationObserver(atualizaLayout).observe(lista, { childList: true });
   aplicaTextos();
   if (fabrica && !$('status').textContent) estado(t('st_wait'));
   document.documentElement.classList.add('js-pronto');
