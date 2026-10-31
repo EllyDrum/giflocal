@@ -152,14 +152,22 @@
       for (const k of Object.keys(MOEDAS)) sel.appendChild(el('option', { value: k, text: formata(0, k, idioma).replace(/[\d.,\s ]+/g, '').trim() + ' ' + ((NOMES[idioma] || NOMES.en)[k]) + ' (' + k + ')' }));
       sel.value = moeda;
     }
+    /* Sem checkout direto, o cartão abre o link de doação publicado, que cobra
+       em reais com valor próprio. Valor e moeda escolhidos aqui só valem para
+       o PIX (BRL); para as outras moedas a escolha de valor fica oculta, para
+       nunca mostrar um valor diferente do que será cobrado. */
+    const podeCheckout = !!(config && config.checkout);
+    const ehPix = moeda === 'BRL';
+    const valorUtil = podeCheckout || ehPix;
     /* valores sugeridos */
     const caixa = $('supportValues');
+    caixa.hidden = !valorUtil;
     caixa.textContent = '';
     m.sugeridos.forEach((v) => caixa.appendChild(el('button', { type: 'button', class: 'chip-valor' + (!personalizado && valor === v ? ' is-on' : ''), 'aria-pressed': String(!personalizado && valor === v), text: formata(v, moeda, idioma), onclick: () => { valor = v; personalizado = false; const c = $('supportCustom'); if (c) c.value = ''; render(); } })));
     caixa.appendChild(el('button', { type: 'button', class: 'chip-valor' + (personalizado ? ' is-on' : ''), 'aria-pressed': String(personalizado), text: t('supportOther'), onclick: () => { personalizado = true; valor = interpreta($('supportCustom').value, moeda, idioma); render(); setTimeout(() => $('supportCustom').focus(), 0); } }));
     /* campo personalizado */
     const campo = $('supportCustomBox');
-    campo.hidden = !personalizado;
+    campo.hidden = !personalizado || !valorUtil;
     const entrada = $('supportCustom');
     entrada.placeholder = formata(m.sugeridos[1], moeda, idioma);
     const [min, max] = LIMITES[moeda];
@@ -178,7 +186,7 @@
     /* cotação informativa */
     const cot = $('supportRate');
     if (cot) {
-      if (moeda === 'BRL') cot.textContent = '';
+      if (moeda === 'BRL' || !podeCheckout) cot.textContent = '';
       else if (cambio && cambio.taxas && valor) {
         const emBrl = converte(valor, moeda, 'BRL', cambio.taxas);
         const data = new Date(cambio.atualizadoEm);
@@ -188,11 +196,9 @@
     }
     /* formas de pagamento */
     const blocoPix = $('supportPix');
-    const ehPix = moeda === 'BRL';
     blocoPix.hidden = !ehPix;
     if (ehPix && pix) pix(valor); // a página desenha o QR com o valor em reais (ou sem valor)
     const btnCartao = $('supportStripe');
-    const podeCheckout = !!(config && config.checkout);
     btnCartao.hidden = false;
     btnCartao.disabled = ocupado || (podeCheckout && !valor);
     btnCartao.textContent = ocupado ? t('supportRedirecting') : t('supportStripe');
@@ -201,7 +207,7 @@
     const metodos = $('supportMethods');
     if (metodos) metodos.textContent = t('supportMethods') + ' ' + (ehPix ? 'PIX · ' : '') + t('supportMethodCard');
     const resumo = $('supportSummary');
-    if (resumo) resumo.textContent = (config && config.teste ? t('supportTestMode') + ' · ' : '') + (valor ? t('supportSummary').replace('{valor}', formataComCodigo(valor, moeda, idioma)) : '');
+    if (resumo) resumo.textContent = (config && config.teste ? t('supportTestMode') + ' · ' : '') + (valor && podeCheckout ? t('supportSummary').replace('{valor}', formataComCodigo(valor, moeda, idioma)) : '');
     const erro = $('supportError'); if (erro && !erro.dataset.fixo) erro.hidden = true;
   }
 
