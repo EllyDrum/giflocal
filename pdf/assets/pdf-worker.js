@@ -6,7 +6,7 @@
 'use strict';
 importScripts('/pdf/vendor/pdf-lib-2.11.1/pdf-lib.min.js');
 
-const { PDFDocument, PDFName, PDFRawStream, PDFArray, PDFNumber, PDFDict, PDFRef, EncryptedPDFError, decodePDFRawStream } = self.PDFLib;
+const { PDFDocument, PDFName, PDFRawStream, PDFArray, PDFNumber, PDFDict, PDFRef, EncryptedPDFError, decodePDFRawStream, degrees, rgb, StandardFonts } = self.PDFLib;
 
 const PRODUTOR = 'GIF Local (giflocal.com)';
 
@@ -331,7 +331,178 @@ async function opComprimir(p, id) {
   return { bytes, stats, paginas: doc.getPageCount() };
 }
 
+
+/* ---------------- organizar / girar ---------------- */
+/* p.paginas: [{ indice, rotacao }] na ordem final (páginas ausentes são excluídas) */
+async function opOrganizar(p, id) {
+  const origem = await carregaComSenha(p.bytes, p.senha);
+  const destino = await PDFDocument.create();
+  marca(destino);
+  const total = p.paginas.length;
+  if (!total) throw new Falha('SEM_PAGINAS');
+  const copiadas = await destino.copyPages(origem, p.paginas.map((x) => x.indice));
+  copiadas.forEach((pg, i) => {
+    const giro = ((p.paginas[i].rotacao || 0) % 360 + 360) % 360;
+    if (giro) pg.setRotation(degrees((pg.getRotation().angle + giro) % 360));
+    destino.addPage(pg);
+    if (i % 20 === 0) progresso(id, i, total, 'organizando');
+  });
+  progresso(id, total, total, 'gravando');
+  const bytes = await destino.save({ useObjectStreams: true });
+  return { bytes, paginas: destino.getPageCount() };
+}
+/* p.giro: 90|180|270; p.indices: null (todas) ou lista */
+async function opGirar(p, id) {
+  const doc = await carregaComSenha(p.bytes, p.senha);
+  marca(doc);
+  const pgs = doc.getPages();
+  const alvo = p.indices ? new Set(p.indices) : null;
+  pgs.forEach((pg, i) => { if (!alvo || alvo.has(i)) pg.setRotation(degrees((pg.getRotation().angle + p.giro) % 360)); });
+  progresso(id, 1, 1, 'gravando');
+  const bytes = await doc.save({ useObjectStreams: true });
+  return { bytes, paginas: pgs.length };
+}
+async function carregaComSenha(bytes, senha) {
+  try { return await abre(bytes, senha ? { password: senha } : undefined); }
+  catch (e) { const c = classifica(e); if (c.codigo === 'CRIPTOGRAFADO') throw new Falha(senha ? 'SENHA_ERRADA' : 'PRECISA_SENHA'); throw c; }
+}
+
+/* ---------------- proteger (AES-256) ---------------- */
+async function opProteger(p, id) {
+  const doc = await carregaComSenha(p.bytes, p.senhaAtual);
+  marca(doc);
+  const perm = p.permissoes || {};
+  progresso(id, 1, 2, 'criptografando');
+  doc.encrypt({
+    userPassword: p.senhaAbertura || '',
+    ownerPassword: p.senhaProprietario || p.senhaAbertura || '',
+    permissions: {
+      printing: perm.imprimir === false ? false : 'highResolution',
+      modifying: perm.editar !== false,
+      copying: perm.copiar !== false,
+      annotating: perm.editar !== false,
+      fillingForms: true,
+      contentAccessibility: true,
+      documentAssembly: perm.editar !== false,
+    },
+  });
+  progresso(id, 2, 2, 'gravando');
+  const bytes = await doc.save({ useObjectStreams: true });
+  return { bytes, paginas: doc.getPageCount() };
+}
+
+/* ---------------- remover metadados ---------------- */
+async function opMetadados(p, id) {
+  const doc = await carregaComSenha(p.bytes, p.senha);
+  const antes = { titulo: seguro(() => doc.getTitle()), autor: seguro(() => doc.getAuthor()), assunto: seguro(() => doc.getSubject()), palavras: seguro(() => doc.getKeywords()), criador: seguro(() => doc.getCreator()), produtor: seguro(() => doc.getProducer()), criacao: seguro(() => doc.getCreationDate()), modificacao: seguro(() => doc.getModificationDate()) };
+  const achados = Object.keys(antes).filter((k) => antes[k]);
+  /* 1. dicionário Info */
+  const info = doc.context.trailerInfo.Info;
+  if (info instanceof PDFRef) doc.context.delete(info);
+  delete doc.context.trailerInfo.Info;
+  /* 2. XMP no catálogo e nas páginas */
+  let xmp = 0;
+  const limpaDict = (d) => { if (d && d.has && d.has(PDFName.of('Metadata'))) { d.delete(PDFName.of('Metadata')); xmp++; } };
+  limpaDict(doc.catalog);
+  for (const pg of doc.getPages()) limpaDict(pg.node);
+  /* 3. identificadores do trailer */
+  delete doc.context.trailerInfo.ID;
+  progresso(id, 1, 1, 'gravando');
+  const bytes = await doc.save({ useObjectStreams: true, updateMetadata: false });
+  return { bytes, paginas: doc.getPageCount(), removidos: achados, xmp };
+}
+function seguro(fn) { try { return fn() || null; } catch (e) { return null; } }
+
+/* ---------------- marca-d'água e numeração ---------------- */
+const SUBST = { '–': '-', '—': '-', '‘': "'", '’': "'", '“': '"', '”': '"', '…': '...', ' ': ' ' };
+function textoPadrao(fonte, t) {
+  const ok = new Set(fonte.getCharacterSet());
+  let out = '', trocados = 0;
+  for (const ch of String(t)) {
+    const cp = ch.codePointAt(0);
+    if (ok.has(cp)) { out += ch; continue; }
+    if (SUBST[ch]) { out += SUBST[ch]; continue; }
+    const base = ch.normalize('NFD')[0];
+    if (base && ok.has(base.codePointAt(0))) { out += base; continue; }
+    trocados++; out += '?';
+  }
+  return { texto: out, trocados };
+}
+const corHex = (h) => { const m = /^#?([0-9a-f]{6})$/i.exec(h || ''); if (!m) return rgb(0.5, 0.5, 0.5); const n = parseInt(m[1], 16); return rgb(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255); };
+
+/* p: { texto, tamanho, opacidade, cor, posicao: 'diagonal'|'centro'|'rodape'|'mosaico', indices? } */
+async function opMarcaDagua(p, id) {
+  const doc = await carregaComSenha(p.bytes, p.senha);
+  marca(doc);
+  const fonte = await doc.embedFont(StandardFonts.HelveticaBold);
+  const { texto, trocados } = textoPadrao(fonte, p.texto || '');
+  if (!texto.trim()) throw new Falha('TEXTO_VAZIO');
+  const pgs = doc.getPages();
+  const alvo = p.indices ? new Set(p.indices) : null;
+  const cor = corHex(p.cor);
+  const opacity = Math.max(0.05, Math.min(1, +p.opacidade || 0.3));
+  pgs.forEach((pg, i) => {
+    if (alvo && !alvo.has(i)) return;
+    const { width: W, height: H } = pg.getSize();
+    const rot = pg.getRotation().angle;
+    /* tamanho relativo à página: p.tamanho em % da largura */
+    let size = Math.max(8, (W * (p.tamanho || 40)) / 100 / Math.max(1, fonte.widthOfTextAtSize(texto, 100) / 100));
+    const tw = fonte.widthOfTextAtSize(texto, size);
+    const desenha = (x, y, ang) => pg.drawText(texto, { x, y, size, font: fonte, color: cor, opacity, rotate: degrees(ang + rot) });
+    if (p.posicao === 'mosaico') {
+      size = Math.max(8, size * 0.45);
+      const tw2 = fonte.widthOfTextAtSize(texto, size);
+      const passoX = tw2 + size * 2, passoY = size * 5;
+      for (let y = -H * 0.2; y < H * 1.2; y += passoY) for (let x = -W * 0.2 - (y / passoY % 2) * passoX / 2; x < W * 1.2; x += passoX) pg.drawText(texto, { x, y, size, font: fonte, color: cor, opacity, rotate: degrees(30 + rot) });
+    } else if (p.posicao === 'rodape') desenha((W - tw) / 2, size * 1.2, 0);
+    else if (p.posicao === 'topo') desenha((W - tw) / 2, H - size * 2, 0);
+    else if (p.posicao === 'centro') desenha((W - tw) / 2, (H - size) / 2, 0);
+    else { const ang = Math.atan2(H, W) * 180 / Math.PI; const cx = W / 2, cy = H / 2; const rad = ang * Math.PI / 180; desenha(cx - (tw / 2) * Math.cos(rad) + (size / 2) * Math.sin(rad), cy - (tw / 2) * Math.sin(rad) - (size / 2) * Math.cos(rad), ang); }
+    if (i % 25 === 0) progresso(id, i, pgs.length, 'marcando');
+  });
+  progresso(id, pgs.length, pgs.length, 'gravando');
+  const bytes = await doc.save({ useObjectStreams: true });
+  return { bytes, paginas: pgs.length, trocados };
+}
+
+/* p: { formato: '{n}'|'{n}/{total}'|'Página {n}'..., posicao: 'rodape-centro'|'rodape-direita'|'rodape-esquerda'|'topo-centro'|'topo-direita'|'topo-esquerda', inicio, tamanho, margem, primeira (pular capa?) } */
+async function opNumerar(p, id) {
+  const doc = await carregaComSenha(p.bytes, p.senha);
+  marca(doc);
+  const fonte = await doc.embedFont(StandardFonts.Helvetica);
+  const pgs = doc.getPages();
+  const total = pgs.length;
+  const inicio = parseInt(p.inicio, 10) || 1;
+  const size = Math.max(6, Math.min(36, +p.tamanho || 11));
+  const margem = Math.max(6, Math.min(80, +p.margem || 28));
+  const cor = corHex(p.cor || '#333333');
+  const modelo = String(p.formato || '{n}');
+  let trocados = 0;
+  pgs.forEach((pg, i) => {
+    if (p.pularPrimeira && i === 0) return;
+    const n = inicio + i - (p.pularPrimeira ? 1 : 0);
+    const bruto = modelo.replace(/\{n\}/g, String(n)).replace(/\{total\}/g, String(p.pularPrimeira ? total - 1 : total));
+    const t = textoPadrao(fonte, bruto); trocados += t.trocados;
+    const { width: W, height: H } = pg.getSize();
+    const tw = fonte.widthOfTextAtSize(t.texto, size);
+    const [vert, horiz] = (p.posicao || 'rodape-centro').split('-');
+    const x = horiz === 'esquerda' ? margem : horiz === 'direita' ? W - margem - tw : (W - tw) / 2;
+    const y = vert === 'topo' ? H - margem - size * 0.7 : margem;
+    pg.drawText(t.texto, { x, y, size, font: fonte, color: cor });
+    if (i % 25 === 0) progresso(id, i, total, 'numerando');
+  });
+  progresso(id, total, total, 'gravando');
+  const bytes = await doc.save({ useObjectStreams: true });
+  return { bytes, paginas: total, trocados };
+}
+
 const OPERACOES = {
+  organizar: opOrganizar,
+  girar: opGirar,
+  proteger: opProteger,
+  metadados: opMetadados,
+  marcaDagua: opMarcaDagua,
+  numerar: opNumerar,
   info: opInfo,
   desbloquear: opDesbloquear,
   unir: opUnir,

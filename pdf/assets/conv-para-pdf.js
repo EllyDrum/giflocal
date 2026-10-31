@@ -3,7 +3,7 @@
    Cada leitor transforma o arquivo num "modelo" simples (parágrafos,
    tabelas, células, formas e imagens). O desenho do PDF a partir do modelo
    acontece no worker (conv-worker.js), com a biblioteca pdf-lib. */
-import { abreZip, leRelacoes, filhos, filho, caminho, descendentes, atr, ErroConversao, imagemParaPdf, pausa } from './conv-base.js?v=3';
+import { abreZip, leRelacoes, filhos, filho, caminho, descendentes, atr, ErroConversao, imagemParaPdf, pausa } from './conv-base.js?v=4';
 
 /* ---------------- utilidades ---------------- */
 const SERIFADAS = /times|cambria|georgia|garamond|book ?antiqua|palatino|constantia|serif|bookman|century|baskerville|didot|caslon|minion|bodoni|rockwell/i;

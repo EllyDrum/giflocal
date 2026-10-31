@@ -7,11 +7,11 @@
    arquivos estáticos em cache, e URL nova garante código novo após cada
    publicação. Ao alterar qualquer arquivo em /pdf/assets, suba a versão
    aqui e em gerar_paginas.py. */
-import { TEXTOS } from './pdf-i18n.js?v=3';
-const VERSAO = '3';
+import { TEXTOS } from './pdf-i18n.js?v=4';
+const VERSAO = '4';
 
 const PDFJS_BASE = '/pdf/vendor/pdfjs-4.10.38/';
-const IDIOMAS = ['pt', 'en', 'es', 'fr', 'de', 'it'];
+const IDIOMAS = ['pt', 'en', 'es', 'fr', 'de', 'it', 'ja'];
 const $ = (id) => document.getElementById(id);
 const FERRAMENTA = document.body.dataset.ferramenta || 'hub';
 
@@ -29,6 +29,9 @@ export const LIMITES = {
 
 /* ---------------- idioma ---------------- */
 function detectaIdioma() {
+  /* ?lang=xx (links hreflang) tem prioridade */
+  const daUrl = new URLSearchParams(location.search).get('lang');
+  if (daUrl && IDIOMAS.includes(daUrl)) return daUrl;
   let salvo = null;
   try { salvo = localStorage.getItem('gifLocalLang'); } catch (e) { /* segue sem */ }
   if (salvo && IDIOMAS.includes(salvo)) return salvo;
@@ -49,9 +52,17 @@ function aplicaTextos() {
   document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
   document.querySelectorAll('[data-i18n-title]').forEach((el) => { el.title = t(el.dataset.i18nTitle); });
   document.querySelectorAll('[data-i18n-aria]').forEach((el) => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => { el.placeholder = t(el.dataset.i18nPlaceholder); });
   document.querySelectorAll('[data-i18n-limite]').forEach((el) => { el.textContent = t('limit_hint', { mb: LIMITES.arquivoMB }); });
+  /* textos explicativos longos só existem em português (conteúdo para busca) */
+  document.querySelectorAll('[data-so-pt]').forEach((el) => { el.hidden = idioma !== 'pt'; });
+  if (idioma === 'ja' && !document.getElementById('fonteJa')) {
+    const l = document.createElement('link'); l.id = 'fonteJa'; l.rel = 'stylesheet'; l.href = '/pdf/vendor/noto-sans-jp/fonte.css';
+    document.head.appendChild(l);
+  }
   const chaveTitulo = document.body.dataset.titulo;
   if (chaveTitulo && idioma !== 'pt') document.title = t(chaveTitulo) + ' | GIF Local';
+  if (aoMudarIdiomaHub) aoMudarIdiomaHub();
   if (ferramentaAtual && ferramentaAtual.aoMudarIdioma) ferramentaAtual.aoMudarIdioma();
 }
 
@@ -62,6 +73,7 @@ function detectaTema() {
   if (s === 'light' || s === 'dark') return s;
   return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
+let aoMudarIdiomaHub = null;
 function aplicaTema(tema) {
   document.documentElement.setAttribute('data-theme', tema);
   const sol = $('themeIconSun'), lua = $('themeIconMoon');
@@ -94,7 +106,7 @@ function obtemWorker() {
     const m = ev.data || {};
     const p = pendentes.get(m.id);
     if (!p) return;
-    if (m.tipo === 'progresso') { if (p.aoProgredir) p.aoProgredir(m); return; }
+    if (m.tipo === 'progresso') { if (p.aoProgredir) { try { p.aoProgredir(m); } catch (e) { /* cancelado */ } } return; }
     pendentes.delete(m.id);
     if (m.tipo === 'ok') p.resolve(m.resultado);
     else p.reject(new ErroFerramenta(m.codigo, m.detalhe));
@@ -110,7 +122,18 @@ function obtemWorker() {
   };
   return worker;
 }
+/* Cancelar: encerra os workers em andamento e interrompe os laços de
+   renderização na próxima atualização de progresso. */
+let cancelado = false;
+function cancelaTudo() {
+  cancelado = true;
+  if (worker) { try { worker.terminate(); } catch (e) { /* já morto */ } worker = null; }
+  for (const [, p] of pendentes) p.reject(new ErroFerramenta('CANCELADO'));
+  pendentes.clear();
+  if (workerConv) { try { workerConv.terminate(); } catch (e) { /* já morto */ } workerConv = null; if (rejeitaConv) rejeitaConv(new ErroFerramenta('CANCELADO')); }
+}
 function chamaWorker(op, dados, transferir, aoProgredir, grande) {
+  if (cancelado) return Promise.reject(new ErroFerramenta('CANCELADO'));
   const w = obtemWorker();
   const id = ++seq;
   return new Promise((resolve, reject) => {
@@ -272,7 +295,16 @@ function atualizaLayout() {
   const st = $('status');
   const ativo = (lista && lista.children.length > 0) || ($('senhaVer') && !$('senhaVer').hidden) || ($('resultado') && $('resultado').classList.contains('show')) || (st && /erro/.test(st.className));
   document.body.classList.toggle('com-arquivo', !!ativo);
+  const temResultado = $('resultado') && $('resultado').classList.contains('show');
+  const temArquivo = (lista && lista.children.length > 0) || ($('grade') && !$('grade').hidden && $('grade').children.length > 0);
+  const atual = temResultado ? 4 : processando ? 3 : temArquivo ? 2 : 1;
+  document.querySelectorAll('.passo').forEach((p) => {
+    const n = +p.dataset.passo;
+    p.classList.toggle('ativo', n === atual); p.classList.toggle('feito', n < atual);
+    if (n === atual) p.setAttribute('aria-current', 'step'); else p.removeAttribute('aria-current');
+  });
 }
+let processando = false;
 function estado(texto, tipo) {
   const el = $('status');
   if (!el) return;
@@ -282,6 +314,7 @@ function estado(texto, tipo) {
   el.setAttribute('role', tipo === 'erro' ? 'alert' : 'status');
 }
 function progresso(feito, total) {
+  if (cancelado && feito != null) throw new ErroFerramenta('CANCELADO');
   const trilha = $('barra'), fill = $('barraFill');
   if (!trilha) return;
   if (feito == null) { trilha.classList.remove('show'); fill.style.width = '0%'; trilha.removeAttribute('aria-valuenow'); return; }
@@ -316,6 +349,9 @@ function mensagemDeErro(e) {
     case 'PLANILHA_GRANDE': return t('err_sheet_big');
     case 'PLANILHA_VAZIA': return t('err_sheet_empty');
     case 'SEM_TEXTO': return t('err_no_text');
+    case 'TEXTO_VAZIO': return t('err_empty_text');
+    case 'SEM_PAGINAS': return t('err_no_pages');
+    case 'CANCELADO': return t('st_cancelled');
     default:
       if (e instanceof RangeError || /memory|allocation/i.test(String(e && e.message))) return t('err_memory');
       return t('err_unexpected');
@@ -324,7 +360,7 @@ function mensagemDeErro(e) {
 function erro(e) {
   if (!e || !e.codigo) console.error(e);
   progresso(null);
-  estado(mensagemDeErro(e), 'erro');
+  estado(mensagemDeErro(e), e && e.codigo === 'CANCELADO' ? 'aviso' : 'erro');
 }
 
 /* ---------------- intervalos de páginas ("1-3, 5, 8") ---------------- */
@@ -445,6 +481,10 @@ function mostraResultado(titulo, estatisticas, acoes, extra) {
   }
   if (extra) r.appendChild(extra);
   if (acoes && acoes.length) r.appendChild(el('div', { class: 'btn-row result-actions' }, acoes));
+  r.appendChild(el('div', { class: 'links-resultado' }, [
+    el('button', { type: 'button', text: t('new_file'), onclick: () => { if (ferramentaAtual) ferramentaAtual.limpa(); const e = $('entrada'); if (e) e.focus(); } }),
+    el('a', { href: '/pdf', text: t('back_tools') }),
+  ]));
   r.classList.add('show');
   atualizaLayout();
   const primeiro = r.querySelector('button');
@@ -466,8 +506,12 @@ function listaDeSaidas(saidas) {
 function acao(habilitar) { const b = $('acao'); if (b) b.disabled = !habilitar; }
 function mostraLimpar(sim) { const b = $('limpar'); if (b) b.hidden = !sim; }
 function ocupado(sim) {
+  processando = sim;
+  if (sim) cancelado = false;
+  const c = $('cancelar'); if (c) c.hidden = !sim;
+  queueMicrotask(atualizaLayout);
   const b = $('acao'); if (b) { b.disabled = sim || b.disabled; b.setAttribute('aria-busy', sim ? 'true' : 'false'); }
-  document.querySelectorAll('#opcoes input, #opcoes select, #lista button').forEach((x) => { x.disabled = sim ? true : x.dataset.desativado === '1'; });
+  document.querySelectorAll('#opcoes input, #opcoes select, #opcoes button, #lista button, #grade button').forEach((x) => { x.disabled = sim ? true : x.dataset.desativado === '1'; });
 }
 
 /* ================================================================
@@ -1038,16 +1082,18 @@ const carregaDePdf = () => (convDePdf = convDePdf || import('./conv-de-pdf.js?v=
 const carregaParaPdf = () => (convParaPdf = convParaPdf || import('./conv-para-pdf.js?v=' + VERSAO));
 
 /* worker próprio das conversões para PDF (diagramação com pdf-lib) */
-let workerConv = null;
+let workerConv = null, rejeitaConv = null;
 function chamaConv(op, dados, aoProgredir) {
+  if (cancelado) return Promise.reject(new ErroFerramenta('CANCELADO'));
   if (!workerConv) {
     try { workerConv = new Worker('/pdf/assets/conv-worker.js?v=' + VERSAO); } catch (e) { return Promise.reject(new ErroFerramenta('WORKER')); }
   }
   const w = workerConv;
   return new Promise((resolve, reject) => {
+    rejeitaConv = reject;
     w.onmessage = (ev) => {
       const m = ev.data || {};
-      if (m.tipo === 'progresso') { aoProgredir && aoProgredir(m.feito, m.total); return; }
+      if (m.tipo === 'progresso') { try { aoProgredir && aoProgredir(m.feito, m.total); } catch (e) { /* cancelado */ } return; }
       if (m.tipo === 'ok') resolve(m.resultado); else reject(new ErroFerramenta(m.codigo, m.detalhe));
     };
     w.onerror = (e) => { e.preventDefault && e.preventDefault(); try { w.terminate(); } catch (x) { /* já morto */ } workerConv = null; reject(new ErroFerramenta('MEMORIA')); };
@@ -1262,15 +1308,464 @@ function ferramentaExcelParaPdf() {
   });
 }
 
-/* Página inicial: filtro por categoria */
+/* ================================================================
+   v4: ORGANIZAR, GIRAR, PROTEGER, METADADOS, MARCA-D'ÁGUA, NUMERAR
+   ================================================================ */
+const SVG_ESQ = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const SVG_DIR = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const SVG_GIRA = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const SVG_LIXO = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+/* Base comum: um PDF, aberto com PDF.js (miniatura e contagem), senha quando
+   preciso, e uma operação do worker de pdf-lib. */
+function ferramentaPdfBase(cfg) {
+  let arq = null, doc = null, senha;
+  async function abre(s) {
+    doc = await abrePdfjs(await leBytes(arq), s);
+    senha = s;
+    $('senhaVer').hidden = true;
+    const lista = $('lista');
+    lista.textContent = '';
+    lista.appendChild(itemArquivo(arq, paginasTxt(doc.numPages), await miniaturaPdf(doc)));
+    $('opcoes').hidden = false;
+    mostraLimpar(true);
+    if (cfg.aoAbrir) await cfg.aoAbrir(doc, arq);
+    atualiza();
+    estado(t('st_selected'));
+  }
+  function atualiza() { acao(!!doc && (!cfg.pronto || cfg.pronto(doc))); }
+  async function recebe(files) {
+    limpaResultado(); await fecha();
+    const f = files[0];
+    try {
+      checaTamanho(f);
+      estado(t('st_validating'));
+      if (!(await ehPdf(f))) throw new ErroFerramenta('NAO_PDF', { nome: f.name });
+      arq = f;
+      try { await abre(undefined); }
+      catch (e) {
+        if (e.codigo === 'PRECISA_SENHA' || e.codigo === 'SENHA_ERRADA') {
+          $('lista').textContent = '';
+          $('lista').appendChild(itemArquivo(arq, '', el('span', { class: 'mini mini-vazia', text: 'PDF' })));
+          $('senhaVer').hidden = false; $('senhaVerCampo').value = ''; $('senhaVerCampo').focus(); estado(t('pw_view_label')); mostraLimpar(true); return;
+        }
+        throw e;
+      }
+    } catch (e) { arq = null; $('lista').textContent = ''; erro(e); }
+  }
+  $('senhaVerBtn').addEventListener('click', async () => { try { await abre($('senhaVerCampo').value); } catch (e) { erro(e); } });
+  $('senhaVerCampo').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('senhaVerBtn').click(); } });
+  async function processa() {
+    if (!doc) return;
+    let dados;
+    try { dados = cfg.dados(doc); } catch (e) { erro(e); return; }
+    if (!dados) return;
+    ocupado(true); limpaResultado();
+    estado(t('st_processing'));
+    progresso(0, 1);
+    try {
+      const b = await leBytes(arq);
+      const r = await chamaWorker(cfg.op, Object.assign({ bytes: b, senha, senhaAtual: senha }, dados), [b.buffer], (m) => progresso(m.feito, m.total), arq.size > 50e6);
+      progresso(null);
+      const blob = blobPdf(r.bytes);
+      const nome = nomeBase(arq.name) + cfg.sufixo;
+      estado(t('st_done'), 'ok');
+      const extra = el('div', { class: 'resultado-extra' });
+      if (r.trocados) extra.appendChild(el('p', { class: 'note warn', text: t('warn_chars', { n: r.trocados }) }));
+      if (cfg.extra) cfg.extra(r, extra, dados);
+      mostraResultado(cfg.titulo(r), [[t('lbl_pages'), String(r.paginas)], [t('lbl_size'), tamanhoLegivel(blob.size)]],
+        [botaoBaixar(t('download'), () => baixa(blob, nome))], extra.children.length ? extra : null);
+    } catch (e) { erro(e); } finally { ocupado(false); atualiza(); }
+  }
+  async function fecha() { if (cfg.aoFechar) cfg.aoFechar(); if (doc) { try { await doc.destroy(); } catch (e) { /* já fechado */ } } doc = null; }
+  async function limpa() { await fecha(); arq = null; senha = undefined; $('senhaVer').hidden = true; $('opcoes').hidden = true; $('lista').textContent = ''; limpaResultado(); liberaUrls(); acao(false); mostraLimpar(false); progresso(null); estado(t('st_wait')); }
+  return { recebe, processa, limpa, atualiza, aoMudarIdioma: () => { if (cfg.aoMudarIdioma) cfg.aoMudarIdioma(); }, get doc() { return doc; } };
+}
+function indicesEscolhidos(total) {
+  if ($('paginasModo').value !== 'escolher') return null;
+  const vistos = new Set();
+  for (const g of interpretaPaginas($('paginas').value, total)) for (const i of g) vistos.add(i);
+  return Array.from(vistos).sort((a, b) => a - b);
+}
+function ligaEscolhaPaginas(aoMudar) {
+  $('paginasModo').addEventListener('change', () => { $('paginasCampo').hidden = $('paginasModo').value !== 'escolher'; if ($('paginasModo').value === 'escolher') $('paginas').focus(); aoMudar && aoMudar(); });
+  $('paginas').addEventListener('input', () => aoMudar && aoMudar());
+}
+
+/* ---------- Organizar páginas ---------- */
+function ferramentaOrganizar() {
+  let ordem = [], total = 0, observador = null, docAtual = null;
+  const miniaturas = new Map();
+  const grade = $('grade');
+  function resumo() {
+    const removidas = total - ordem.length;
+    const giradas = ordem.filter((p) => p.rotacao).length;
+    $('orgResumo').textContent = t('org_summary', { n: ordem.length, r: removidas, g: giradas });
+  }
+  function move(i, d) { const j = i + d; if (j < 0 || j >= ordem.length) return; [ordem[i], ordem[j]] = [ordem[j], ordem[i]]; desenha(j, d < 0 ? 0 : 1); }
+  function desenha(foco, botao) {
+    grade.textContent = '';
+    if (observador) observador.disconnect();
+    observador = new IntersectionObserver(async (entradas) => {
+      for (const en of entradas) {
+        if (!en.isIntersecting) continue;
+        observador.unobserve(en.target);
+        const idx = +en.target.dataset.indice;
+        await miniatura(idx, en.target.querySelector('img'));
+      }
+    }, { rootMargin: '300px' });
+    ordem.forEach((pg, i) => {
+      const img = el('img', { alt: '' });
+      if (miniaturas.has(pg.indice)) img.src = miniaturas.get(pg.indice);
+      const folha = el('div', { class: 'folha', 'data-rot': String(pg.rotacao) }, img);
+      const ctl = el('div', { class: 'ctl' }, [
+        botaoIcone(SVG_ESQ, t('org_move_before', { n: pg.indice + 1 }), () => move(i, -1), i === 0),
+        botaoIcone(SVG_GIRA, t('org_rotate', { n: pg.indice + 1 }), () => { pg.rotacao = (pg.rotacao + 90) % 360; desenha(i, 2); }),
+        botaoIcone(SVG_LIXO, t('org_delete', { n: pg.indice + 1 }), () => { ordem.splice(i, 1); desenha(Math.min(i, ordem.length - 1), 3); }, ordem.length === 1),
+        botaoIcone(SVG_DIR, t('org_move_after', { n: pg.indice + 1 }), () => move(i, 1), i === ordem.length - 1),
+      ]);
+      ctl.children[2].classList.add('perigo');
+      const card = el('div', { class: 'pagina-org', draggable: 'true', role: 'group', 'aria-label': t('page_n', { n: pg.indice + 1 }) + (pg.rotacao ? ' · ' + pg.rotacao + '°' : '') }, [folha, el('span', { class: 'num', text: String(pg.indice + 1) }), ctl]);
+      card.dataset.indice = String(pg.indice);
+      card.addEventListener('dragstart', (e) => { e.dataTransfer.setData('text/plain', String(i)); e.dataTransfer.effectAllowed = 'move'; card.classList.add('arrastando'); });
+      card.addEventListener('dragend', () => card.classList.remove('arrastando'));
+      card.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); });
+      card.addEventListener('drop', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const de = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        if (Number.isInteger(de) && de !== i) { const [m] = ordem.splice(de, 1); ordem.splice(i, 0, m); desenha(i, 2); }
+      });
+      grade.appendChild(card);
+      if (!miniaturas.has(pg.indice)) observador.observe(card);
+    });
+    grade.hidden = ordem.length === 0;
+    resumo();
+    base.atualiza();
+    if (foco != null && foco >= 0 && grade.children[foco]) {
+      const bts = grade.children[foco].querySelectorAll('.mini-btn');
+      const alvo = bts[botao || 0];
+      (alvo && !alvo.disabled ? alvo : grade.children[foco].querySelector('.mini-btn:not([disabled])'))?.focus();
+    }
+  }
+  async function miniatura(idx, img) {
+    if (!docAtual) return;
+    try {
+      const { tela } = await renderizaPagina(docAtual, idx + 1, null, 140);
+      const u = urlTemporaria(await canvasParaBlob(tela, 'image/jpeg', 0.75));
+      liberaCanvas(tela);
+      miniaturas.set(idx, u);
+      if (img) img.src = u;
+    } catch (e) { /* miniatura é só apoio visual */ }
+  }
+  function original() { ordem = Array.from({ length: total }, (_, i) => ({ indice: i, rotacao: 0 })); }
+  $('orgGirarTodas').addEventListener('click', () => { ordem.forEach((p) => { p.rotacao = (p.rotacao + 90) % 360; }); desenha(); });
+  $('orgRestaurar').addEventListener('click', () => { original(); desenha(); estado(t('org_restored')); });
+  const base = ferramentaPdfBase({
+    op: 'organizar', sufixo: '-organizado.pdf',
+    aoAbrir: (doc) => { docAtual = doc; total = doc.numPages; miniaturas.clear(); original(); desenha(); },
+    aoFechar: () => { if (observador) observador.disconnect(); docAtual = null; ordem = []; total = 0; miniaturas.clear(); grade.textContent = ''; grade.hidden = true; },
+    pronto: () => ordem.length > 0,
+    dados: () => {
+      if (!ordem.length) throw new ErroFerramenta('SEM_PAGINAS');
+      return { paginas: ordem.map((p) => ({ indice: p.indice, rotacao: p.rotacao })) };
+    },
+    titulo: (r) => t('org_done', { n: r.paginas }),
+    aoMudarIdioma: () => { if (ordem.length) desenha(); },
+  });
+  return base;
+}
+
+/* ---------- Girar ---------- */
+function ferramentaGirar() {
+  let base;
+  ligaEscolhaPaginas(() => base && base.atualiza());
+  base = ferramentaPdfBase({
+    op: 'girar', sufixo: '-girado.pdf',
+    pronto: () => $('paginasModo').value !== 'escolher' || $('paginas').value.trim().length > 0,
+    dados: (doc) => ({ giro: parseInt(radio('giro') || '90', 10), indices: indicesEscolhidos(doc.numPages) }),
+    titulo: () => t('rot_done'),
+    extra: (r, box, d) => { box.appendChild(el('p', { class: 'note info', text: d.indices ? t('rot_done_some', { n: d.indices.length }) : t('rot_done_all', { n: r.paginas }) })); },
+  });
+  return base;
+}
+
+/* ---------- Proteger ---------- */
+function forcaSenha(s) {
+  let pontos = 0;
+  if (s.length >= 8) pontos++;
+  if (s.length >= 12) pontos++;
+  if (/[a-z]/.test(s) && /[A-Z]/.test(s)) pontos++;
+  if (/\d/.test(s)) pontos++;
+  if (/[^A-Za-z0-9]/.test(s)) pontos++;
+  return s.length < 6 ? 0 : pontos <= 2 ? 1 : pontos <= 3 ? 2 : 3;
+}
+function senhaAleatoria() {
+  const a = new Uint8Array(24); crypto.getRandomValues(a);
+  return Array.from(a, (b) => 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'[b % 57]).join('');
+}
+function ferramentaProteger() {
+  const s1 = $('senhaNova'), s2 = $('senhaConfirma'), forca = $('forcaSenha');
+  let base;
+  function avalia() {
+    const v = s1.value;
+    if (!v) { forca.textContent = t('prot_hint'); forca.className = 'hint'; }
+    else {
+      const f = forcaSenha(v);
+      forca.textContent = [t('prot_weak_short'), t('prot_weak'), t('prot_ok'), t('prot_strong')][f];
+      forca.className = 'hint ' + ['forca-fraca', 'forca-fraca', 'forca-media', 'forca-boa'][f];
+    }
+    base && base.atualiza();
+  }
+  s1.addEventListener('input', avalia); s2.addEventListener('input', avalia);
+  $('mostrarSenha').addEventListener('change', () => { const tp = $('mostrarSenha').checked ? 'text' : 'password'; s1.type = tp; s2.type = tp; });
+  base = ferramentaPdfBase({
+    op: 'proteger', sufixo: '-protegido.pdf',
+    pronto: () => s1.value.length >= 6 && s1.value === s2.value,
+    dados: () => {
+      if (s1.value.length < 6) { estado(t('prot_weak_short'), 'erro'); s1.focus(); return null; }
+      if (s1.value !== s2.value) { estado(t('prot_mismatch'), 'erro'); s2.focus(); return null; }
+      const permissoes = { imprimir: $('permImprimir').checked, copiar: $('permCopiar').checked, editar: $('permEditar').checked };
+      const restrito = !permissoes.imprimir || !permissoes.copiar || !permissoes.editar;
+      /* Com restrições, a senha de proprietário precisa ser outra: se fosse a
+         mesma, quem abre o arquivo teria todas as permissões. */
+      return { senhaAbertura: s1.value, senhaProprietario: restrito ? senhaAleatoria() : s1.value, permissoes, restrito };
+    },
+    titulo: () => t('prot_done'),
+    extra: (r, box, d) => {
+      box.appendChild(el('p', { class: 'note info', text: t('prot_done_note') }));
+      if (d.restrito) box.appendChild(el('p', { class: 'note warn', text: t('prot_restricted_note') }));
+    },
+    aoMudarIdioma: avalia,
+  });
+  avalia();
+  return base;
+}
+
+/* ---------- Remover metadados ---------- */
+const CAMPOS_META = [['Title', 'meta_title'], ['Author', 'meta_author'], ['Subject', 'meta_subject'], ['Keywords', 'meta_keywords'], ['Creator', 'meta_creator'], ['Producer', 'meta_producer'], ['CreationDate', 'meta_created'], ['ModDate', 'meta_modified']];
+function dataPdf(v) {
+  const m = /^D:(\d{4})(\d{2})?(\d{2})?(\d{2})?(\d{2})?/.exec(String(v || ''));
+  if (!m) return String(v || '');
+  const d = new Date(Date.UTC(+m[1], (+m[2] || 1) - 1, +m[3] || 1, +m[4] || 0, +m[5] || 0));
+  try { return d.toLocaleString(idioma === 'pt' ? 'pt-BR' : idioma, { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' }); } catch (e) { return d.toISOString(); }
+}
+function ferramentaMetadados() {
+  let atuais = null, xmp = false;
+  function mostra() {
+    const dl = $('metaAtual');
+    dl.textContent = '';
+    if (!atuais) return;
+    const achados = CAMPOS_META.filter(([k]) => atuais[k]);
+    for (const [k, rot] of achados) dl.append(el('dt', { text: t(rot) }), el('dd', { text: /Date$/.test(k) ? dataPdf(atuais[k]) : String(atuais[k]).slice(0, 300) }));
+    if (xmp) dl.append(el('dt', { text: 'XMP' }), el('dd', { text: t('meta_xmp') }));
+    if (!achados.length && !xmp) dl.appendChild(el('dd', { class: 'vazio', text: t('meta_none') }));
+  }
+  return ferramentaPdfBase({
+    op: 'metadados', sufixo: '-sem-metadados.pdf',
+    aoAbrir: async (doc) => {
+      try { const m = await doc.getMetadata(); atuais = m.info || {}; xmp = !!m.metadata; } catch (e) { atuais = {}; xmp = false; }
+      mostra();
+    },
+    aoFechar: () => { atuais = null; xmp = false; $('metaAtual').textContent = ''; },
+    dados: () => ({}),
+    titulo: () => t('meta_done'),
+    extra: (r, box) => {
+      const itens = (r.removidos || []).length + (r.xmp ? 1 : 0);
+      box.appendChild(el('p', { class: 'note info', text: itens ? t('meta_done_n', { n: itens }) : t('meta_done_none') }));
+    },
+    aoMudarIdioma: mostra,
+  });
+}
+
+/* ---------- Marca-d'água ---------- */
+function ferramentaMarcaDagua() {
+  let base;
+  const txt = $('wmTexto');
+  const saida = (id, v) => { $(id + 'V').textContent = v + '%'; };
+  $('wmTamanho').addEventListener('input', () => saida('wmTamanho', $('wmTamanho').value));
+  $('wmOpacidade').addEventListener('input', () => saida('wmOpacidade', $('wmOpacidade').value));
+  txt.addEventListener('input', () => base && base.atualiza());
+  ligaEscolhaPaginas(() => base && base.atualiza());
+  base = ferramentaPdfBase({
+    op: 'marcaDagua', sufixo: '-marca-dagua.pdf',
+    pronto: () => txt.value.trim().length > 0 && ($('paginasModo').value !== 'escolher' || $('paginas').value.trim().length > 0),
+    dados: (doc) => ({ texto: txt.value.trim(), posicao: $('wmPosicao').value, tamanho: +$('wmTamanho').value, opacidade: +$('wmOpacidade').value / 100, cor: $('wmCor').value, indices: indicesEscolhidos(doc.numPages) }),
+    titulo: () => t('wm_done'),
+  });
+  return base;
+}
+
+/* ---------- Numerar páginas ---------- */
+function ferramentaNumerar() {
+  let posicao = 'rodape-centro';
+  const botoes = document.querySelectorAll('.grade-posicoes button');
+  botoes.forEach((b) => {
+    b.addEventListener('click', () => { posicao = b.dataset.pos; botoes.forEach((x) => { x.setAttribute('aria-checked', x === b ? 'true' : 'false'); x.tabIndex = x === b ? 0 : -1; }); });
+    b.tabIndex = b.dataset.pos === posicao ? 0 : -1;
+    b.addEventListener('keydown', (e) => {
+      const lista = Array.from(botoes), i = lista.indexOf(b);
+      const d = { ArrowRight: 1, ArrowDown: 3, ArrowLeft: -1, ArrowUp: -3 }[e.key];
+      if (d) { e.preventDefault(); const alvo = lista[(i + d + lista.length) % lista.length]; alvo.click(); alvo.focus(); }
+    });
+  });
+  /* Helvetica só desenha o alfabeto latino: formatos com palavras entram só
+     quando o texto do idioma cabe nela. */
+  function formatos() {
+    const sel = $('numFormato'), atual = sel.value;
+    sel.textContent = '';
+    const lista = [['{n}', '1'], ['{n} / {total}', '1 / 10'], ['- {n} -', '- 1 -']];
+    for (const k of ['num_fmt_page', 'num_fmt_page_of']) { const m = t(k); if (/^[\x20-\xff]*$/.test(m)) lista.push([m, m.replace('{n}', '1').replace('{total}', '10')]); }
+    for (const [v, ex] of lista) sel.appendChild(el('option', { value: v, text: ex }));
+    if (lista.some(([v]) => v === atual)) sel.value = atual;
+  }
+  formatos();
+  return ferramentaPdfBase({
+    op: 'numerar', sufixo: '-numerado.pdf',
+    dados: () => ({ formato: $('numFormato').value, posicao, inicio: Math.max(1, parseInt($('numInicio').value, 10) || 1), tamanho: +$('numTamanho').value, margem: 28, pularPrimeira: $('numPularCapa').checked }),
+    titulo: () => t('num_done'),
+    aoMudarIdioma: formatos,
+  });
+}
+
+/* ================================================================
+   PÁGINA INICIAL: menu, busca, categorias e arquivo solto no topo
+   ================================================================ */
+const normaliza = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’'`]/g, '').trim();
+
+function iniciaMenu() {
+  const btn = $('menuBtn'), menu = $('menuMovel');
+  if (!btn || !menu) return;
+  const fecha = (foco) => { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); document.body.classList.remove('menu-aberto'); if (foco) btn.focus(); };
+  btn.addEventListener('click', () => {
+    const abrir = menu.hidden;
+    menu.hidden = !abrir; btn.setAttribute('aria-expanded', String(abrir));
+    document.body.classList.toggle('menu-aberto', abrir);
+    if (abrir) { const a = menu.querySelector('a'); if (a) a.focus(); }
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !menu.hidden) fecha(true); });
+  menu.addEventListener('click', (e) => { if (e.target.closest('a')) fecha(false); });
+  window.matchMedia('(min-width: 821px)').addEventListener('change', (m) => { if (m.matches) fecha(false); });
+}
+
 function iniciaHub() {
+  const busca = $('busca');
   const chips = document.querySelectorAll('.chip[data-filtro]');
-  if (!chips.length) return;
+  const cards = Array.from(document.querySelectorAll('.categoria .ferramenta-card'));
+  if (!busca && !chips.length) return;
+  let filtro = 'todas';
+  function filtra() {
+    const q = normaliza(busca ? busca.value : '');
+    const termos = q.split(/\s+/).filter(Boolean);
+    let visiveis = 0;
+    for (const c of cards) {
+      const feno = normaliza(c.textContent + ' ' + c.dataset.busca + ' ' + c.dataset.slug.replace(/-/g, ' '));
+      const ok = (filtro === 'todas' || c.dataset.categoria === filtro) && termos.every((x) => feno.includes(x));
+      c.hidden = !ok;
+      if (ok) visiveis++;
+    }
+    document.querySelectorAll('.categoria').forEach((s) => { s.hidden = !s.querySelector('.ferramenta-card:not([hidden])'); });
+    $('semResultado').hidden = visiveis > 0;
+    if (busca) {
+      $('buscaLimpar').classList.toggle('show', !!busca.value);
+      $('buscaStatus').textContent = q ? (visiveis ? t('search_n', { n: visiveis }) : t('search_none')) : '';
+    }
+  }
   chips.forEach((c) => c.addEventListener('click', () => {
-    const f = c.dataset.filtro;
+    filtro = c.dataset.filtro;
     chips.forEach((x) => x.setAttribute('aria-pressed', x === c ? 'true' : 'false'));
-    document.querySelectorAll('#gradeFerramentas .ferramenta-card').forEach((card) => { card.hidden = f !== 'todas' && card.dataset.categoria !== f; });
+    filtra();
   }));
+  if (busca) {
+    busca.addEventListener('input', filtra);
+    busca.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { busca.value = ''; filtra(); }
+      if (e.key === 'Enter') { const p = cards.find((c) => !c.hidden); if (p) { e.preventDefault(); p.click(); } }
+    });
+    $('buscaLimpar').addEventListener('click', () => { busca.value = ''; filtra(); busca.focus(); });
+    document.addEventListener('keydown', (e) => { if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); busca.focus(); } });
+  }
+  aoMudarIdiomaHub = () => { filtra(); if (ultimoSolto) mostraEscolha(ultimoSolto); };
+  iniciaDropHub();
+  filtra();
+}
+
+/* Arquivo solto na página inicial: sugere as ferramentas que aceitam aquele
+   tipo e leva o arquivo junto (IndexedDB do próprio navegador). */
+const SUGESTOES = {
+  pdf: ['comprimir', 'unir', 'dividir', 'organizar', 'pdf-para-word', 'pdf-para-excel', 'pdf-para-imagem', 'proteger', 'marca-dagua', 'numerar-paginas', 'girar', 'remover-metadados', 'pdf-para-powerpoint', 'pdf-para-texto', 'desbloquear'],
+  img: ['imagem-para-pdf'], docx: ['word-para-pdf'], xlsx: ['excel-para-pdf'], pptx: ['powerpoint-para-pdf'],
+};
+const MULTIPLOS = new Set(['unir', 'imagem-para-pdf']);
+let ultimoSolto = null;
+function tipoDoArquivo(f) {
+  const n = f.name.toLowerCase();
+  if (/\.pdf$/.test(n) || f.type === 'application/pdf') return 'pdf';
+  if (/\.(jpe?g|png|webp)$/.test(n) || /^image\/(jpeg|png|webp)$/.test(f.type)) return 'img';
+  if (/\.docx$/.test(n)) return 'docx';
+  if (/\.(xlsx|xlsm|csv)$/.test(n)) return 'xlsx';
+  if (/\.pptx$/.test(n)) return 'pptx';
+  return null;
+}
+function mostraEscolha(files) {
+  const caixa = $('escolha'), acoes = $('escolhaAcoes');
+  const tipos = new Set(files.map(tipoDoArquivo));
+  acoes.textContent = '';
+  if (tipos.has(null) || tipos.size !== 1) {
+    $('escolhaTitulo').textContent = t(tipos.has(null) ? 'hub_unknown' : 'hub_mixed');
+    caixa.hidden = false; caixa.focus(); return;
+  }
+  const tipo = [...tipos][0];
+  $('escolhaTitulo').textContent = files.length === 1 ? t('hub_file_one', { nome: files[0].name }) : t('hub_file_n', { n: files.length });
+  let lista = SUGESTOES[tipo];
+  if (tipo === 'pdf' && files.length > 1) lista = ['unir'];
+  for (const slug of lista) {
+    const card = document.querySelector('.ferramenta-card[data-slug="' + slug + '"]');
+    if (!card) continue;
+    const b = el('button', { type: 'button', onclick: () => entrega(slug, MULTIPLOS.has(slug) ? files : [files[0]]) });
+    const ic = card.querySelector('.ic svg');
+    if (ic) b.appendChild(ic.cloneNode(true));
+    b.appendChild(document.createTextNode(card.querySelector('b').textContent));
+    acoes.appendChild(b);
+  }
+  caixa.hidden = false;
+  caixa.focus();
+}
+function abreBanco() {
+  return new Promise((ok, falha) => {
+    const r = indexedDB.open('giflocal-pdf', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('entrega');
+    r.onsuccess = () => ok(r.result);
+    r.onerror = () => falha(r.error);
+  });
+}
+async function entrega(slug, files) {
+  try {
+    const db = await abreBanco();
+    await new Promise((ok, falha) => { const tx = db.transaction('entrega', 'readwrite'); tx.objectStore('entrega').put({ files, quando: Date.now() }, 'arquivo'); tx.oncomplete = ok; tx.onerror = () => falha(tx.error); });
+    db.close();
+    location.href = '/pdf/' + slug + '?de=inicio';
+  } catch (e) { location.href = '/pdf/' + slug; }
+}
+async function recebeEntrega() {
+  if (new URLSearchParams(location.search).get('de') !== 'inicio' || !ferramentaAtual) return;
+  try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) { /* segue */ }
+  try {
+    const db = await abreBanco();
+    const item = await new Promise((ok, falha) => { const tx = db.transaction('entrega', 'readwrite'); const st = tx.objectStore('entrega'); const g = st.get('arquivo'); g.onsuccess = () => { st.delete('arquivo'); ok(g.result); }; g.onerror = () => falha(g.error); });
+    db.close();
+    if (item && item.files && item.files.length && Date.now() - item.quando < 10 * 60 * 1000) await ferramentaAtual.recebe(item.files);
+  } catch (e) { /* sem IndexedDB: o visitante escolhe o arquivo de novo */ }
+}
+function iniciaDropHub() {
+  const zona = $('zonaHub'), entrada = $('entradaHub');
+  if (!zona) return;
+  const recebe = (fs) => { ultimoSolto = fs; mostraEscolha(fs); };
+  entrada.addEventListener('change', () => { const fs = Array.from(entrada.files || []); entrada.value = ''; if (fs.length) recebe(fs); });
+  ['dragenter', 'dragover'].forEach((ev) => zona.addEventListener(ev, (e) => { e.preventDefault(); zona.classList.add('dragover'); }));
+  ['dragleave', 'drop'].forEach((ev) => zona.addEventListener(ev, (e) => { e.preventDefault(); zona.classList.remove('dragover'); }));
+  zona.addEventListener('drop', (e) => { const fs = Array.from((e.dataTransfer && e.dataTransfer.files) || []); if (fs.length) recebe(fs); });
+  window.addEventListener('dragover', (e) => e.preventDefault());
+  window.addEventListener('drop', (e) => { if (!zona.contains(e.target)) e.preventDefault(); });
 }
 
 /* ================================================================ */
@@ -1288,6 +1783,12 @@ const FABRICAS = {
   'word-para-pdf': ferramentaWordParaPdf,
   'excel-para-pdf': ferramentaExcelParaPdf,
   'powerpoint-para-pdf': ferramentaPptParaPdf,
+  organizar: ferramentaOrganizar,
+  girar: ferramentaGirar,
+  proteger: ferramentaProteger,
+  'remover-metadados': ferramentaMetadados,
+  'marca-dagua': ferramentaMarcaDagua,
+  'numerar-paginas': ferramentaNumerar,
 };
 let ferramentaAtual = null;
 
@@ -1310,14 +1811,18 @@ function inicia() {
     ligaZona((fs) => ferramentaAtual.recebe(fs));
     $('acao').addEventListener('click', () => ferramentaAtual.processa());
     $('limpar').addEventListener('click', () => { ferramentaAtual.limpa(); const e = $('entrada'); if (e) e.focus(); });
+    const c = $('cancelar'); if (c) c.addEventListener('click', () => { cancelaTudo(); estado(t('st_cancelled'), 'aviso'); });
     estado(t('st_wait'));
   }
+  iniciaMenu();
   iniciaHub();
   const lista = $('lista');
   if (lista && window.MutationObserver) new MutationObserver(atualizaLayout).observe(lista, { childList: true });
   aplicaTextos();
   if (fabrica && !$('status').textContent) estado(t('st_wait'));
   document.documentElement.classList.add('js-pronto');
+  atualizaLayout();
+  recebeEntrega();
 }
 
 /* Exposto só para os testes automatizados (não altera nada). */

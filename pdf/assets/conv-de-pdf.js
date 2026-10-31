@@ -2,8 +2,8 @@
    O PDF é lido pelo PDF.js no navegador. O texto vem com posição e
    tamanho de cada trecho; daqui saem linhas, parágrafos e tabelas, que
    viram arquivos do Office montados aqui mesmo (sem servidor). */
-import { criaZip, escXml, pausa } from './conv-base.js?v=3';
-import { TEMA, MESTRE } from './conv-pptx-modelo.js?v=3';
+import { criaZip, escXml, pausa } from './conv-base.js?v=4';
+import { TEMA, MESTRE } from './conv-pptx-modelo.js?v=4';
 
 const NEGRITO = /bold|black|heavy|semibold|demibold|extrabold|ultrabold|,bd|-bd\b/i;
 const ITALICO = /italic|oblique|,it\b|-it\b/i;
