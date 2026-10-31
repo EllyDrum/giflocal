@@ -1,18 +1,210 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://giflocal.com/</loc></url>
-  <url><loc>https://giflocal.com/pdf</loc></url>
-  <url><loc>https://giflocal.com/pdf/unir</loc></url>
-  <url><loc>https://giflocal.com/pdf/dividir</loc></url>
-  <url><loc>https://giflocal.com/pdf/comprimir</loc></url>
-  <url><loc>https://giflocal.com/pdf/pdf-para-word</loc></url>
-  <url><loc>https://giflocal.com/pdf/pdf-para-excel</loc></url>
-  <url><loc>https://giflocal.com/pdf/pdf-para-powerpoint</loc></url>
-  <url><loc>https://giflocal.com/pdf/pdf-para-imagem</loc></url>
-  <url><loc>https://giflocal.com/pdf/pdf-para-texto</loc></url>
-  <url><loc>https://giflocal.com/pdf/word-para-pdf</loc></url>
-  <url><loc>https://giflocal.com/pdf/excel-para-pdf</loc></url>
-  <url><loc>https://giflocal.com/pdf/powerpoint-para-pdf</loc></url>
-  <url><loc>https://giflocal.com/pdf/imagem-para-pdf</loc></url>
-  <url><loc>https://giflocal.com/pdf/desbloquear</loc></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url><loc>https://giflocal.com/</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/pdf</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/pdf"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/pdf?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/pdf?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/pdf?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/pdf?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/pdf?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/pdf?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/pdf/unir</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/pdf/unir"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/pdf/unir?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/pdf/unir?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/pdf/unir?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/pdf/unir?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/pdf/unir?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/pdf/unir?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/pdf/dividir</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/pdf/dividir"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/pdf/dividir?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/pdf/dividir?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/pdf/dividir?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/pdf/dividir?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/pdf/dividir?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/pdf/dividir?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/pdf/organizar</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/pdf/organizar"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/pdf/organizar?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/pdf/organizar?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/pdf/organizar?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/pdf/organizar?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/pdf/organizar?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/pdf/organizar?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/pdf/girar</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/pdf/girar"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/pdf/girar?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/pdf/girar?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/pdf/girar?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/pdf/girar?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/pdf/girar?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/pdf/girar?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/pdf/comprimir</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/pdf/comprimir"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/pdf/comprimir?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/pdf/comprimir?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/pdf/comprimir?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/pdf/comprimir?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/pdf/comprimir?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/pdf/comprimir?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/pdf/imagem-para-pdf</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/pdf/imagem-para-pdf"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/pdf/imagem-para-pdf?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/pdf/imagem-para-pdf?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/pdf/imagem-para-pdf?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/pdf/imagem-para-pdf?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/pdf/imagem-para-pdf?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/pdf/imagem-para-pdf?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/pdf/word-para-pdf</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/pdf/word-para-pdf"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/pdf/word-para-pdf?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/pdf/word-para-pdf?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/pdf/word-para-pdf?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/pdf/word-para-pdf?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/pdf/word-para-pdf?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/pdf/word-para-pdf?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/pdf/excel-para-pdf</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/pdf/excel-para-pdf"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/pdf/excel-para-pdf?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/pdf/excel-para-pdf?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/pdf/excel-para-pdf?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/pdf/excel-para-pdf?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/pdf/excel-para-pdf?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/pdf/excel-para-pdf?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/pdf/powerpoint-para-pdf</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/pdf/powerpoint-para-pdf"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/pdf/powerpoint-para-pdf?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/pdf/powerpoint-para-pdf?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/pdf/powerpoint-para-pdf?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/pdf/powerpoint-para-pdf?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/pdf/powerpoint-para-pdf?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/pdf/powerpoint-para-pdf?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/pdf/pdf-para-word</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/pdf/pdf-para-word"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/pdf/pdf-para-word?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/pdf/pdf-para-word?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/pdf/pdf-para-word?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/pdf/pdf-para-word?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/pdf/pdf-para-word?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/pdf/pdf-para-word?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/pdf/pdf-para-excel</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/pdf/pdf-para-excel"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/pdf/pdf-para-excel?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/pdf/pdf-para-excel?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/pdf/pdf-para-excel?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/pdf/pdf-para-excel?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/pdf/pdf-para-excel?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/pdf/pdf-para-excel?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/pdf/pdf-para-powerpoint</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/pdf/pdf-para-powerpoint"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/pdf/pdf-para-powerpoint?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/pdf/pdf-para-powerpoint?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/pdf/pdf-para-powerpoint?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/pdf/pdf-para-powerpoint?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/pdf/pdf-para-powerpoint?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/pdf/pdf-para-powerpoint?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/pdf/pdf-para-imagem</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/pdf/pdf-para-imagem"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/pdf/pdf-para-imagem?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/pdf/pdf-para-imagem?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/pdf/pdf-para-imagem?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/pdf/pdf-para-imagem?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/pdf/pdf-para-imagem?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/pdf/pdf-para-imagem?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/pdf/pdf-para-texto</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/pdf/pdf-para-texto"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/pdf/pdf-para-texto?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/pdf/pdf-para-texto?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/pdf/pdf-para-texto?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/pdf/pdf-para-texto?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/pdf/pdf-para-texto?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/pdf/pdf-para-texto?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/pdf/desbloquear</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/pdf/desbloquear"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/pdf/desbloquear?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/pdf/desbloquear?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/pdf/desbloquear?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/pdf/desbloquear?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/pdf/desbloquear?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/pdf/desbloquear?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/pdf/proteger</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/pdf/proteger"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/pdf/proteger?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/pdf/proteger?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/pdf/proteger?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/pdf/proteger?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/pdf/proteger?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/pdf/proteger?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/pdf/remover-metadados</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/pdf/remover-metadados"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/pdf/remover-metadados?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/pdf/remover-metadados?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/pdf/remover-metadados?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/pdf/remover-metadados?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/pdf/remover-metadados?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/pdf/remover-metadados?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/pdf/marca-dagua</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/pdf/marca-dagua"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/pdf/marca-dagua?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/pdf/marca-dagua?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/pdf/marca-dagua?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/pdf/marca-dagua?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/pdf/marca-dagua?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/pdf/marca-dagua?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/pdf/numerar-paginas</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/pdf/numerar-paginas"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/pdf/numerar-paginas?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/pdf/numerar-paginas?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/pdf/numerar-paginas?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/pdf/numerar-paginas?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/pdf/numerar-paginas?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/pdf/numerar-paginas?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/ajuda</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/ajuda"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/ajuda?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/ajuda?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/ajuda?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/ajuda?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/ajuda?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/ajuda?lang=ja"/>
+  </url>
+  <url><loc>https://giflocal.com/sobre</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/sobre"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://giflocal.com/sobre?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://giflocal.com/sobre?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://giflocal.com/sobre?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://giflocal.com/sobre?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://giflocal.com/sobre?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://giflocal.com/sobre?lang=ja"/>
+  </url>
 </urlset>

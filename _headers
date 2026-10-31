@@ -48,6 +48,13 @@
 # FERRAMENTAS DE PDF - politica mais estrita, somada a de /* (o navegador
 # aplica as duas). Sem 'unsafe-inline' e com rede apenas para o proprio
 # site: e isso que torna verificavel que os documentos nao saem daqui.
+# Ajuda e Sobre usam o mesmo CSS/JS da seção PDF e a mesma CSP estrita.
+/ajuda
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; img-src 'self' blob: data:; style-src 'self'; font-src 'self'; worker-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'
+  Cache-Control: public, max-age=0, must-revalidate
+/sobre
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; img-src 'self' blob: data:; style-src 'self'; font-src 'self'; worker-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'
+  Cache-Control: public, max-age=0, must-revalidate
 /pdf
   Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; img-src 'self' blob: data:; style-src 'self'; font-src 'self'; worker-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'
   Cache-Control: public, max-age=0, must-revalidate

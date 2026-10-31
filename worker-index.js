@@ -129,8 +129,8 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: corsHeaders() });
 }
 
-function err(code, message, status = 400) {
-  return json({ error: code, message }, status);
+function err(code, message, status = 400, extra) {
+  return json(Object.assign({ error: code, message }, extra || {}), status);
 }
 
 function nowIso() {
@@ -664,6 +664,232 @@ function resolvePlanFromSession(session) {
   return null;
 }
 
+
+/* ============================ doações ============================
+   Apoio voluntário internacional. Tudo aqui é opcional para o site: se a
+   chave da Stripe não estiver configurada, a interface volta ao Payment
+   Link. Regras financeiras:
+   - valores sempre em unidade mínima inteira (centavos; iene sem decimais);
+   - a moeda pedida nunca é trocada em silêncio: se a Stripe não aceitar,
+     a resposta diz qual seria a moeda efetiva e a interface pede nova
+     confirmação ao doador;
+   - mínimos da Stripe por moeda, máximo próprio por moeda;
+   - cotação (open.er-api.com) só informativa, com data; o valor cobrado é
+     o que a Stripe confirma. */
+
+const MOEDAS = {
+  BRL: { dec: 2, min: 100,  max: 2000000,  locale: 'pt-BR' },
+  USD: { dec: 2, min: 50,   max: 500000,   locale: 'en-US' },
+  EUR: { dec: 2, min: 50,   max: 500000,   locale: 'de-DE' },
+  GBP: { dec: 2, min: 30,   max: 400000,   locale: 'en-GB' },
+  CAD: { dec: 2, min: 50,   max: 700000,   locale: 'en-CA' },
+  AUD: { dec: 2, min: 50,   max: 750000,   locale: 'en-AU' },
+  CHF: { dec: 2, min: 50,   max: 450000,   locale: 'de-CH' },
+  JPY: { dec: 0, min: 50,   max: 750000,   locale: 'ja-JP' },
+  MXN: { dec: 2, min: 1000, max: 9000000,  locale: 'es-MX' },
+  ARS: { dec: 2, min: 50,   max: 99999999, locale: 'es-AR' },
+  CLP: { dec: 0, min: 500,  max: 5000000,  locale: 'es-CL' },
+};
+const IDIOMAS_CHECKOUT = { pt: 'pt-BR', en: 'en', es: 'es', fr: 'fr', de: 'de', it: 'it', ja: 'ja' };
+const CAMBIO_URL = 'https://open.er-api.com/v6/latest/BRL';
+const CAMBIO_TTL_S = 6 * 3600;        // cache "fresco"
+const CAMBIO_TTL_VELHO_S = 7 * 86400; // cópia de reserva se a fonte cair
+const SITE = 'https://giflocal.com';
+
+async function buscaCambio(env, ctxWait) {
+  const cache = caches.default;
+  const chaveFresca = new Request('https://cache.giflocal.internal/cambio/fresco');
+  const chaveVelha = new Request('https://cache.giflocal.internal/cambio/velho');
+  const fresca = await cache.match(chaveFresca);
+  if (fresca) return await fresca.json();
+  let dados = null;
+  try {
+    const r = await fetch(CAMBIO_URL, { headers: { Accept: 'application/json' }, cf: { cacheTtl: 0 } });
+    if (r.ok) {
+      const j = await r.json();
+      if (j && j.result === 'success' && j.rates) {
+        const taxas = {};
+        for (const m of Object.keys(MOEDAS)) if (typeof j.rates[m] === 'number' && isFinite(j.rates[m]) && j.rates[m] > 0) taxas[m] = j.rates[m];
+        if (taxas.BRL && taxas.USD && taxas.JPY) {
+          dados = { base: 'BRL', taxas, atualizadoEm: new Date((j.time_last_update_unix || Math.floor(Date.now() / 1000)) * 1000).toISOString(), proximaEm: j.time_next_update_unix ? new Date(j.time_next_update_unix * 1000).toISOString() : null, fonte: 'open.er-api.com (ExchangeRate-API)', velho: false };
+        }
+      }
+    }
+  } catch (e) { console.error('cambio: fonte indisponível', e && e.message); }
+  if (dados) {
+    const corpo = JSON.stringify(dados);
+    const salva = (chave, ttl) => cache.put(chave, new Response(corpo, { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'max-age=' + ttl } }));
+    const grava = Promise.all([salva(chaveFresca, CAMBIO_TTL_S), salva(chaveVelha, CAMBIO_TTL_VELHO_S)]);
+    if (ctxWait) ctxWait(grava); else await grava;
+    return dados;
+  }
+  const velha = await cache.match(chaveVelha);
+  if (velha) { const v = await velha.json(); v.velho = true; return v; }
+  return null;
+}
+
+async function handleCambio(request, env, ctx) {
+  const dados = await buscaCambio(env, ctx && ctx.waitUntil ? (p) => ctx.waitUntil(p) : null);
+  if (!dados) return err('COTACAO_INDISPONIVEL', 'Cotação indisponível no momento.', 503);
+  return new Response(JSON.stringify(dados), { status: 200, headers: corsHeaders({ 'Cache-Control': 'public, max-age=900' }) });
+}
+
+/* Quais moedas a conta Stripe de fato aceita: descoberto na primeira
+   tentativa de cada moeda e lembrado por 7 dias. "null" = ainda não
+   testada. */
+async function suporteMoeda(moeda) {
+  const r = await caches.default.match(new Request('https://cache.giflocal.internal/moeda/' + moeda));
+  if (!r) return null;
+  return (await r.text()) === 'sim';
+}
+async function gravaSuporteMoeda(moeda, ok) {
+  await caches.default.put(new Request('https://cache.giflocal.internal/moeda/' + moeda), new Response(ok ? 'sim' : 'nao', { headers: { 'Cache-Control': 'max-age=' + 7 * 86400 } }));
+}
+
+/* Chave de teste (sk_test_/rk_test_) só cria cobranças fictícias. Para que
+   um visitante real nunca caia num checkout de teste, o modo de teste só é
+   liberado quando o pedido diz explicitamente que é um teste (?teste=1 na
+   página). Sem isso, o site continua usando o link de doação publicado. */
+/* Limite de taxa aproximado por IP (com hash), guardado no Cache API do
+   próprio datacenter. Não é atômico nem global: segura rajadas de um mesmo
+   cliente sem custo nem configuração. Rotas de doação chamam a Stripe, e
+   abuso poderia esbarrar no limite de requisições da conta. */
+async function limitaTaxa(env, request, rota, maximo, janelaSeg) {
+  try {
+    const h = await hashIp(env, request.headers.get('CF-Connecting-IP') || '');
+    if (!h) return false;
+    const janela = Math.floor(Date.now() / 1000 / janelaSeg);
+    const chave = new Request('https://cache.giflocal.internal/taxa/' + rota + '/' + h + '/' + janela);
+    const atual = await caches.default.match(chave);
+    const n = atual ? parseInt(await atual.text(), 10) || 0 : 0;
+    if (n >= maximo) return true;
+    await caches.default.put(chave, new Response(String(n + 1), { headers: { 'Cache-Control': 'max-age=' + janelaSeg } }));
+    return false;
+  } catch (e) { return false; }
+}
+
+function modoStripe(env) {
+  const k = env.STRIPE_SECRET_KEY || '';
+  if (/^(sk|rk)_live_/.test(k)) return 'live';
+  if (/^(sk|rk)_test_/.test(k)) return 'teste';
+  return null;
+}
+function checkoutLiberado(env, pedidoDeTeste) {
+  const modo = modoStripe(env);
+  return modo === 'live' || (modo === 'teste' && pedidoDeTeste === true);
+}
+const STRIPE_VERSAO = '2024-11-20.acacia';
+
+async function handleDoacaoConfig(request, env) {
+  const url = new URL(request.url);
+  const teste = url.searchParams.get('teste') === '1';
+  const moedas = {};
+  for (const [k, v] of Object.entries(MOEDAS)) moedas[k] = { dec: v.dec, min: v.min, max: v.max, suporte: await suporteMoeda(k) };
+  return json({ checkout: checkoutLiberado(env, teste), teste: modoStripe(env) === 'teste' && teste, moedas, pix: true, paymentLink: STRIPE_DOACAO_LINK });
+}
+const STRIPE_DOACAO_LINK = 'https://donate.stripe.com/aFaeVdgxw9mybwk2cB8bS09';
+
+function formEncode(obj, prefixo, out) {
+  out = out || [];
+  for (const [k, v] of Object.entries(obj)) {
+    const chave = prefixo ? prefixo + '[' + k + ']' : k;
+    if (v && typeof v === 'object') formEncode(v, chave, out);
+    else if (v !== undefined && v !== null) out.push(encodeURIComponent(chave) + '=' + encodeURIComponent(String(v)));
+  }
+  return out.join('&');
+}
+
+async function handleDoacaoSessao(request, env) {
+  if (await limitaTaxa(env, request, 'sessao', 10, 600)) return err('RATE_LIMITED', 'Muitas tentativas. Aguarde alguns minutos.', 429);
+  const body = await readJson(request);
+  if (!body) return err('BAD_REQUEST', 'Corpo inválido', 400);
+  if (!checkoutLiberado(env, body.teste)) return err('CHECKOUT_INDISPONIVEL', 'Checkout direto não configurado.', 503);
+  const emTeste = modoStripe(env) === 'teste';
+  const moeda = typeof body.moeda === 'string' ? body.moeda.toUpperCase() : '';
+  const cfg = MOEDAS[moeda];
+  if (!cfg) return err('MOEDA_INVALIDA', 'Moeda não suportada.', 400);
+  /* valor SEMPRE inteiro em unidade mínima; qualquer outra coisa é recusada */
+  const valor = body.valor;
+  if (!Number.isInteger(valor) || valor < cfg.min || valor > cfg.max) return err('VALOR_INVALIDO', 'Valor fora dos limites.', 400, { min: cfg.min, max: cfg.max });
+  const idioma = IDIOMAS_CHECKOUT[String(body.idioma || '')] || 'auto';
+  const nonce = texto(body.nonce, 64);
+  if (!nonce || !/^[a-zA-Z0-9_-]{16,64}$/.test(nonce)) return err('BAD_REQUEST', 'Identificador inválido', 400);
+
+  const sabido = await suporteMoeda(moeda);
+  if (sabido === false) return err('MOEDA_NAO_ACEITA', 'A conta não aceita cobranças nesta moeda.', 409, { moedaEfetiva: 'BRL' });
+
+  const campos = {
+    mode: 'payment',
+    submit_type: 'donate',
+    locale: idioma,
+    success_url: SITE + '/obrigado?doacao=1' + (emTeste ? '&teste=1' : '') + '&session_id={CHECKOUT_SESSION_ID}',
+    cancel_url: SITE + (emTeste ? '/?teste=1#apoiar' : '/#apoiar'),
+    /* o doador paga exatamente na moeda e no valor que viu no site: nada de
+       conversão automática da Stripe (Adaptive Pricing) no checkout */
+    adaptive_pricing: { enabled: false },
+    line_items: { 0: { quantity: 1, price_data: { currency: moeda.toLowerCase(), unit_amount: valor, product_data: { name: 'Apoio ao GIF Local' } } } },
+    metadata: { tipo: 'doacao', moeda_pedida: moeda, valor_pedido: String(valor) },
+    payment_intent_data: { description: 'Apoio voluntário ao GIF Local', metadata: { tipo: 'doacao' } },
+  };
+  let resp, dados;
+  try {
+    resp = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + env.STRIPE_SECRET_KEY, 'Content-Type': 'application/x-www-form-urlencoded', 'Idempotency-Key': 'doacao-' + nonce, 'Stripe-Version': STRIPE_VERSAO },
+      body: formEncode(campos),
+    });
+    dados = await resp.json();
+  } catch (e) {
+    console.error('stripe: falha de rede', e && e.message);
+    return err('GATEWAY_INDISPONIVEL', 'Não foi possível falar com o gateway.', 502);
+  }
+  if (!resp.ok) {
+    const msg = (dados && dados.error && (dados.error.message || dados.error.code)) || '';
+    /* a Stripe diz, em texto, quando a moeda não é aceita pela conta */
+    if (/currency|moeda/i.test(msg) && /not (a )?(valid|supported)|invalid|unsupported|não/i.test(msg)) {
+      await gravaSuporteMoeda(moeda, false);
+      await logEvent(env, { event: 'DOACAO', detail: 'moeda recusada pelo gateway: ' + moeda, request });
+      return err('MOEDA_NAO_ACEITA', 'A conta não aceita cobranças nesta moeda.', 409, { moedaEfetiva: 'BRL' });
+    }
+    console.error('stripe: erro', resp.status, msg);
+    return err('GATEWAY_ERRO', 'O gateway recusou a solicitação.', 502);
+  }
+  if (!dados || !dados.url || dados.currency !== moeda.toLowerCase() || dados.amount_total !== valor) {
+    /* a sessão existe mas não bate com o pedido: nunca mandar o doador
+       para uma cobrança diferente da que ele viu */
+    console.error('stripe: sessão divergente', dados && dados.id, dados && dados.currency, dados && dados.amount_total);
+    return err('GATEWAY_ERRO', 'Resposta inesperada do gateway.', 502);
+  }
+  await gravaSuporteMoeda(moeda, true);
+  await logEvent(env, { event: 'DOACAO', detail: 'sessão criada ' + moeda + ' ' + valor, request });
+  return json({ url: dados.url, moeda, valor, teste: emTeste, sessao: dados.id.slice(0, 12) + '…' });
+}
+
+/* Confirmação real para a página /obrigado: consulta a sessão na Stripe e
+   devolve só o necessário (situação, moeda e valor). Nunca dados do cartão
+   ou do doador. */
+async function handleDoacaoStatus(request, env) {
+  const id = new URL(request.url).searchParams.get('session_id') || '';
+  if (!/^cs_(test|live)_[A-Za-z0-9]{10,200}$/.test(id)) return err('BAD_REQUEST', 'Sessão inválida', 400);
+  if (await limitaTaxa(env, request, 'status', 30, 60)) return err('RATE_LIMITED', 'Muitas consultas. Aguarde um minuto.', 429);
+  if (!modoStripe(env)) return err('CHECKOUT_INDISPONIVEL', 'Checkout direto não configurado.', 503);
+  let resp, d;
+  try {
+    resp = await fetch('https://api.stripe.com/v1/checkout/sessions/' + encodeURIComponent(id), {
+      headers: { Authorization: 'Bearer ' + env.STRIPE_SECRET_KEY, 'Stripe-Version': STRIPE_VERSAO },
+    });
+    d = await resp.json();
+  } catch (e) {
+    return err('GATEWAY_INDISPONIVEL', 'Não foi possível falar com o gateway.', 502);
+  }
+  if (resp.status === 404) return err('NOT_FOUND', 'Sessão não encontrada', 404);
+  if (!resp.ok || !d) return err('GATEWAY_ERRO', 'O gateway recusou a consulta.', 502);
+  if (!d.metadata || d.metadata.tipo !== 'doacao') return err('NOT_FOUND', 'Sessão não encontrada', 404);
+  const pago = d.status === 'complete' && (d.payment_status === 'paid' || d.payment_status === 'no_payment_required');
+  const situacao = pago ? 'pago' : d.status === 'complete' ? 'processando' : d.status === 'expired' ? 'expirado' : 'aberto';
+  return json({ situacao, moeda: String(d.currency || '').toUpperCase(), valor: d.amount_total, teste: d.livemode === false });
+}
+
 async function handleStripeWebhook(request, env) {
   const rawBody = await leCorpo(request, 256 * 1024);
   if (rawBody === null) return err('PAYLOAD_TOO_LARGE', 'Corpo da requisição grande demais.', 413);
@@ -688,6 +914,12 @@ async function handleStripeWebhook(request, env) {
       return json({ ok: true, pending: true });
     }
 
+    /* Doação criada pela API (/doacao/sessao): registra a confirmação
+       real e termina. Nunca vira licença. */
+    if (session.metadata && session.metadata.tipo === 'doacao') {
+      await logEvent(env, { event: 'DOACAO', detail: `confirmada ${session.currency} ${session.amount_total} (pedido ${session.metadata.moeda_pedida || '-'} ${session.metadata.valor_pedido || '-'}) session=${session.id}`, request });
+      return json({ ok: true, doacao: true });
+    }
     const email = session.customer_details?.email || session.customer_email;
     const plan = resolvePlanFromSession(session);
     if (!email || !plan || !PLAN_DEVICES[plan]) {
@@ -1037,7 +1269,7 @@ function arrayBufferToBase64(buf) {
 /* ============================== router ============================== */
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
     if (request.method === 'OPTIONS') {
@@ -1045,7 +1277,7 @@ export default {
     }
 
     try {
-      return withCors(await route(request, env, url), request);
+      return withCors(await route(request, env, url, ctx), request);
     } catch (e) {
       if (e instanceof CorpoGrande) return withCors(err('PAYLOAD_TOO_LARGE', 'Corpo da requisição grande demais.', 413), request);
       /* O detalhe vai para o log do Worker (visível só no painel); quem
@@ -1063,7 +1295,7 @@ export default {
 const LIMITE_CORPO = { '/webhooks/stripe': 256 * 1024 };
 const LIMITE_CORPO_PADRAO = 16 * 1024;
 
-async function route(request, env, url) {
+async function route(request, env, url, ctx) {
   if (request.method === 'POST') {
     const tam = Number(request.headers.get('Content-Length') || '0');
     if (tam > (LIMITE_CORPO[url.pathname] || LIMITE_CORPO_PADRAO)) return err('PAYLOAD_TOO_LARGE', 'Corpo da requisição grande demais.', 413);
@@ -1076,6 +1308,10 @@ async function route(request, env, url) {
   if (url.pathname === '/license-by-session' && request.method === 'GET') return await handleLicenseBySession(request, env);
   if (url.pathname === '/license/resend' && request.method === 'POST') return await handleResendLicense(request, env);
   if (url.pathname === '/webhooks/stripe' && request.method === 'POST') return await handleStripeWebhook(request, env);
+  if (url.pathname === '/cambio' && request.method === 'GET') return await handleCambio(request, env, ctx);
+  if (url.pathname === '/doacao/config' && request.method === 'GET') return await handleDoacaoConfig(request, env);
+  if (url.pathname === '/doacao/sessao' && request.method === 'POST') return await handleDoacaoSessao(request, env);
+  if (url.pathname === '/doacao/status' && request.method === 'GET') return await handleDoacaoStatus(request, env);
   if (url.pathname === '/ai/generate' && request.method === 'POST') return await handleAiGenerate(request, env);
   if (url.pathname === '/ai/quota' && request.method === 'POST') return await handleAiQuota(request, env);
 

@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#6C4CF5">
+<meta name="theme-color" content="#1e3a8a">
+<link rel="alternate" hreflang="pt-BR" href="https://giflocal.com/">
+<link rel="alternate" hreflang="en" href="https://giflocal.com/?lang=en">
+<link rel="alternate" hreflang="es" href="https://giflocal.com/?lang=es">
+<link rel="alternate" hreflang="fr" href="https://giflocal.com/?lang=fr">
+<link rel="alternate" hreflang="de" href="https://giflocal.com/?lang=de">
+<link rel="alternate" hreflang="it" href="https://giflocal.com/?lang=it">
+<link rel="alternate" hreflang="ja" href="https://giflocal.com/?lang=ja">
+<link rel="alternate" hreflang="x-default" href="https://giflocal.com/">
 <meta name="description" id="metaDesc" content="Crie GIFs a partir de fotos, vídeos ou gravações de tela, tudo processado localmente no navegador, sem upload.">
 <meta property="og:title" id="ogTitle" content="GIF Local: crie GIFs sem enviar seus arquivos para a internet">
 <meta property="og:description" id="ogDesc" content="Fotos, vídeo, gravação de tela ou do zero. 100% no seu navegador, em qualquer dispositivo.">
@@ -14,41 +22,43 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <title id="pageTitle">GIF Local: crie GIFs sem enviar seus arquivos para a internet</title>
 <style>
+  @font-face{font-family:"Inter"; font-style:normal; font-weight:100 900; font-display:swap; src:url(/pdf/vendor/inter/inter-latin-wght-normal.woff2) format("woff2"); unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+  @font-face{font-family:"Inter"; font-style:normal; font-weight:100 900; font-display:swap; src:url(/pdf/vendor/inter/inter-latin-ext-wght-normal.woff2) format("woff2"); unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
   :root{
-    --bg:#faf9fd; --bg-soft:#f1eefb; --card:#ffffff; --ink:#181521; --ink-soft:#655f72; --ink-faint:#8b859a;
-    --line:#e9e5f4; --line-soft:#f0edf9;
-    --primary:#6c4cf5; --primary-ink:#4c2fd6; --primary-soft:#efe9ff; --primary-2:#ff6f91;
-    --green:#12915a; --green-soft:#e3f6ec; --amber:#b4790b; --amber-soft:#fdf1de;
+    --bg:#f8fafc; --bg-soft:#f1f5f9; --card:#ffffff; --ink:#0f172a; --ink-soft:#475569; --ink-faint:#64748b;
+    --line:#e2e8f0; --line-soft:#f1f5f9;
+    --primary:#2563eb; --primary-ink:#1d4ed8; --primary-soft:#eff6ff; --primary-2:#0ea5e9;
+    --green:#15803d; --green-soft:#ecfdf5; --amber:#b45309; --amber-soft:#fffbeb;
     --radius-lg:20px; --radius:14px; --radius-sm:10px;
     --shadow-sm:0 1px 2px rgba(24,21,33,.05), 0 1px 1px rgba(24,21,33,.04);
-    --shadow-md:0 8px 24px rgba(76,47,214,.10), 0 2px 6px rgba(24,21,33,.05);
-    --shadow-lg:0 16px 40px rgba(76,47,214,.16), 0 4px 10px rgba(24,21,33,.06);
-    --font-ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --shadow-md:0 8px 24px rgba(30,58,138,.10), 0 2px 6px rgba(24,21,33,.05);
+    --shadow-lg:0 16px 40px rgba(30,58,138,.16), 0 4px 10px rgba(24,21,33,.06);
+    --font-ui:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   }
   @media (prefers-color-scheme: dark){
     :root{
-      --bg:#141220; --bg-soft:#1b1830; --card:#1d1a2e; --ink:#f1eefb; --ink-soft:#b6aecf; --ink-faint:#7d7594;
-      --line:#322c4a; --line-soft:#272240;
-      --primary:#9c85ff; --primary-ink:#c3b3ff; --primary-soft:#2a2350; --primary-2:#ff8aa8;
-      --green:#4bcf95; --green-soft:#173428; --amber:#e2a545; --amber-soft:#3a2e12;
+      --bg:#0b1220; --bg-soft:#111a2e; --card:#141f36; --ink:#eef2ff; --ink-soft:#b6c2dc; --ink-faint:#94a3b8;
+      --line:#243149; --line-soft:#1b2640;
+      --primary:#60a5fa; --primary-ink:#93c5fd; --primary-soft:#172554; --primary-2:#38bdf8;
+      --green:#4ade80; --green-soft:#0f2a1c; --amber:#fbbf24; --amber-soft:#3a2a0a;
       --shadow-sm:0 1px 2px rgba(0,0,0,.3); --shadow-md:0 8px 24px rgba(0,0,0,.35); --shadow-lg:0 16px 40px rgba(0,0,0,.45);
     }
   }
   html[data-theme="dark"]{
-    --bg:#141220; --bg-soft:#1b1830; --card:#1d1a2e; --ink:#f1eefb; --ink-soft:#b6aecf; --ink-faint:#7d7594;
-    --line:#322c4a; --line-soft:#272240;
-    --primary:#9c85ff; --primary-ink:#c3b3ff; --primary-soft:#2a2350; --primary-2:#ff8aa8;
-    --green:#4bcf95; --green-soft:#173428; --amber:#e2a545; --amber-soft:#3a2e12;
+    --bg:#0b1220; --bg-soft:#111a2e; --card:#141f36; --ink:#eef2ff; --ink-soft:#b6c2dc; --ink-faint:#94a3b8;
+    --line:#243149; --line-soft:#1b2640;
+    --primary:#60a5fa; --primary-ink:#93c5fd; --primary-soft:#172554; --primary-2:#38bdf8;
+    --green:#4ade80; --green-soft:#0f2a1c; --amber:#fbbf24; --amber-soft:#3a2a0a;
     --shadow-sm:0 1px 2px rgba(0,0,0,.3); --shadow-md:0 8px 24px rgba(0,0,0,.35); --shadow-lg:0 16px 40px rgba(0,0,0,.45);
   }
   html[data-theme="light"]{
-    --bg:#faf9fd; --bg-soft:#f1eefb; --card:#ffffff; --ink:#181521; --ink-soft:#655f72; --ink-faint:#8b859a;
-    --line:#e9e5f4; --line-soft:#f0edf9;
-    --primary:#6c4cf5; --primary-ink:#4c2fd6; --primary-soft:#efe9ff; --primary-2:#ff6f91;
-    --green:#12915a; --green-soft:#e3f6ec; --amber:#b4790b; --amber-soft:#fdf1de;
+    --bg:#f8fafc; --bg-soft:#f1f5f9; --card:#ffffff; --ink:#0f172a; --ink-soft:#475569; --ink-faint:#64748b;
+    --line:#e2e8f0; --line-soft:#f1f5f9;
+    --primary:#2563eb; --primary-ink:#1d4ed8; --primary-soft:#eff6ff; --primary-2:#0ea5e9;
+    --green:#15803d; --green-soft:#ecfdf5; --amber:#b45309; --amber-soft:#fffbeb;
     --shadow-sm:0 1px 2px rgba(24,21,33,.05), 0 1px 1px rgba(24,21,33,.04);
-    --shadow-md:0 8px 24px rgba(76,47,214,.10), 0 2px 6px rgba(24,21,33,.05);
-    --shadow-lg:0 16px 40px rgba(76,47,214,.16), 0 4px 10px rgba(24,21,33,.06);
+    --shadow-md:0 8px 24px rgba(30,58,138,.10), 0 2px 6px rgba(24,21,33,.05);
+    --shadow-lg:0 16px 40px rgba(30,58,138,.16), 0 4px 10px rgba(24,21,33,.06);
   }
   *{box-sizing:border-box;}
   html{color-scheme:light dark;}
@@ -60,6 +70,10 @@
       var(--bg);
     color:var(--ink); line-height:1.6; -webkit-font-smoothing:antialiased; transition:background-color .2s ease, color .2s ease;
   }
+  /* Japonês: Noto Sans JP (servida pelo próprio site, só carregada em ja) e
+     quebra de linha própria do idioma */
+  html:lang(ja){--font-ui:"Inter","Noto Sans JP","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI",Meiryo,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+  html:lang(ja) body{line-break:strict; word-break:normal; overflow-wrap:anywhere; line-height:1.7;}
   .wrap{max-width:900px; margin:0 auto; padding:0 22px 90px;}
   ::selection{background:var(--primary-soft); color:var(--primary-ink);}
   :focus-visible{outline:2.5px solid var(--primary); outline-offset:2px; border-radius:6px;}
@@ -144,6 +158,20 @@
   .support-qr{display:flex; justify-content:center; margin:0 auto 14px; line-height:0;}
   .support-qr svg{border-radius:10px; border:1px solid var(--line); max-width:100%; height:auto;}
   .support-hint{font-size:13px; color:var(--ink-soft); margin:0 0 14px;}
+  .support-row{display:flex; align-items:center; gap:10px; justify-content:center; margin-bottom:14px; flex-wrap:wrap;}
+  .support-label{font-size:13px; font-weight:700; color:var(--ink);}
+  .support-select, .support-input{font:inherit; font-size:14px; padding:9px 12px; border:1.5px solid var(--line); border-radius:10px; background:var(--card); color:var(--ink); min-height:44px;}
+  .support-select{min-width:220px;}
+  .support-custom{display:flex; flex-direction:column; align-items:center; gap:6px; margin-bottom:12px;}
+  .support-input{width:220px; text-align:center; font-size:18px; font-weight:700;}
+  .support-custom .support-hint{margin:0;}
+  .support-custom .support-hint.erro{color:#b42318;}
+  .support-summary{font-size:16px; font-weight:800; color:var(--ink); margin:0 0 4px;}
+  .support-rate{font-size:12.5px; color:var(--ink-faint);}
+  .support-confirm{background:var(--amber-soft); border-left:3px solid var(--amber); border-radius:0 12px 12px 0; padding:12px 14px; font-size:13.5px; text-align:left; margin:12px 0;}
+  .support-confirm .btn-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;}
+  .support-error{color:#b42318; font-size:13px; font-weight:600; margin:8px 0;}
+  .support-cards .btn:disabled{opacity:.55; cursor:not-allowed; transform:none;}
   /* .oculto tira da vista sem tirar do documento: precisa continuar
      selecionável para o execCommand de emergência funcionar. */
   .support-code.oculto{position:absolute; left:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;}
@@ -386,6 +414,7 @@
     .card{padding:18px 16px;}
   }
 </style>
+<script src="/assets/doacao.js?v=2"></script>
 </head>
 <body>
 
@@ -400,6 +429,7 @@
       <a href="#como-funciona" data-i18n="navHowItWorks">Como funciona</a>
       <a href="#privacidade" data-i18n="navPrivacy">Privacidade</a>
       <a href="/pdf" data-i18n="navPdf">Ferramentas de PDF</a>
+      <a href="/ajuda" data-i18n="navHelp">Ajuda</a>
     </nav>
     <div class="top-right">
       <div class="privacy-badge">
@@ -422,6 +452,7 @@
         <option value="fr">Français</option>
         <option value="de">Deutsch</option>
         <option value="it">Italiano</option>
+        <option value="ja">日本語</option>
       </select>
     </div>
   </div>
@@ -846,36 +877,36 @@
       <button class="btn" id="supportOpen" type="button" data-i18n="supportOpen">☕ Quero apoiar</button>
 
       <div class="support-panel" id="supportPanel" hidden>
-        <div class="support-values" id="supportValues" role="group" aria-label="Valor sugerido">
-          <button type="button" data-v="5">R$ 5</button>
-          <button type="button" data-v="10">R$ 10</button>
-          <button type="button" data-v="20">R$ 20</button>
-          <button type="button" data-v="50">R$ 50</button>
-          <button type="button" data-v="" class="is-on" data-i18n="supportOther">Outro valor</button>
+        <div class="support-row">
+          <label class="support-label" for="supportCurrency" data-i18n="supportCurrencyLabel">Moeda</label>
+          <select id="supportCurrency" class="support-select" aria-describedby="supportRate"></select>
         </div>
+        <div class="support-values" id="supportValues" role="group" aria-label="Valor sugerido"></div>
+        <div class="support-custom" id="supportCustomBox" hidden>
+          <label class="support-label" for="supportCustom" data-i18n="supportCustomLabel">Outro valor</label>
+          <input type="text" id="supportCustom" class="support-input" inputmode="decimal" autocomplete="off" spellcheck="false" maxlength="20">
+          <p class="support-hint" id="supportCustomHint" aria-live="polite"></p>
+        </div>
+        <p class="support-summary" id="supportSummary" aria-live="polite"></p>
+        <p class="support-hint support-rate" id="supportRate" aria-live="polite"></p>
 
-        <!-- PIX: só aparece quando a moeda do idioma é o real. Fora do
-             Brasil ninguém consegue pagar um PIX, então mostrar o QR
-             seria enfeite inútil. -->
+        <!-- PIX: só em reais (o campo 53 do BR Code é sempre BRL). -->
         <div id="supportPix">
           <div class="support-qr" id="supportQr" aria-live="polite"></div>
           <p class="support-hint" data-i18n="supportScan">Abra o app do seu banco, escolha PIX e aponte a câmera para o código. No computador, use o botão de copiar.</p>
-
           <label class="sr-only" for="supportCode" data-i18n="supportCodeLabel">Código PIX copia e cola</label>
           <textarea id="supportCode" class="support-code oculto" readonly rows="3" spellcheck="false" tabindex="-1" aria-hidden="true"></textarea>
           <button class="btn" id="supportCopy" type="button" data-i18n="supportCopy">Copiar código PIX</button>
         </div>
 
-        <!-- Cartão e internacional. Cada botão só aparece quando o canal
-             correspondente está configurado lá em cima. -->
+        <!-- Cartão via Stripe Checkout: valor e moeda exatos, confirmados pelo gateway. -->
         <div id="supportCards" class="support-cards">
-          <a class="btn" id="supportStripe" href="#" rel="noopener" target="_blank" hidden data-i18n="supportStripe">Apoiar com cartão</a>
-          <a class="btn sec-pay" id="supportPaypal" href="#" rel="noopener" target="_blank" hidden data-i18n="supportPaypal">Apoiar via PayPal</a>
+          <button class="btn" id="supportStripe" type="button" data-i18n="supportStripe">Apoiar com cartão</button>
         </div>
-        <p class="support-hint" id="supportCardHint" hidden data-i18n="supportCardHint">O valor é escolhido na tela seguinte, na sua própria moeda.</p>
-        <div id="supportIntl" hidden>
-          <p class="support-hint" id="supportIntlSoon" data-i18n="supportIntlSoon">O apoio de fora do Brasil está sendo configurado. Por enquanto, o PIX só funciona com conta em banco brasileiro.</p>
-        </div>
+        <p class="support-hint" id="supportCardHint"></p>
+        <p class="support-hint" id="supportMethods"></p>
+        <div class="support-confirm" id="supportConfirm" hidden></div>
+        <p class="support-error" id="supportError" role="alert" hidden></p>
 
         <p class="support-privacy" data-i18n="supportPrivacy">O pagamento vai direto de você para o projeto. O GIF Local não processa, não armazena e não vê nenhum dado do seu pagamento.</p>
         <button class="support-dismiss" id="supportClose" type="button" data-i18n="supportClose">Fechar</button>
@@ -1358,7 +1389,7 @@ function tick(){ return new Promise(r => setTimeout(r, 0)); }
    site (nada sai do dispositivo). O idioma do navegador é um
    sinal local, sem rede, e cobre o mesmo caso de uso melhor.
    ========================================================= */
-const SUPPORTED_LANGS = ['pt','en','es','fr','de','it'];
+const SUPPORTED_LANGS = ['pt','en','es','fr','de','it','ja'];
 
 const I18N = {
   pt: {
@@ -1543,6 +1574,29 @@ const I18N = {
     licenseErrDeviceLimit: "Esta licença já está ativada no número máximo de dispositivos permitido.",
     licenseErrGeneric: "Não foi possível completar a ação. Tente novamente.",
     licenseErrOffline: "Sem conexão para carregar os dispositivos agora.",
+    supportCurrencyLabel: "Moeda",
+    supportCustomLabel: "Outro valor",
+    supportCustomHelp: "Digite um valor entre {min} e {max}.",
+    supportInvalid: "Valor não reconhecido. Use números, por exemplo 35,50.",
+    supportMin: "O valor mínimo é {min}.",
+    supportMax: "O valor máximo é {max}.",
+    supportApprox: "≈ {valor}",
+    supportRateDate: "cotação de {data}",
+    supportRateOld: "cotação pode estar desatualizada",
+    supportRateUnavailable: "Cotação indisponível no momento; o valor será cobrado na moeda escolhida.",
+    supportSummary: "Você vai apoiar com {valor}.",
+    supportMethods: "Formas de pagamento:",
+    supportMethodCard: "cartão (Stripe)",
+    supportCardExact: "Você será levado ao checkout seguro da Stripe com exatamente este valor e esta moeda.",
+    supportRedirecting: "Abrindo o checkout...",
+    supportCheckoutFail: "Não foi possível iniciar o pagamento agora. Tente novamente em instantes.",
+    supportCheckoutFallback: "O checkout direto está indisponível; abrimos a página de doação da Stripe, onde o valor é escolhido na própria página.",
+    supportEffective: "O gateway não aceita cobranças em {pedida}. Podemos cobrar o equivalente em {efetiva}, pela cotação de {data}.",
+    supportConfirmEffective: "Confirmar {valor}",
+    supportCancel: "Cancelar",
+    supportNoCurrencyNoRate: "O gateway não aceita {moeda} e a cotação está indisponível. Escolha outra moeda.",
+    supportTestMode: "Modo de teste: nenhuma cobrança real",
+    navHelp: "Ajuda",
   },
   en: {
     badge: "100% in your browser · your files never leave it",
@@ -1726,6 +1780,29 @@ const I18N = {
     licenseErrDeviceLimit: "This license is already activated on the maximum number of allowed devices.",
     licenseErrGeneric: "Couldn't complete the action. Please try again.",
     licenseErrOffline: "No connection to load devices right now.",
+    supportCurrencyLabel: "Currency",
+    supportCustomLabel: "Other amount",
+    supportCustomHelp: "Enter an amount between {min} and {max}.",
+    supportInvalid: "Amount not recognized. Use numbers, e.g. 35.50.",
+    supportMin: "The minimum amount is {min}.",
+    supportMax: "The maximum amount is {max}.",
+    supportApprox: "≈ {valor}",
+    supportRateDate: "rate as of {data}",
+    supportRateOld: "rate may be outdated",
+    supportRateUnavailable: "Exchange rate unavailable right now; you will be charged in the selected currency.",
+    supportSummary: "You will support with {valor}.",
+    supportMethods: "Payment methods:",
+    supportMethodCard: "card (Stripe)",
+    supportCardExact: "You will be taken to Stripe's secure checkout with exactly this amount and currency.",
+    supportRedirecting: "Opening checkout...",
+    supportCheckoutFail: "The payment could not be started right now. Please try again shortly.",
+    supportCheckoutFallback: "Direct checkout is unavailable; we opened Stripe's donation page, where the amount is chosen on the page itself.",
+    supportEffective: "The gateway does not accept charges in {pedida}. We can charge the equivalent in {efetiva}, at the rate of {data}.",
+    supportConfirmEffective: "Confirm {valor}",
+    supportCancel: "Cancel",
+    supportNoCurrencyNoRate: "The gateway does not accept {moeda} and the exchange rate is unavailable. Please choose another currency.",
+    supportTestMode: "Test mode: no real charge",
+    navHelp: "Help",
   },
   es: {
     badge: "100% en tu navegador · tus archivos nunca salen de ahí",
@@ -1909,6 +1986,29 @@ const I18N = {
     licenseErrDeviceLimit: "Esta licencia ya está activada en el número máximo de dispositivos permitidos.",
     licenseErrGeneric: "No se pudo completar la acción. Inténtalo de nuevo.",
     licenseErrOffline: "Sin conexión para cargar los dispositivos ahora.",
+    supportCurrencyLabel: "Moneda",
+    supportCustomLabel: "Otro importe",
+    supportCustomHelp: "Escribe un importe entre {min} y {max}.",
+    supportInvalid: "Importe no reconocido. Usa números, por ejemplo 35,50.",
+    supportMin: "El importe mínimo es {min}.",
+    supportMax: "El importe máximo es {max}.",
+    supportApprox: "≈ {valor}",
+    supportRateDate: "cotización del {data}",
+    supportRateOld: "la cotización puede estar desactualizada",
+    supportRateUnavailable: "Cotización no disponible ahora; se cobrará en la moneda elegida.",
+    supportSummary: "Vas a apoyar con {valor}.",
+    supportMethods: "Formas de pago:",
+    supportMethodCard: "tarjeta (Stripe)",
+    supportCardExact: "Irás al checkout seguro de Stripe con exactamente este importe y esta moneda.",
+    supportRedirecting: "Abriendo el checkout...",
+    supportCheckoutFail: "No se pudo iniciar el pago ahora. Inténtalo de nuevo en unos instantes.",
+    supportCheckoutFallback: "El checkout directo no está disponible; abrimos la página de donación de Stripe, donde el importe se elige en la propia página.",
+    supportEffective: "La pasarela no acepta cobros en {pedida}. Podemos cobrar el equivalente en {efetiva}, según la cotización del {data}.",
+    supportConfirmEffective: "Confirmar {valor}",
+    supportCancel: "Cancelar",
+    supportNoCurrencyNoRate: "La pasarela no acepta {moeda} y la cotización no está disponible. Elige otra moneda.",
+    supportTestMode: "Modo de prueba: ningún cargo real",
+    navHelp: "Ayuda",
   },
   fr: {
     badge: "100% dans votre navigateur · vos fichiers n'en sortent jamais",
@@ -2092,6 +2192,29 @@ const I18N = {
     licenseErrDeviceLimit: "Cette licence est déjà activée sur le nombre maximum d'appareils autorisés.",
     licenseErrGeneric: "Impossible de terminer l'action. Réessayez.",
     licenseErrOffline: "Pas de connexion pour charger les appareils maintenant.",
+    supportCurrencyLabel: "Devise",
+    supportCustomLabel: "Autre montant",
+    supportCustomHelp: "Saisissez un montant entre {min} et {max}.",
+    supportInvalid: "Montant non reconnu. Utilisez des chiffres, par ex. 35,50.",
+    supportMin: "Le montant minimum est {min}.",
+    supportMax: "Le montant maximum est {max}.",
+    supportApprox: "≈ {valor}",
+    supportRateDate: "taux du {data}",
+    supportRateOld: "le taux peut être obsolète",
+    supportRateUnavailable: "Taux de change indisponible pour le moment ; vous serez débité dans la devise choisie.",
+    supportSummary: "Vous allez soutenir avec {valor}.",
+    supportMethods: "Moyens de paiement :",
+    supportMethodCard: "carte (Stripe)",
+    supportCardExact: "Vous serez redirigé vers le paiement sécurisé Stripe avec exactement ce montant et cette devise.",
+    supportRedirecting: "Ouverture du paiement...",
+    supportCheckoutFail: "Le paiement n'a pas pu démarrer. Réessayez dans un instant.",
+    supportCheckoutFallback: "Le paiement direct est indisponible ; nous avons ouvert la page de don Stripe, où le montant se choisit sur la page.",
+    supportEffective: "La passerelle n'accepte pas les paiements en {pedida}. Nous pouvons débiter l'équivalent en {efetiva}, au taux du {data}.",
+    supportConfirmEffective: "Confirmer {valor}",
+    supportCancel: "Annuler",
+    supportNoCurrencyNoRate: "La passerelle n'accepte pas {moeda} et le taux est indisponible. Choisissez une autre devise.",
+    supportTestMode: "Mode test : aucun débit réel",
+    navHelp: "Aide",
   },
   de: {
     badge: "100% in Ihrem Browser · Ihre Dateien verlassen ihn nie",
@@ -2275,6 +2398,29 @@ const I18N = {
     licenseErrDeviceLimit: "Diese Lizenz ist bereits auf der maximal erlaubten Geräteanzahl aktiviert.",
     licenseErrGeneric: "Aktion konnte nicht abgeschlossen werden. Bitte erneut versuchen.",
     licenseErrOffline: "Keine Verbindung, um Geräte jetzt zu laden.",
+    supportCurrencyLabel: "Währung",
+    supportCustomLabel: "Anderer Betrag",
+    supportCustomHelp: "Geben Sie einen Betrag zwischen {min} und {max} ein.",
+    supportInvalid: "Betrag nicht erkannt. Bitte Zahlen verwenden, z. B. 35,50.",
+    supportMin: "Der Mindestbetrag ist {min}.",
+    supportMax: "Der Höchstbetrag ist {max}.",
+    supportApprox: "≈ {valor}",
+    supportRateDate: "Kurs vom {data}",
+    supportRateOld: "Kurs könnte veraltet sein",
+    supportRateUnavailable: "Wechselkurs derzeit nicht verfügbar; die Abbuchung erfolgt in der gewählten Währung.",
+    supportSummary: "Sie unterstützen mit {valor}.",
+    supportMethods: "Zahlungsarten:",
+    supportMethodCard: "Karte (Stripe)",
+    supportCardExact: "Sie werden zum sicheren Stripe-Checkout mit genau diesem Betrag und dieser Währung weitergeleitet.",
+    supportRedirecting: "Checkout wird geöffnet...",
+    supportCheckoutFail: "Die Zahlung konnte nicht gestartet werden. Bitte versuchen Sie es gleich erneut.",
+    supportCheckoutFallback: "Der direkte Checkout ist nicht verfügbar; wir haben die Stripe-Spendenseite geöffnet, auf der der Betrag direkt gewählt wird.",
+    supportEffective: "Das Gateway akzeptiert keine Abbuchungen in {pedida}. Wir können den Gegenwert in {efetiva} abbuchen, zum Kurs vom {data}.",
+    supportConfirmEffective: "{valor} bestätigen",
+    supportCancel: "Abbrechen",
+    supportNoCurrencyNoRate: "Das Gateway akzeptiert {moeda} nicht und der Kurs ist nicht verfügbar. Bitte eine andere Währung wählen.",
+    supportTestMode: "Testmodus: keine echte Belastung",
+    navHelp: "Hilfe",
   },
   it: {
     badge: "100% nel tuo browser · i tuoi file non escono mai da lì",
@@ -2458,6 +2604,307 @@ const I18N = {
     licenseErrDeviceLimit: "Questa licenza è già attivata sul numero massimo di dispositivi consentiti.",
     licenseErrGeneric: "Impossibile completare l'azione. Riprova.",
     licenseErrOffline: "Nessuna connessione per caricare i dispositivi ora.",
+    supportCurrencyLabel: "Valuta",
+    supportCustomLabel: "Altro importo",
+    supportCustomHelp: "Inserisci un importo tra {min} e {max}.",
+    supportInvalid: "Importo non riconosciuto. Usa i numeri, ad esempio 35,50.",
+    supportMin: "L'importo minimo è {min}.",
+    supportMax: "L'importo massimo è {max}.",
+    supportApprox: "≈ {valor}",
+    supportRateDate: "cambio del {data}",
+    supportRateOld: "il cambio potrebbe non essere aggiornato",
+    supportRateUnavailable: "Cambio non disponibile al momento; l'addebito sarà nella valuta scelta.",
+    supportSummary: "Sosterrai con {valor}.",
+    supportMethods: "Metodi di pagamento:",
+    supportMethodCard: "carta (Stripe)",
+    supportCardExact: "Verrai portato al checkout sicuro di Stripe con esattamente questo importo e questa valuta.",
+    supportRedirecting: "Apertura del checkout...",
+    supportCheckoutFail: "Non è stato possibile avviare il pagamento. Riprova tra poco.",
+    supportCheckoutFallback: "Il checkout diretto non è disponibile; abbiamo aperto la pagina di donazione Stripe, dove l'importo si sceglie nella pagina stessa.",
+    supportEffective: "Il gateway non accetta addebiti in {pedida}. Possiamo addebitare l'equivalente in {efetiva}, al cambio del {data}.",
+    supportConfirmEffective: "Conferma {valor}",
+    supportCancel: "Annulla",
+    supportNoCurrencyNoRate: "Il gateway non accetta {moeda} e il cambio non è disponibile. Scegli un'altra valuta.",
+    supportTestMode: "Modalità test: nessun addebito reale",
+    navHelp: "Aiuto",
+  },
+  ja: {
+    badge: "100% ブラウザ内で処理 · ファイルは外部に送信されません",
+    heroTitle: "今すぐ、ここでGIFを作成",
+    heroDesc: "素材を選び、設定を調整して「作成」を押すだけ。GIFはブラウザ内で生成され、写真・動画・録画がサーバーに送られることはありません。",
+    tabFotosB: "写真",
+    tabFotosSmall: "写真をGIFにまとめる",
+    tabVideoB: "動画",
+    tabVideoSmall: "動画を切り出してGIFに",
+    tabTelaB: "画面録画",
+    tabTelaSmall: "画面をキャプチャ",
+    tabZeroB: "ゼロから",
+    tabZeroSmall: "AIなしのシンプルなアニメ",
+    fotosH2: "写真 → GIF",
+    fotosDesc: "表示したい順に写真を追加してください。",
+    fotosChooseLabel: "写真を選択",
+    fotosInputHint: "複数枚をまとめて選び、あとで並べ替えできます。",
+    fotosDurationLabel: "各写真の表示時間",
+    sizeLabel: "GIFのサイズ",
+    sizeSmallOpt: "小 (320px)",
+    sizeMedOpt: "中 (480px)",
+    sizeLargeOpt: "大 (640px)",
+    sizeXLargeOpt: "特大 (960px)",
+    sizeFullOpt: "最大 (1280px)",
+    qualityLabel: "色の品質",
+    qualityHighOpt: "高 (ファイル大)",
+    qualityMedOpt: "中",
+    qualityLowOpt: "軽量 (ファイル小)",
+    fotosBtn: "GIFを作成",
+    fotosHintEmpty: "1枚以上の写真を追加してください (2枚以上でアニメーションになります)。",
+    fotosHintOne: "写真が1枚です。GIFは静止画になります。アニメにするには写真を追加してください。",
+    fotosDownload: "GIFをダウンロード",
+    altFotos: "追加した写真から生成したGIFのプレビュー",
+    videoH2: "動画 → GIF",
+    videoDesc: "動画を追加し、GIFにする区間を選んでください。",
+    videoChooseLabel: "動画を選択",
+    videoStartLabel: "開始",
+    videoEndLabel: "終了",
+    videoFpsLabel: "フレームレート (fps)",
+    videoRangeHint: "GIFが重くなりすぎないよう、選択できる区間は最長8秒です。",
+    videoBtn: "GIFを作成",
+    videoDownload: "GIFをダウンロード",
+    altVideo: "追加した動画から生成したGIFのプレビュー",
+    telaH2: "画面録画 → GIF",
+    telaDesc: "今すぐ画面を録画するか、既存の録画を追加してください。",
+    telaStartRecBtn: "画面録画を開始",
+    telaStopRecBtn: "録画を停止",
+    telaUploadLabel: "または録画済みの動画を追加",
+    telaFallbackMsg: "このブラウザまたは端末では、ここで直接画面を録画できません (スマートフォンではOSの制限です)。端末の標準の録画機能 (Windows、Mac、iPhone、Android) で録画して下のフォームから追加するか、「カメラで録画」をお使いください。",
+    telaRecordingMsg: "録画中… 終わったら「録画を停止」を押してください。",
+    telaReadyMsg: "録画が完了しました。下で区間を調整してGIFを作成してください。",
+    telaDownloadVideo: "動画をダウンロード (最高画質)",
+    telaCantStart: "録画を開始できませんでした。録画済みの動画を下から追加してください。",
+    cameraStartRecBtn: "カメラで録画",
+    cameraStopRecBtn: "録画を停止",
+    cameraFlipBtn: "カメラを切り替え",
+    cameraRecordingMsg: "カメラで録画中… 終わったら「録画を停止」を押してください。",
+    cameraReadyMsg: "録画が完了しました。下で区間を調整してGIFを作成してください。",
+    cameraCantStart: "カメラにアクセスできませんでした。ブラウザの許可を確認するか、録画済みの動画を下から追加してください。",
+    telaBtn: "GIFを作成",
+    telaDownload: "GIFをダウンロード",
+    altTela: "画面録画から生成したGIFのプレビュー",
+    zeroH2: "AIを使わずゼロから作成",
+    zeroDesc: "写真・動画・AIを使わず、コードで生成するシンプルなアニメーションです。",
+    zeroChoiceText: "脈打つテキスト",
+    zeroChoiceBall: "跳ねるボール",
+    zeroChoiceConfetti: "舞い落ちる紙吹雪",
+    zeroTextLabel: "テキスト",
+    zeroColorLabel: "色",
+    zeroSpeedLabel: "速さ",
+    zeroBtn: "GIFを作成",
+    zeroDownload: "GIFをダウンロード",
+    zeroChoiceAi: "✨ AIで作成",
+    aiPromptLabel: "どんなGIFを作りますか？",
+    aiPromptPlaceholder: "例: 宇宙に浮かぶ宇宙飛行士、背景に惑星、輝く星",
+    aiStyleLabel: "スタイル",
+    aiStyleNone: "なし",
+    aiStyleCinema: "シネマティック",
+    aiStyle3d: "3D",
+    aiStyleAnime: "アニメ",
+    aiStyleCartoon: "カートゥーン",
+    aiStylePixel: "ピクセルアート",
+    aiStyleWater: "水彩",
+    aiStyleMin: "ミニマル",
+    aiMotionLabel: "動き",
+    aiMotionZoomIn: "ズームイン",
+    aiMotionZoomOut: "ズームアウト",
+    aiMotionPanH: "横パン",
+    aiMotionPanV: "縦パン",
+    aiMotionKen: "シネマティック",
+    aiPrivacyNote: "🔒 画像生成のため、入力した説明文のみAIサービスに送信されます。アニメーション、最適化、GIF生成はブラウザ内で行われ、あなたのファイルは送信されません。",
+    aiGenerateBtn: "AIでGIFを作成",
+    aiPreviewEmpty: "アイデアを入力して「作成」を押してください",
+    aiSourceHint: "画像が生成されました。GIF Localが動きを付けます。",
+    aiNeedPrompt: "作りたい内容を入力してください。",
+    aiCreating: "✨ 画像を生成中…",
+    aiLimitReached: "本日のAI生成回数を使い切りました。",
+    aiServiceBusy: "AI生成の1日の上限に達しました。明日もう一度お試しください。",
+    aiQuotaLoading: "確認中…",
+    aiUpsellTitle: "✨ 本日の無料生成を使い切りました",
+    aiUpsellDesc: "Proプランでは1日の生成回数が大幅に増え、すべてのツールで解像度と長さの上限が上がります。",
+    aiUpsellBtn: "プランを見る",
+    altZero: "ゼロから生成したアニメーションGIFのプレビュー",
+    aiNote: "AIで生成した画像 (ChatGPT/DALL·E、Sora) を使いたい場合は、生成した画像やフレームをダウンロードし、<b>写真</b>タブでまとめてください。最終的な合成は100%ローカルで行われます。",
+    footerText: "写真・動画・録画がパソコンの外に出ることはありません。すべて通常のJavaScriptでブラウザ内で処理されます。",
+    errorPrefix: "GIFを作成できませんでした: ",
+    progAnalyzing: "色を解析中…",
+    progConverting: "フレームを変換中…",
+    progCompacting: "GIFを圧縮中…",
+    progReady: "完了！",
+    progLoadingPhotos: "写真を読み込み中…",
+    progPreparingVideo: "動画を準備中…",
+    progGeneratingFrames: "フレームを生成中…",
+    thumbUp: "上へ移動",
+    thumbDown: "下へ移動",
+    thumbDel: "削除",
+    shareBtn: "共有",
+    shareText: "ブラウザだけで作ったGIFを見てください。アップロードなし！",
+    shareCopied: "リンクをクリップボードにコピーしました。",
+    pageTitle: "GIF Local: ファイルを送信せずにGIFを作成",
+    metaDesc: "写真、動画、画面録画からGIFを作成。アップロードなしで、すべてブラウザ内でローカル処理されます。",
+    trustNoUpload: "アップロードなし",
+    trustNoSignup: "登録不要",
+    trustFree: "無料で始められる",
+    trustInstallable: "アプリとしてインストール可能",
+    navFeatures: "機能",
+    navHowItWorks: "使い方",
+    navPrivacy: "プライバシー",
+    navPdf: "PDFツール",
+    navPdfShort: "PDF",
+    howStep1: "素材を選ぶ",
+    howStep1Desc: "写真、動画、画面、またはゼロから",
+    howStep2: "調整して作成",
+    howStep2Desc: "サイズと品質を決めるだけ",
+    howStep3: "すぐにダウンロード",
+    howStep3Desc: "端末に直接、待ち時間なし",
+    fotosHeroTitle: "写真から素敵なGIFを",
+    fotosHeroDesc: "複数の画像を選び、設定を調整して数秒でGIFを作成。すべてブラウザ内で完結し、パソコンの外には出ません。",
+    videoHeroTitle: "動画を切り出してGIFに",
+    videoHeroDesc: "動画を追加し、好きな区間を選んで高品質なGIFに変換します。",
+    telaHeroTitle: "画面を録画",
+    telaHeroDesc: "リアルタイムで画面を録画してGIFに。チュートリアルやデモに最適です。",
+    zeroHeroTitle: "ゼロからアニメーションを作成",
+    zeroHeroDesc: "スタイルを選んでカスタマイズ。シンプルなアニメーションを数秒で。",
+    dropzoneHintPhotos: "写真をドラッグするか、クリックして選択",
+    dropzoneHintVideo: "動画をドラッグするか、クリックして選択",
+    dropzoneHintScreen: "録画をドラッグするか、クリックして選択",
+    dropzoneFormatsPhotos: "PNG, JPG, WEBP",
+    dropzoneFormatsVideo: "MP4, MOV, WEBM",
+    successTitle: "GIFが完成しました！",
+    successDesc: "すべてブラウザ内で処理され、パソコンの外には出ていません。",
+    statDurationLabel: "長さ",
+    statSizeLabel: "サイズ",
+    statFramesLabel: "フレーム",
+    copyBtn: "コピー",
+    copiedMsg: "GIFをコピーしました！",
+    copyFailMsg: "コピーできませんでした。ファイルをダウンロードしてください。",
+    createAnotherBtn: "もう1つ作る",
+    plansTitle: "プラン",
+    plansDesc: "無料で始めて、必要なときにアップグレード。",
+    plansCurrencyNote: "表示額は参考用の概算です。請求は常にブラジルレアル (R$) で行われ、お使いの通貨への換算はカード会社または決済事業者が行います。",
+    planFreeName: "Free",
+    planFreePrice: "R$ 0",
+    planFreeF1: "4つの作成モードすべて",
+    planFreeF2: "透かしなし",
+    planFreeF3: "1日3つのGIF · AI生成1回",
+    planFreeCta: "今すぐ始める",
+    planProName: "Full",
+    planProPrice: "近日公開",
+    planProF1: "Proの全機能を最大<b>3台</b>で",
+    planProF2: "4K録画、時間無制限",
+    planProF3: "1日80回のAI生成",
+    planProF4: "メールでの優先サポート",
+    planSupName: "Pro",
+    planOneTime: "買い切り",
+    planPopularBadge: "人気",
+    planSupF0: "<b>GIF無制限</b>、1日の上限なし",
+    planSupF1: "1日25回のAI生成",
+    planSupF2: "1台",
+    planProCta: "お知らせを受け取る",
+    payWithStripe: "Stripeで支払う",
+    payWithLemonSqueezy: "Lemon Squeezyで支払う",
+    payWithPayPal: "PayPalで支払う",
+    helpBtnTitle: "問題を報告",
+    helpEmailSubject: "GIF Local - 問題の報告",
+    helpEmailBody: "何が起きたか説明してください (何をしようとして、何がうまくいかなかったか):\n\n",
+    payNote: "決済事業者による安全な支払いです。どの国のカードでも利用できます。",
+    planComingSoonMsg: "有料プランはまだ利用できません。まもなくここからProに登録できるようになります。",
+    limitReachedMsg: "本日の無料GIF 3つを作成済みです。下にスクロールして無制限利用を解放してください。",
+    proStatusFree: "無料",
+    proOnlyOptionSuffix: "",
+    supportTitle: "GIF Localを応援する",
+    supportDesc: "すべてのツールは無料で、今後も無料です。登録も透かしも1日の上限もありません。GIF Localが役に立ったなら、寄付で応援できます。任意であり、何かが解放されるわけではありません。ロックされているものは何もないからです。",
+    founderNote: "★ あなたは創設サポーターです。まだ有料だった頃にプロジェクトを支えてくださり、ありがとうございます。ライセンスは引き続き有効で、失われたものはありません。今はあなたが購入したものを全員が使えます。",
+    licenseFreeDesc: "すべてのツールはすでに利用できます。ライセンスも登録も不要です。",
+    licenseBuyBtn: "プロジェクトを応援",
+    licenseFreeTitle: "GIF Local",
+    supportOther: "その他の金額",
+    supportScan: "銀行アプリを開き、PIXを選んでコードにカメラを向けてください。パソコンではコピーボタンをお使いください。",
+    supportCodeLabel: "PIXコピー＆ペーストコード",
+    supportCopy: "PIXコードをコピー",
+    supportCopied: "コピーしました！",
+    supportCopyFail: "上の欄からコピーしてください",
+    supportPaypal: "PayPalで応援",
+    supportPrivacy: "支払いはあなたからプロジェクトへ直接行われます。GIF Localは支払い情報を処理・保存・閲覧しません。",
+    nudgeText: "GIF Localは役に立ちましたか？無料で広告もありません。",
+    nudgeYes: "☕ プロジェクトを応援",
+    nudgeNo: "今はしない",
+    supportOpen: "☕ 応援する",
+    supportClose: "閉じる",
+    supportStripe: "カードで応援",
+    supportIntlSoon: "海外からの支援は準備中です。現在、PIXはブラジルの銀行口座でのみ利用できます。",
+    supportCardHint: "金額は次の画面で、お使いの通貨で選びます。",
+    founderBadge: "★ 創設サポーター",
+    founderBadgeTitle: "まだ有料だった頃にGIF Localを支えてくださり、ありがとうございます！今はすべてのツールが全員無料です。",
+    planFreeF4: "GIF 480pxまで · 録画 720p、60秒",
+    planSupF3: "GIF 1280pxまで · 録画 1080p、10分",
+    licenseActivateBtn: "ライセンスを有効化",
+    licenseActivateTitle: "ライセンスを有効化",
+    licenseActivateDesc: "購入後に受け取ったキーを貼り付けてください。",
+    licenseSubmitBtn: "有効化",
+    licenseCancelBtn: "キャンセル",
+    licenseActivating: "有効化中…",
+    licenseActiveTitle: "✓ GIF Local PRO 有効",
+    licenseDeviceLabel: "端末",
+    licensePlanLabel: "ライセンス",
+    licenseStatusLabel: "状態",
+    licenseStatusActive: "有効",
+    licenseManageBtn: "端末を管理",
+    licenseDevicesTitle: "端末",
+    licenseDevicesDesc: "古い端末を無効化して枠を空けてください。",
+    licenseBackBtn: "戻る",
+    licenseLoadingDevices: "読み込み中…",
+    licenseNoOtherDevices: "他に有効な端末はありません。",
+    licenseUnknownDevice: "端末",
+    licenseThisDevice: "この端末",
+    licenseLastSeen: "最終確認:",
+    licenseDeactivateBtn: "無効化",
+    licenseErrNotFound: "ライセンスが見つかりません。入力したキーを確認してください。",
+    licenseErrNotActivatable: "このライセンスは有効化できません (状態を確認してください)。",
+    licenseErrDeviceLimit: "このライセンスはすでに上限台数で有効化されています。",
+    licenseErrGeneric: "操作を完了できませんでした。もう一度お試しください。",
+    licenseErrOffline: "接続がないため、端末を読み込めません。",
+    supportCurrencyLabel: "通貨",
+    supportCustomLabel: "その他の金額",
+    supportCustomHelp: "{min} から {max} の間で金額を入力してください。",
+    supportInvalid: "金額を認識できません。例: 3500 のように数字で入力してください。",
+    supportMin: "最低金額は {min} です。",
+    supportMax: "最高金額は {max} です。",
+    supportApprox: "≈ {valor}",
+    supportRateDate: "{data} 時点のレート",
+    supportRateOld: "レートが古い可能性があります",
+    supportRateUnavailable: "現在、為替レートを取得できません。選択した通貨で請求されます。",
+    supportSummary: "{valor} で応援します。",
+    supportMethods: "お支払い方法:",
+    supportMethodCard: "カード (Stripe)",
+    supportCardExact: "この金額と通貨のまま、Stripeの安全な決済ページに移動します。",
+    supportRedirecting: "決済ページを開いています…",
+    supportCheckoutFail: "現在、お支払いを開始できません。しばらくしてからもう一度お試しください。",
+    supportCheckoutFallback: "直接決済が利用できないため、Stripeの寄付ページを開きました。金額はそのページで選択します。",
+    supportEffective: "決済事業者は {pedida} での請求に対応していません。{data} 時点のレートで、相当額を {efetiva} で請求できます。",
+    supportConfirmEffective: "{valor} で確定",
+    supportCancel: "キャンセル",
+    supportNoCurrencyNoRate: "決済事業者は {moeda} に対応しておらず、為替レートも取得できません。別の通貨を選んでください。",
+    supportTestMode: "テストモード: 実際の請求は発生しません",
+    fotosHintMany: (n) => n + " 枚の写真が準備できました。いつでも作成できます。",
+    telaVideoHintMsg: (size) => `元の動画をフル画質で保持 (${size})。変換も色の劣化もありません。`,
+    telaRecordingLeft: (clock) => `録画中… 残り ${clock}。終わったら「録画を停止」を押してください。`,
+    telaRecordingElapsed: (clock) => `録画中… ${clock}。終わったら「録画を停止」を押してください。`,
+    telaLimitReached: (sec) => `Freeプランの上限 ${sec} 秒に達しました。録画は保存されています。`,
+    telaLimitUpgradeMsg: (freeSec, proMin) => `Freeプランは720pで最長${freeSec}秒、Proは1080pで最長${proMin}分録画できます。`,
+    aiQuotaMsg: (r, a) => `本日のAI生成 残り ${r} / ${a} 回`,
+    framesMeta: (n, size) => n + " フレーム · " + size,
+    progConvertingFrame: (i, tt) => "フレーム " + i + " / " + tt + " を変換中…",
+    progCapturingFrame: (i, tt) => "フレーム " + i + " / " + tt + " をキャプチャ中…",
+    chargedAsBrl: (amt) => `${amt} (BRL) として請求`,
+    usageCounterMsg: (used, total) => `本日の無料GIF ${used} / ${total}`,
+    navHelp: "ヘルプ",
   },
 };
 
@@ -2614,38 +3061,10 @@ const PAYPAL_ME = '';
    quantidade pré-preenchida pela URL. Daí o aviso na interface de que o
    valor é escolhido na tela seguinte. */
 const STRIPE_DOACAO = 'https://donate.stripe.com/aFaeVdgxw9mybwk2cB8bS09';
-const STRIPE_LINK = { BRL: STRIPE_DOACAO, USD: STRIPE_DOACAO, EUR: STRIPE_DOACAO };
 
-/* MOEDA SEGUE O IDIOMA, E O MEIO DE PAGAMENTO SEGUE A MOEDA.
-
-   O PIX é fixado em real: o campo 53 do BR Code é sempre 986 (BRL), por
-   definição do padrão do Banco Central. Não existe PIX em euro ou dólar.
-
-   Por isso os valores NÃO são "convertidos": mostrar "€ 5" num botão que
-   gera um QR de R$ 5 faria alguém na Europa transferir uns 80 centavos de
-   euro achando que deu cinco. Cada moeda tem seus próprios valores
-   sugeridos, arredondados, e só o real leva ao PIX. As demais moedas vão
-   para o PayPal, que aceita a moeda de verdade.
-
-   Nenhuma cotação é usada aqui de propósito: uma taxa de câmbio ao vivo
-   exigiria uma API (custo e dependência), e uma taxa fixa no código
-   envelheceria em silêncio e passaria a mentir o valor. */
-const MOEDA_POR_IDIOMA = { pt: 'BRL', en: 'USD', es: 'EUR', fr: 'EUR', de: 'EUR', it: 'EUR' };
-const VALORES_SUGERIDOS = { BRL: [5, 10, 20, 50], USD: [1, 3, 5, 10], EUR: [1, 3, 5, 10] };
-const LOCALE_POR_IDIOMA = { pt: 'pt-BR', en: 'en-US', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', it: 'it-IT' };
-
-function moedaAtual(){ return MOEDA_POR_IDIOMA[currentLang] || 'BRL'; }
-
-function formatarValor(v, moeda){
-  try {
-    return new Intl.NumberFormat(LOCALE_POR_IDIOMA[currentLang] || 'pt-BR',
-      { style: 'currency', currency: moeda, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(v);
-  } catch (e) {
-    /* Intl pode faltar em navegador muito antigo: melhor um rótulo simples
-       do que um botão vazio. */
-    return ({ BRL: 'R$ ', USD: '$', EUR: '€' }[moeda] || '') + v;
-  }
-}
+/* Moeda, cotação, valores sugeridos, campo de valor e cartão ficam em
+   /assets/doacao.js (módulo compartilhado). Aqui fica só o PIX, que é
+   fixado em real pelo padrão do Banco Central (campo 53 = 986). */
 
 /* ---- BR Code (PIX estatico) — EMV MPM + CRC16-CCITT-FALSE ---- */
 function emv(id, valor){
@@ -2996,89 +3415,24 @@ function qrSvg(texto, lado){
          '<path d="' + d + '" fill="#000"/></svg>';
 }
 
-let apoioValor = null;   /* null = sem valor definido; o doador escolhe no app */
+let apoioValor = null;   /* valor em reais (número) usado só pelo QR do PIX */
 
 function apoioPayload(){
   return brCode({ chave: PIX.chave, nome: PIX.nome, cidade: PIX.cidade, valor: apoioValor });
 }
 
-function montarBotoesDeValor(){
-  const caixa = $('supportValues');
-  if (!caixa) return;
-  const moeda = moedaAtual();
-  const valores = VALORES_SUGERIDOS[moeda] || VALORES_SUGERIDOS.BRL;
-  caixa.innerHTML = '';
-  valores.forEach((v) => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.setAttribute('data-v', String(v));
-    b.textContent = formatarValor(v, moeda);
-    caixa.appendChild(b);
-  });
-  const outro = document.createElement('button');
-  outro.type = 'button';
-  outro.setAttribute('data-v', '');
-  outro.setAttribute('data-i18n', 'supportOther');
-  outro.textContent = t('supportOther');
-  caixa.appendChild(outro);
-  /* Os botões são recriados a cada troca de idioma, então o ouvinte tem
-     de ser religado aqui e não uma vez só na inicialização. */
-  caixa.querySelectorAll('button').forEach((b) => {
-    b.addEventListener('click', () => {
-      const v = b.getAttribute('data-v');
-      apoioValor = v === '' ? null : Number(v);
-      renderApoio();
-    });
-  });
+/* O módulo /assets/doacao.js cuida de moeda, cotação, valores e cartão.
+   Esta página só desenha o QR do PIX quando a moeda é o real. */
+function desenhaPix(valorCentavos){
+  apoioValor = valorCentavos ? valorCentavos / 100 : null;
+  const payload = apoioPayload();
+  const caixa = $('supportQr');
+  if (caixa) caixa.innerHTML = qrSvg(payload, 180);
+  const campo = $('supportCode');
+  if (campo) campo.value = payload;
 }
-
 function renderApoio(){
-  if (!$('supportPanel')) return;
-  const moeda = moedaAtual();
-  const ehPix = moeda === 'BRL';
-
-  montarBotoesDeValor();
-  document.querySelectorAll('#supportValues button').forEach((b) => {
-    const v = b.getAttribute('data-v');
-    b.classList.toggle('is-on', (v === '' && apoioValor === null) || (v !== '' && Number(v) === apoioValor));
-  });
-
-  /* PIX só no real: o campo 53 do BR Code é sempre BRL, então fora do
-     Brasil o QR seria enfeite que ninguém consegue pagar. */
-  const blocoPix = $('supportPix');
-  if (blocoPix) blocoPix.hidden = !ehPix;
-  if (ehPix) {
-    const payload = apoioPayload();
-    const caixa = $('supportQr');
-    if (caixa) caixa.innerHTML = qrSvg(payload, 180);
-    const campo = $('supportCode');
-    if (campo) campo.value = payload;
-  }
-
-  /* Cartão (Stripe) e PayPal valem para qualquer moeda, inclusive o real:
-     quem prefere cartão a PIX também é bem-vindo. */
-  const stripe = $('supportStripe');
-  const urlStripe = STRIPE_LINK[moeda] || '';
-  if (stripe) {
-    stripe.hidden = !urlStripe;
-    if (urlStripe) stripe.href = urlStripe;
-  }
-  const aviso = $('supportCardHint');
-  if (aviso) aviso.hidden = !(urlStripe || PAYPAL_ME);
-  const paypal = $('supportPaypal');
-  if (paypal) {
-    paypal.hidden = !PAYPAL_ME;
-    if (PAYPAL_ME) {
-      paypal.href = 'https://www.paypal.com/paypalme/' + PAYPAL_ME +
-        (apoioValor ? '/' + apoioValor + moeda : '');
-    }
-  }
-
-  /* O aviso honesto só aparece quando a pessoa ficaria sem nenhuma opção:
-     fora do real e sem nenhum canal de cartão configurado. */
-  const semNada = !ehPix && !urlStripe && !PAYPAL_ME;
-  const blocoIntl = $('supportIntl');
-  if (blocoIntl) blocoIntl.hidden = !semNada;
+  if (window.GifLocalDoacao) window.GifLocalDoacao.render();
 }
 
 /* O painel de pagamento começa fechado e só é montado na primeira vez
@@ -3093,7 +3447,7 @@ function abrirApoio(){
   painel.hidden = false;
   const abrir = $('supportOpen');
   if (abrir) abrir.style.display = 'none';
-  if (!apoioMontado) { apoioMontado = true; renderApoio(); }
+  if (!apoioMontado) { apoioMontado = true; if (window.GifLocalDoacao) window.GifLocalDoacao.abre({ idioma: currentLang }); }
 }
 
 function fecharApoio(){
@@ -3108,6 +3462,7 @@ function ligaApoio(){
 
   const abrir = $('supportOpen');
   if (abrir) abrir.addEventListener('click', abrirApoio);
+  if (window.GifLocalDoacao) window.GifLocalDoacao.liga({ t, pix: desenhaPix, idioma: currentLang });
   const fechar = $('supportClose');
   if (fechar) fechar.addEventListener('click', fecharApoio);
 
@@ -3230,6 +3585,9 @@ function detectLang(){
   /* localStorage pode lançar exceção (modo privado, políticas do navegador
      etc.) — sem o try/catch aqui, essa única linha travava a inicialização
      inteira do site (nenhum listener de botão chegava a ser registrado). */
+  /* ?lang=xx (links de idioma e hreflang) tem prioridade */
+  const daUrl = new URLSearchParams(location.search).get('lang');
+  if (daUrl && SUPPORTED_LANGS.includes(daUrl)) return daUrl;
   let saved = null;
   try { saved = localStorage.getItem('gifLocalLang'); } catch (e) { /* ignora, segue detecção pelo navegador */ }
   if (saved && SUPPORTED_LANGS.includes(saved)) return saved;
@@ -3250,6 +3608,10 @@ function t(key, ...args){
 
 function applyTranslations(){
   document.documentElement.lang = currentLang === 'pt' ? 'pt-BR' : currentLang;
+  if (currentLang === 'ja' && !document.getElementById('fonteJa')) {
+    const l = document.createElement('link'); l.id = 'fonteJa'; l.rel = 'stylesheet'; l.href = '/pdf/vendor/noto-sans-jp/fonte.css';
+    document.head.appendChild(l);
+  }
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     const val = t(key);
@@ -3288,6 +3650,8 @@ function applyTranslations(){
 function setLang(lang){
   currentLang = SUPPORTED_LANGS.includes(lang) ? lang : 'en';
   try { localStorage.setItem('gifLocalLang', currentLang); } catch (e) { /* segue sem persistir a escolha */ }
+  /* se a página veio com ?lang=xx, o endereço acompanha a troca */
+  try { const u = new URL(location.href); if (u.searchParams.has('lang')) { u.searchParams.set('lang', currentLang); history.replaceState(null, '', u); } } catch (e) { /* segue */ }
   $('langSwitch').value = currentLang;
   applyTranslations();
   /* O aviso de gravação de tela indisponível é definido via textContent
@@ -3298,7 +3662,7 @@ function setLang(lang){
      recriados a cada render. Sem isto, trocar de idioma com o painel
      aberto deixava valores em real numa página em alemão. Só refaz se o
      painel já tiver sido montado, para não gerar QR à toa. */
-  if (apoioMontado) { apoioValor = null; renderApoio(); }
+  if (window.GifLocalDoacao) window.GifLocalDoacao.mudaIdioma(currentLang);
 }
 
 /* ============== utilidades gerais ============== */
