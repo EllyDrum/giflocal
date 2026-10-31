@@ -160,6 +160,7 @@
   .support-hint{font-size:13px; color:var(--ink-soft); margin:0 0 14px;}
   .support-row{display:flex; align-items:center; gap:10px; justify-content:center; margin-bottom:14px; flex-wrap:wrap;}
   .support-label{font-size:13px; font-weight:700; color:var(--ink);}
+  .support-values[hidden], .support-custom[hidden], .support-row[hidden]{display:none !important;}
   .support-select, .support-input{font:inherit; font-size:14px; padding:9px 12px; border:1.5px solid var(--line); border-radius:10px; background:var(--card); color:var(--ink); min-height:44px;}
   .support-select{min-width:220px;}
   .support-custom{display:flex; flex-direction:column; align-items:center; gap:6px; margin-bottom:12px;}
@@ -414,7 +415,7 @@
     .card{padding:18px 16px;}
   }
 </style>
-<script src="/assets/doacao.js?v=2"></script>
+<script src="/assets/doacao.js?v=3"></script>
 </head>
 <body>
 
@@ -1555,7 +1556,7 @@ const I18N = {
     supportClose: "Fechar",
     supportStripe: "Apoiar com cartão",
     supportIntlSoon: "O apoio de fora do Brasil está sendo configurado. Por enquanto, o PIX só funciona com conta em banco brasileiro.",
-    supportCardHint: "O valor é escolhido na tela seguinte, na sua própria moeda.",
+    supportCardHint: "Por enquanto, o cartão abre a página de doação da Stripe, que cobra em reais (BRL). O valor e a moeda escolhidos aqui não são aplicados lá: confira o total na Stripe antes de pagar.",
     founderBadge: "★ Fundador",
     founderBadgeTitle: "Você apoiou o GIF Local quando ele ainda era pago. Obrigado! Todas as ferramentas agora são gratuitas para todos.",
     planFreeF4: "GIF até 480px · gravação 720p, 60s", planSupF3: "GIF até 1280px · gravação 1080p, 10 min",
@@ -1761,7 +1762,7 @@ const I18N = {
     supportClose: "Close",
     supportStripe: "Support by card",
     supportIntlSoon: "Support from outside Brazil is being set up. For now, PIX only works with a Brazilian bank account.",
-    supportCardHint: "You choose the amount on the next screen, in your own currency.",
+    supportCardHint: "For now, card payment opens Stripe's donation page, which charges in Brazilian reais (BRL). The amount and currency chosen here are not applied there: check the total on Stripe before paying.",
     founderBadge: "★ Founder",
     founderBadgeTitle: "You backed GIF Local when it was still paid. Thank you! Every tool is now free for everyone.",
     planFreeF4: "GIF up to 480px · 720p recording, 60s", planSupF3: "GIF up to 1280px · 1080p recording, 10 min",
@@ -1967,7 +1968,7 @@ const I18N = {
     supportClose: "Cerrar",
     supportStripe: "Apoyar con tarjeta",
     supportIntlSoon: "El apoyo desde fuera de Brasil se está configurando. Por ahora, PIX solo funciona con una cuenta bancaria brasileña.",
-    supportCardHint: "Eliges el importe en la pantalla siguiente, en tu propia moneda.",
+    supportCardHint: "Por ahora, la tarjeta abre la página de donación de Stripe, que cobra en reales brasileños (BRL). El importe y la moneda elegidos aquí no se aplican allí: revisa el total en Stripe antes de pagar.",
     founderBadge: "★ Mecenas",
     founderBadgeTitle: "Apoyaste GIF Local cuando aún era de pago. ¡Gracias! Todas las herramientas ahora son gratuitas para todos.",
     planFreeF4: "GIF hasta 480px · grabación 720p, 60s", planSupF3: "GIF hasta 1280px · grabación 1080p, 10 min",
@@ -2173,7 +2174,7 @@ const I18N = {
     supportClose: "Fermer",
     supportStripe: "Soutenir par carte",
     supportIntlSoon: "Le soutien depuis l'étranger est en cours de mise en place. Pour l'instant, PIX ne fonctionne qu'avec un compte bancaire brésilien.",
-    supportCardHint: "Vous choisissez le montant sur l\u2019écran suivant, dans votre propre monnaie.",
+    supportCardHint: "Pour l’instant, la carte ouvre la page de don Stripe, qui débite en réals brésiliens (BRL). Le montant et la devise choisis ici n’y sont pas appliqués : vérifiez le total sur Stripe avant de payer.",
     founderBadge: "★ Fondateur",
     founderBadgeTitle: "Vous avez soutenu GIF Local quand il était encore payant. Merci ! Tous les outils sont désormais gratuits pour tous.",
     planFreeF4: "GIF jusqu'à 480px · enregistrement 720p, 60s", planSupF3: "GIF jusqu'à 1280px · enregistrement 1080p, 10 min",
@@ -2379,7 +2380,7 @@ const I18N = {
     supportClose: "Schließen",
     supportStripe: "Mit Karte unterstützen",
     supportIntlSoon: "Die Unterstützung aus dem Ausland wird gerade eingerichtet. Vorerst funktioniert PIX nur mit einem brasilianischen Bankkonto.",
-    supportCardHint: "Den Betrag wählen Sie auf dem nächsten Bildschirm, in Ihrer eigenen Währung.",
+    supportCardHint: "Vorerst öffnet die Kartenzahlung die Spendenseite von Stripe, die in brasilianischen Real (BRL) abbucht. Betrag und Währung von hier werden dort nicht übernommen: Prüfen Sie den Gesamtbetrag bei Stripe vor dem Bezahlen.",
     founderBadge: "★ Förderer",
     founderBadgeTitle: "Sie haben GIF Local unterstützt, als es noch kostenpflichtig war. Danke! Alle Werkzeuge sind jetzt für alle kostenlos.",
     planFreeF4: "GIF bis 480px · Aufnahme 720p, 60s", planSupF3: "GIF bis 1280px · Aufnahme 1080p, 10 Min.",
@@ -2585,7 +2586,7 @@ const I18N = {
     supportClose: "Chiudi",
     supportStripe: "Sostieni con carta",
     supportIntlSoon: "Il sostegno dall'estero è in fase di configurazione. Per ora PIX funziona solo con un conto bancario brasiliano.",
-    supportCardHint: "Scegli l\u2019importo nella schermata successiva, nella tua valuta.",
+    supportCardHint: "Per ora, la carta apre la pagina di donazione di Stripe, che addebita in real brasiliani (BRL). Importo e valuta scelti qui non vengono applicati: controlla il totale su Stripe prima di pagare.",
     founderBadge: "★ Fondatore",
     founderBadgeTitle: "Hai sostenuto GIF Local quando era ancora a pagamento. Grazie! Tutti gli strumenti ora sono gratuiti per tutti.",
     planFreeF4: "GIF fino a 480px · registrazione 720p, 60s", planSupF3: "GIF fino a 1280px · registrazione 1080p, 10 min",
@@ -2839,7 +2840,7 @@ const I18N = {
     supportClose: "閉じる",
     supportStripe: "カードで応援",
     supportIntlSoon: "海外からの支援は準備中です。現在、PIXはブラジルの銀行口座でのみ利用できます。",
-    supportCardHint: "金額は次の画面で、お使いの通貨で選びます。",
+    supportCardHint: "現在、カード払いはStripeの寄付ページを開き、ブラジルレアル（BRL）で請求されます。ここで選んだ金額と通貨はそのページには反映されません。支払う前にStripeで合計金額を確認してください。",
     founderBadge: "★ 創設サポーター",
     founderBadgeTitle: "まだ有料だった頃にGIF Localを支えてくださり、ありがとうございます！今はすべてのツールが全員無料です。",
     planFreeF4: "GIF 480pxまで · 録画 720p、60秒",
